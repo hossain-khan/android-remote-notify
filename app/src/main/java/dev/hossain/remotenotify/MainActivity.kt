@@ -12,10 +12,10 @@ import com.slack.circuit.foundation.NavigableCircuitContent
 import com.slack.circuit.foundation.rememberCircuitNavigator
 import com.slack.circuitx.gesturenavigation.GestureNavigationDecoration
 import com.squareup.anvil.annotations.ContributesMultibinding
-import dev.hossain.remotenotify.circuit.InboxScreen
 import dev.hossain.remotenotify.di.ActivityKey
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.theme.ComposeAppTheme
+import dev.hossain.remotenotify.ui.alertlist.HomeScreen
 import javax.inject.Inject
 
 @ContributesMultibinding(AppScope::class, boundType = Activity::class)
@@ -32,7 +32,7 @@ class MainActivity
             setContent {
                 ComposeAppTheme {
                     // See https://slackhq.github.io/circuit/navigation/
-                    val backStack = rememberSaveableBackStack(root = InboxScreen)
+                    val backStack = rememberSaveableBackStack(root = HomeScreen)
                     val navigator = rememberCircuitNavigator(backStack)
 
                     // See https://slackhq.github.io/circuit/circuit-content/

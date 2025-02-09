@@ -8,11 +8,11 @@ import androidx.room.Query
 @Dao
 interface NotificationDao {
     @Query("SELECT * FROM notifications")
-    fun getAll(): List<NotificationEntity>
+    suspend fun getAll(): List<NotificationEntity>
 
     @Insert
-    fun insert(notification: NotificationEntity)
+    suspend fun insert(notification: NotificationEntity)
 
     @Delete
-    fun delete(notification: NotificationEntity)
+    suspend fun delete(notification: NotificationEntity)
 }
