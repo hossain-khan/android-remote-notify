@@ -5,12 +5,11 @@ import android.content.Context
 import com.squareup.anvil.annotations.MergeComponent
 import com.squareup.anvil.annotations.optional.SingleIn
 import dagger.BindsInstance
-import dev.hossain.remotenotify.di.DaggerAppComponent
 import javax.inject.Provider
 
 @MergeComponent(
     scope = AppScope::class,
-    modules = [ExampleAppModule::class, CircuitModule::class],
+    modules = [AppModule::class, CircuitModule::class],
 )
 @SingleIn(AppScope::class)
 interface AppComponent {
