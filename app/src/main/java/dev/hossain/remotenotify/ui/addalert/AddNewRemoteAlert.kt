@@ -1,9 +1,12 @@
 package dev.hossain.remotenotify.ui.addalert
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,7 +33,7 @@ import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data object AddNotificationScreen : Screen {
+data object AddNewRemoteAlertScreen : Screen {
     data class State(
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
@@ -42,18 +45,18 @@ data object AddNotificationScreen : Screen {
     }
 }
 
-class AddNotificationPresenter
+class AddNewRemoteAlertPresenter
     @AssistedInject
     constructor(
         @Assisted private val navigator: Navigator,
         private val notificationDao: NotificationDao,
-    ) : Presenter<AddNotificationScreen.State> {
+    ) : Presenter<AddNewRemoteAlertScreen.State> {
         @Composable
-        override fun present(): AddNotificationScreen.State {
+        override fun present(): AddNewRemoteAlertScreen.State {
             val scope = rememberCoroutineScope()
-            return AddNotificationScreen.State { event ->
+            return AddNewRemoteAlertScreen.State { event ->
                 when (event) {
-                    is AddNotificationScreen.Event.SaveNotification -> {
+                    is AddNewRemoteAlertScreen.Event.SaveNotification -> {
                         scope.launch {
                             notificationDao.insert(event.notification)
                         }
@@ -63,17 +66,17 @@ class AddNotificationPresenter
             }
         }
 
-        @CircuitInject(AddNotificationScreen::class, AppScope::class)
+        @CircuitInject(AddNewRemoteAlertScreen::class, AppScope::class)
         @AssistedFactory
         fun interface Factory {
-            fun create(navigator: Navigator): AddNotificationPresenter
+            fun create(navigator: Navigator): AddNewRemoteAlertPresenter
         }
     }
 
-@CircuitInject(screen = AddNotificationScreen::class, scope = AppScope::class)
+@CircuitInject(screen = AddNewRemoteAlertScreen::class, scope = AppScope::class)
 @Composable
-fun AddNotification(
-    state: AddNotificationScreen.State,
+fun AddNewRemoteAlertUi(
+    state: AddNewRemoteAlertScreen.State,
     modifier: Modifier = Modifier,
 ) {
     var type by remember { mutableStateOf(NotificationType.BATTERY) }
@@ -86,12 +89,50 @@ fun AddNotification(
                     .padding(innerPadding)
                     .padding(16.dp),
         ) {
-            // UI for selecting type and threshold
+            // UI for selecting type
+            Text("Select Alert Type")
+            Row {
+                RadioButton(
+                    selected = type == NotificationType.BATTERY,
+                    onClick = { type = NotificationType.BATTERY },
+                )
+                Text("Battery")
+                RadioButton(
+                    selected = type == NotificationType.STORAGE,
+                    onClick = { type = NotificationType.STORAGE },
+                )
+                Text("Storage")
+            }
+
+            // UI for setting threshold
+            Text("Set Threshold")
+            Slider(
+                value = threshold.toFloat(),
+                onValueChange = { threshold = it.toInt() },
+                valueRange = 0f..100f,
+                steps = 100,
+            )
+            Text("Threshold: $threshold")
+
+            // Save button
             Button(onClick = {
+                val notification =
+                    when (type) {
+                        NotificationType.BATTERY ->
+                            NotificationEntity(
+                                type = type,
+                                batteryPercentage = threshold,
+                                storageMinSpaceGb = 0,
+                            )
+                        NotificationType.STORAGE ->
+                            NotificationEntity(
+                                type = type,
+                                batteryPercentage = 0,
+                                storageMinSpaceGb = threshold,
+                            )
+                    }
                 state.eventSink(
-                    AddNotificationScreen.Event.SaveNotification(
-                        NotificationEntity(type = type, batteryPercentage = threshold, storageMinSpaceGb = threshold),
-                    ),
+                    AddNewRemoteAlertScreen.Event.SaveNotification(notification),
                 )
             }) {
                 Text("Save")
