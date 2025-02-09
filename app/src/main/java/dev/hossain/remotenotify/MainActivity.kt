@@ -1,14 +1,14 @@
-package app.example
+package dev.hossain.remotenotify
 
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import app.example.circuit.InboxScreen
-import app.example.di.ActivityKey
-import app.example.di.AppScope
-import app.example.ui.theme.ComposeAppTheme
+import dev.hossain.remotenotify.circuit.InboxScreen
+import dev.hossain.remotenotify.di.ActivityKey
+import dev.hossain.remotenotify.di.AppScope
+import dev.hossain.remotenotify.theme.ComposeAppTheme
 import com.slack.circuit.backstack.rememberSaveableBackStack
 import com.slack.circuit.foundation.Circuit
 import com.slack.circuit.foundation.CircuitCompositionLocals

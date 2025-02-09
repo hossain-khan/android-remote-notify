@@ -1,7 +1,7 @@
-package app.example.data
+package dev.hossain.remotenotify.data
 
 import android.content.Context
-import app.example.di.ApplicationContext
+import dev.hossain.remotenotify.di.ApplicationContext
 import javax.inject.Inject
 
 // Example service class that does not need DI module or binding

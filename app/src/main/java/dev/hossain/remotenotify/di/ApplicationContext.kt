@@ -1,4 +1,4 @@
-package app.example.di
+package dev.hossain.remotenotify.di
 
 import javax.inject.Qualifier
 

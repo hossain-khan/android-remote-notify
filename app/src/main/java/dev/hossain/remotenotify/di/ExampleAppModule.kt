@@ -1,6 +1,6 @@
-package app.example.di
+package dev.hossain.remotenotify.di
 
-import app.example.data.ExampleEmailValidator
+import dev.hossain.remotenotify.data.ExampleEmailValidator
 import com.squareup.anvil.annotations.ContributesTo
 import dagger.Module
 import dagger.Provides

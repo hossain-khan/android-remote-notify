@@ -1,10 +1,11 @@
-package app.example.di
+package dev.hossain.remotenotify.di
 
 import android.app.Activity
 import android.content.Context
 import com.squareup.anvil.annotations.MergeComponent
 import com.squareup.anvil.annotations.optional.SingleIn
 import dagger.BindsInstance
+import dev.hossain.remotenotify.di.DaggerAppComponent
 import javax.inject.Provider
 
 @MergeComponent(

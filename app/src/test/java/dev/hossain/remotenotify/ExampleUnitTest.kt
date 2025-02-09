@@ -1,4 +1,4 @@
-package app.example
+package dev.hossain.remotenotify
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

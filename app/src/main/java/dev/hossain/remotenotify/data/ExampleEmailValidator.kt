@@ -1,4 +1,4 @@
-package app.example.data
+package dev.hossain.remotenotify.data
 
 // Example of a class that is used in traditional Dagger module
 // Does not use Anvil contributed binding

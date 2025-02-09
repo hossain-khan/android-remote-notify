@@ -1,4 +1,4 @@
-package app.example.di
+package dev.hossain.remotenotify.di
 
 import com.slack.circuit.foundation.Circuit
 import com.slack.circuit.runtime.presenter.Presenter

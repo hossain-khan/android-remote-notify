@@ -1,4 +1,4 @@
-package app.example.di
+package dev.hossain.remotenotify.di
 
 /**
  * App scope for dependency injection.

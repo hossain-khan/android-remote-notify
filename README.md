@@ -1,5 +1,5 @@
 # Android - Remote Notify 🔔
-Very specilized app that will notify about remote android device diagnostic data, specifically battery level and storage.
+Very specialized app that will notify about remote android device diagnostic data, specifically battery level and storage.
 
 > [!NOTE]  
 > Why❓  

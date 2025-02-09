@@ -1,4 +1,4 @@
-package app.example.circuit
+package dev.hossain.remotenotify.circuit
 
 // -------------------------------------------------------------------------------------
 //
@@ -37,10 +37,10 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.example.data.Email
-import app.example.data.ExampleEmailRepository
-import app.example.data.ExampleEmailValidator
-import app.example.di.AppScope
+import dev.hossain.remotenotify.data.Email
+import dev.hossain.remotenotify.data.ExampleEmailRepository
+import dev.hossain.remotenotify.data.ExampleEmailValidator
+import dev.hossain.remotenotify.di.AppScope
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
 import com.slack.circuit.runtime.CircuitUiState

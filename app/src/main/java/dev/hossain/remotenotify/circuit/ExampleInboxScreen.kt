@@ -1,4 +1,4 @@
-package app.example.circuit
+package dev.hossain.remotenotify.circuit
 
 // -------------------------------------------------------------------------------------
 //
@@ -21,10 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
-import app.example.data.Email
-import app.example.data.ExampleAppVersionService
-import app.example.data.ExampleEmailRepository
-import app.example.di.AppScope
+import dev.hossain.remotenotify.data.Email
+import dev.hossain.remotenotify.data.ExampleAppVersionService
+import dev.hossain.remotenotify.data.ExampleEmailRepository
+import dev.hossain.remotenotify.di.AppScope
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
 import com.slack.circuit.runtime.CircuitUiState

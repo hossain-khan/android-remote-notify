@@ -1,11 +1,11 @@
-package app.example.di
+package dev.hossain.remotenotify.di
 
 import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import androidx.annotation.Keep
 import androidx.core.app.AppComponentFactory
-import app.example.ComposeApp
+import dev.hossain.remotenotify.ComposeApp
 import javax.inject.Provider
 
 /**
