@@ -5,10 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import dev.hossain.remotenotify.circuit.InboxScreen
-import dev.hossain.remotenotify.di.ActivityKey
-import dev.hossain.remotenotify.di.AppScope
-import dev.hossain.remotenotify.theme.ComposeAppTheme
 import com.slack.circuit.backstack.rememberSaveableBackStack
 import com.slack.circuit.foundation.Circuit
 import com.slack.circuit.foundation.CircuitCompositionLocals
@@ -16,6 +12,10 @@ import com.slack.circuit.foundation.NavigableCircuitContent
 import com.slack.circuit.foundation.rememberCircuitNavigator
 import com.slack.circuitx.gesturenavigation.GestureNavigationDecoration
 import com.squareup.anvil.annotations.ContributesMultibinding
+import dev.hossain.remotenotify.circuit.InboxScreen
+import dev.hossain.remotenotify.di.ActivityKey
+import dev.hossain.remotenotify.di.AppScope
+import dev.hossain.remotenotify.theme.ComposeAppTheme
 import javax.inject.Inject
 
 @ContributesMultibinding(AppScope::class, boundType = Activity::class)

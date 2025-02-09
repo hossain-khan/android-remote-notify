@@ -21,10 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
-import dev.hossain.remotenotify.data.Email
-import dev.hossain.remotenotify.data.ExampleAppVersionService
-import dev.hossain.remotenotify.data.ExampleEmailRepository
-import dev.hossain.remotenotify.di.AppScope
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
 import com.slack.circuit.runtime.CircuitUiState
@@ -34,6 +30,10 @@ import com.slack.circuit.runtime.screen.Screen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dev.hossain.remotenotify.data.Email
+import dev.hossain.remotenotify.data.ExampleAppVersionService
+import dev.hossain.remotenotify.data.ExampleEmailRepository
+import dev.hossain.remotenotify.di.AppScope
 import kotlinx.parcelize.Parcelize
 
 // See https://slackhq.github.io/circuit/screen/

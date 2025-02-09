@@ -1,7 +1,7 @@
 package dev.hossain.remotenotify.data
 
-import dev.hossain.remotenotify.di.AppScope
 import com.squareup.anvil.annotations.ContributesBinding
+import dev.hossain.remotenotify.di.AppScope
 import javax.inject.Inject
 
 // -------------------------------------------------------------------------------------

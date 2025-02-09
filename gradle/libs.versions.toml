@@ -1,47 +1,133 @@
 [versions]
-agp = "8.8.0"
-kotlin = "2.1.10"
-coreKtx = "1.15.0"
-junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.0"
-composeBom = "2025.01.01"
+
+# Adaptive library to create adaptive UIs
+# https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive
+adaptiveAndroid = "1.1.0-beta01"
+
+agp = "8.8.0"
+
+# Forked Anvil
+# https://github.com/ZacSweers/anvil
+# Original Anvil - https://github.com/square/anvil
+anvil = "0.4.1"
 
 # https://github.com/slackhq/circuit/releases
 circuit = "0.26.0"
 
-# Kotlin Symbol Processing API
-# https://kotlinlang.org/docs/ksp-overview.html
-# https://github.com/google/ksp/releases
-ksp = "2.1.10-1.0.29"
-
-# Forked Anvil
-# https://github.com/ZacSweers/anvil
-anvil = "0.4.1"
+composeBom = "2025.01.01"
+composeMaterial3 = "1.3.1"
+coreKtx = "1.15.0"
+coroutinesTest = "1.10.1"
 
 # https://dagger.dev/dev-guide/ksp
 dagger = "2.55"
 
+dataStore = "1.1.2"
+
+# API result type for modeling network API responses.
+# https://github.com/slackhq/EitherNet
+eithernet = "2.0.0"
+espressoCore = "3.6.1"
+firebaseBom = "33.9.0"
+
 # https://developer.android.com/develop/ui/compose/text/fonts
 googleFonts = "1.7.7"
 
+# Fluent assertions for Java and Android
+# https://truth.dev/ | https://github.com/google/truth
+googleTruth = "1.4.4"
+
+junit = "4.13.2"
+junitKtx = "1.2.1"
+
+# https://developer.android.com/jetpack/androidx/releases/test
+junitVersion = "1.2.1"
+
+kotlin = "2.1.0"
+
+# Kotlin linter with built-in formatter
+# https://github.com/jeremymailen/kotlinter-gradle
+# https://github.com/pinterest/ktlint
+kotlinter = "5.0.1"
+
+kotlinxSerializationJson = "1.8.0"
+kotlinxSerializationProperties = "1.8.0"
+
+# Kotlin Symbol Processing API
+# https://kotlinlang.org/docs/ksp-overview.html
+# https://github.com/google/ksp/releases
+ksp = "2.1.0-1.0.29"
+
+lifecycleRuntimeKtx = "2.8.7"
+
+# A modern JSON library for Kotlin and Java.
+# https://github.com/square/moshi
+moshi = "1.15.2"
+
+# Navigation for Jetpack Compose
+# https://developer.android.com/develop/ui/compose/navigation
+navigationCompose = "2.8.6"
+
+# Http client for Android
+# https://square.github.io/okhttp/
+okhttp = "4.12.0"
+retrofit = "2.11.0"
+
+# Room Database
+# https://developer.android.com/training/data-storage/room
+roomDb = "2.6.1"
+
+testCore = "1.6.1"
+
+# https://github.com/JakeWharton/timber
+timber = "5.0.1"
+
+# https://developer.android.com/jetpack/androidx/releases/work
+workManager = "2.10.0"
+
 [libraries]
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+
+# https://developer.android.com/develop/ui/compose/bom
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "dataStore" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStore" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+
+# Material Design 3 in Compose
+# https://developer.android.com/develop/ui/compose/designsystems/material3
+# https://developer.android.com/jetpack/androidx/releases/compose-material3
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref="composeMaterial3" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "testCore" }
+androidx-test-core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "testCore" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
+androidx-work-testing = { group = "androidx.work", name = "work-testing", version.ref = "workManager" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+
+# Room Database
+# https://developer.android.com/training/data-storage/room
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomDb" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomDb" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomDb" }
+androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "roomDb" }
+
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+google-truth = { group = "com.google.truth", name = "truth", version.ref = "googleTruth" }
 
 # Circuit - ⚡️A Compose-driven architecture for Kotlin and Android applications.
 # https://github.com/slackhq/circuit/releases
@@ -66,21 +152,84 @@ anvil-annotations-optional = { group = "dev.zacsweers.anvil", name = "annotation
 # https://mvnrepository.com/artifact/androidx.compose.ui/ui-text-google-fonts
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googleFonts" }
 
+# https://github.com/JakeWharton/timber
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber"}
 
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-mock-server = { group = "com.squareup.retrofit2", name = "retrofit-mock", version.ref = "retrofit" }
+retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+retrofit-converter-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
+
+# Kotlin multiplatform / multi-format serialization
+# https://github.com/Kotlin/kotlinx.serialization
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx",name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotlinx-serialization-properties = { group = "org.jetbrains.kotlinx",name = "kotlinx-serialization-properties", version.ref = "kotlinxSerializationProperties" }
+
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+okhttp-mock-webserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
+
+# A modern JSON library for Kotlin and Java.
+# https://github.com/square/moshi
+moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
+moshi-kotlin-codegen = { group = "com.squareup.moshi", name = "moshi-kotlin-codegen", version.ref = "moshi" }
+
+# API result type for modeling network API responses.
+# https://github.com/slackhq/EitherNet
+eithernet = { group = "com.slack.eithernet", name = "eithernet", version.ref = "eithernet" }
+eithernet-integration-retrofit = { group = "com.slack.eithernet", name = "eithernet-integration-retrofit", version.ref = "eithernet" }
+
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.14.1" }
+
+# open-meteo-api-kotlin
+# https://github.com/open-meteo/open-meteo-api-kotlin/releases
+openmeteo-api-kotlin = { group = "com.open-meteo", name = "open-meteo-api-kotlin", version = "0.7.1-beta.1" }
+
+# Adaptive library to create adaptive UIs
+# https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive
+androidx-adaptive-android = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "adaptiveAndroid" }
 
 [plugins]
+# Plugin for Android Applications
+# https://developer.android.com/build
 android-application = { id = "com.android.application", version.ref = "agp" }
+
+# Plugin for Android Libraries
+# https://developer.android.com/studio/projects/android-library
+# https://developer.android.com/build
+android-library = { id = "com.android.library", version.ref = "agp" }
+
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+
+androidx-room = { id = "androidx.room", version.ref = "roomDb" }
 
 # Add @Parcelize support
 # https://plugins.gradle.org/plugin/org.jetbrains.kotlin.plugin.parcelize
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 
+# Add Kotlin serialization support
+# https://github.com/Kotlin/kotlinx.serialization
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
 
+# Forked Anvil
 # https://github.com/ZacSweers/anvil/blob/main/FORK.md
+# Original Anvil - https://github.com/square/anvil
 anvil = { id = "dev.zacsweers.anvil", version.ref = "anvil" }
 
+# Kotlin linter with built-in formatter
+# https://github.com/jeremymailen/kotlinter-gradle
+# https://github.com/pinterest/ktlint
+kotlinter = { id = "org.jmailen.kotlinter", version.ref = "kotlinter" }
 
+# Google Services plugin
+google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
+# https://firebase.google.com/docs/crashlytics/get-started?platform=android#add-sdk
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.3" }
+
+# Kover is a set of solutions for collecting test coverage of Kotlin code compiled for JVM and Android platforms.
+# https://github.com/Kotlin/kotlinx-kover?tab=readme-ov-file#kover-gradle-plugin
+kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.1" }

@@ -37,10 +37,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dev.hossain.remotenotify.data.Email
-import dev.hossain.remotenotify.data.ExampleEmailRepository
-import dev.hossain.remotenotify.data.ExampleEmailValidator
-import dev.hossain.remotenotify.di.AppScope
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
 import com.slack.circuit.runtime.CircuitUiState
@@ -50,6 +46,10 @@ import com.slack.circuit.runtime.screen.Screen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dev.hossain.remotenotify.data.Email
+import dev.hossain.remotenotify.data.ExampleEmailRepository
+import dev.hossain.remotenotify.data.ExampleEmailValidator
+import dev.hossain.remotenotify.di.AppScope
 import kotlinx.parcelize.Parcelize
 
 // See https://slackhq.github.io/circuit/screen/
