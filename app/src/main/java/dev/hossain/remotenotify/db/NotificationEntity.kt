@@ -8,7 +8,7 @@ import dev.hossain.remotenotify.model.STORAGE_MIN_SPACE_GB_NONE
 
 @Entity(tableName = "notifications")
 data class NotificationEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val type: NotificationType,
     @ColumnInfo(name = "battery_percentage", defaultValue = BATTERY_PERCENTAGE_NONE.toString())
     val batteryPercentage: Int,

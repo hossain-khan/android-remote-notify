@@ -17,10 +17,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -40,6 +38,7 @@ import dev.hossain.remotenotify.model.RemoteNotification
 import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
 
 @Parcelize
 data object HomeScreen : Screen {
@@ -66,15 +65,19 @@ class HomePresenter
         @Composable
         override fun present(): HomeScreen.State {
             val scope = rememberCoroutineScope()
-            var notifications: List<RemoteNotification> by remember { mutableStateOf(emptyList()) }
 
-            LaunchedEffect(Unit) {
-                notifications = remoteAlertRepository.getAllRemoteNotifications()
+            val notifications by produceState<List<RemoteNotification>>(emptyList()) {
+                remoteAlertRepository
+                    .getAllRemoteNotificationsFlow()
+                    .collect {
+                        value = it
+                    }
             }
 
             return HomeScreen.State(notifications) { event ->
                 when (event) {
                     is HomeScreen.Event.DeleteNotification -> {
+                        Timber.d("Deleting notification: $event")
                         scope.launch {
                             remoteAlertRepository.deleteRemoteNotification(event.notification)
                         }
