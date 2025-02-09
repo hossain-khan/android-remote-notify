@@ -44,7 +44,7 @@ junitKtx = "1.2.1"
 # https://developer.android.com/jetpack/androidx/releases/test
 junitVersion = "1.2.1"
 
-kotlin = "2.1.0"
+kotlin = "2.1.10"
 
 # Kotlin linter with built-in formatter
 # https://github.com/jeremymailen/kotlinter-gradle
