@@ -25,10 +25,10 @@ import com.slack.circuit.runtime.screen.Screen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import dev.hossain.remotenotify.db.NotificationDao
-import dev.hossain.remotenotify.db.NotificationEntity
+import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.db.NotificationType
 import dev.hossain.remotenotify.di.AppScope
+import dev.hossain.remotenotify.model.RemoteNotification
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -40,7 +40,7 @@ data object AddNewRemoteAlertScreen : Screen {
 
     sealed class Event : CircuitUiEvent {
         data class SaveNotification(
-            val notification: NotificationEntity,
+            val notification: RemoteNotification,
         ) : Event()
     }
 }
@@ -49,7 +49,7 @@ class AddNewRemoteAlertPresenter
     @AssistedInject
     constructor(
         @Assisted private val navigator: Navigator,
-        private val notificationDao: NotificationDao,
+        private val remoteAlertRepository: RemoteAlertRepository,
     ) : Presenter<AddNewRemoteAlertScreen.State> {
         @Composable
         override fun present(): AddNewRemoteAlertScreen.State {
@@ -58,7 +58,7 @@ class AddNewRemoteAlertPresenter
                 when (event) {
                     is AddNewRemoteAlertScreen.Event.SaveNotification -> {
                         scope.launch {
-                            notificationDao.insert(event.notification)
+                            remoteAlertRepository.saveRemoteNotification(event.notification)
                         }
                         navigator.pop()
                     }
@@ -119,15 +119,11 @@ fun AddNewRemoteAlertUi(
                 val notification =
                     when (type) {
                         NotificationType.BATTERY ->
-                            NotificationEntity(
-                                type = type,
+                            RemoteNotification.BatteryNotification(
                                 batteryPercentage = threshold,
-                                storageMinSpaceGb = 0,
                             )
                         NotificationType.STORAGE ->
-                            NotificationEntity(
-                                type = type,
-                                batteryPercentage = 0,
+                            RemoteNotification.StorageNotification(
                                 storageMinSpaceGb = threshold,
                             )
                     }
