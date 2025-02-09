@@ -28,7 +28,7 @@ import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.db.NotificationDao
 import dev.hossain.remotenotify.db.NotificationEntity
 import dev.hossain.remotenotify.di.AppScope
-import dev.hossain.remotenotify.ui.addalert.AddNotificationScreen
+import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -71,7 +71,7 @@ class HomePresenter
                         }
                     }
                     HomeScreen.Event.AddNotification -> {
-                        navigator.goTo(AddNotificationScreen)
+                        navigator.goTo(AddNewRemoteAlertScreen)
                     }
                 }
             }
