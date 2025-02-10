@@ -8,6 +8,8 @@ import com.squareup.anvil.annotations.ContributesTo
 import dagger.Module
 import dagger.Provides
 import dev.hossain.remotenotify.data.RemoteAlertRepository
+import dev.hossain.remotenotify.monitor.BatteryMonitor
+import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.worker.ObserveDeviceHealthWorker
 
@@ -17,6 +19,8 @@ import dev.hossain.remotenotify.worker.ObserveDeviceHealthWorker
 object WorkerModule {
     @Provides
     fun provideWorkerFactory(
+        batteryMonitor: BatteryMonitor,
+        storageMonitor: StorageMonitor,
         repository: RemoteAlertRepository,
         notifiers: Set<@JvmSuppressWildcards NotificationSender>,
     ): WorkerFactory =
@@ -35,6 +39,8 @@ object WorkerModule {
                         ObserveDeviceHealthWorker(
                             context = appContext,
                             workerParams = workerParameters,
+                            batteryMonitor = batteryMonitor,
+                            storageMonitor = storageMonitor,
                             repository = repository,
                             notifiers = notifiers,
                         )
