@@ -27,8 +27,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.data.RemoteAlertRepository
-import dev.hossain.remotenotify.db.NotificationType
 import dev.hossain.remotenotify.di.AppScope
+import dev.hossain.remotenotify.model.NotificationType
 import dev.hossain.remotenotify.model.RemoteNotification
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
