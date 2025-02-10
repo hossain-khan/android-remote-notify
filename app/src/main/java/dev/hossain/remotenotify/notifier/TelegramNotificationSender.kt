@@ -1,6 +1,8 @@
 package dev.hossain.remotenotify.notifier
 
+import com.squareup.anvil.annotations.ContributesMultibinding
 import dev.hossain.remotenotify.data.TelegramConfigDataStore
+import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteNotification
 import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -9,7 +11,10 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
 
+@ContributesMultibinding(AppScope::class)
+@Named("telegram") // Could not use `NotifierType.TELEGRAM.name` as it's not a constant.
 class TelegramNotificationSender
     @Inject
     constructor(
