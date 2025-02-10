@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.codegen.annotations.CircuitInject
@@ -35,6 +36,7 @@ import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteNotification
+import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -102,6 +104,9 @@ fun AlertsListUi(
     state: AlertsListScreen.State,
     modifier: Modifier = Modifier,
 ) {
+    val batteryMonitor = BatteryMonitor(LocalContext.current)
+    val batteryPercentage = batteryMonitor.getBatteryLevel()
+
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
@@ -110,11 +115,18 @@ fun AlertsListUi(
             }
         },
     ) { innerPadding ->
-        LazyColumn(modifier = Modifier.padding(innerPadding)) {
-            items(state.notifications) { notification ->
-                NotificationItem(notification = notification, onDelete = {
-                    state.eventSink(AlertsListScreen.Event.DeleteNotification(notification))
-                })
+        Column(modifier = Modifier.padding(innerPadding)) {
+            // Display battery percentage at the top
+            Text(
+                text = "Battery Percentage: $batteryPercentage%",
+                modifier = Modifier.padding(16.dp),
+            )
+            LazyColumn {
+                items(state.notifications) { notification ->
+                    NotificationItem(notification = notification, onDelete = {
+                        state.eventSink(AlertsListScreen.Event.DeleteNotification(notification))
+                    })
+                }
             }
         }
     }
