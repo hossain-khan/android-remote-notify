@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
@@ -135,4 +136,15 @@ fun AddNewRemoteAlertUi(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewAddNewRemoteAlertUi() {
+    AddNewRemoteAlertUi(
+        state =
+            AddNewRemoteAlertScreen.State(
+                eventSink = {},
+            ),
+    )
 }
