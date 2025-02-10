@@ -1,6 +1,8 @@
 package dev.hossain.remotenotify.notifier
 
+import dev.hossain.remotenotify.data.TelegramConfigDataStore
 import dev.hossain.remotenotify.model.RemoteNotification
+import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -11,6 +13,7 @@ import javax.inject.Inject
 class TelegramNotificationSender
     @Inject
     constructor(
+        private val telegramConfigDataStore: TelegramConfigDataStore,
         private val client: OkHttpClient,
     ) : NotificationSender {
         override val notifierType: NotifierType = NotifierType.TELEGRAM
@@ -22,9 +25,13 @@ class TelegramNotificationSender
                     is RemoteNotification.StorageNotification -> "Storage Alert: ${remoteNotification.storageMinSpaceGb}GB available"
                 }
 
-            // TODO - load for configuration
-            val botToken = ""
-            val chatId = ""
+            val botToken = telegramConfigDataStore.botToken.first() ?: ""
+            val chatId = telegramConfigDataStore.chatId.first() ?: ""
+
+            if (botToken.isBlank() || chatId.isBlank()) {
+                Timber.e("Bot token or chat ID is not configured.")
+                return
+            }
 
             val url = "https://api.telegram.org/bot$botToken/sendMessage"
             val json =
