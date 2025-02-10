@@ -107,7 +107,7 @@ fun AlertsListUi(
 ) {
     val context = LocalContext.current
     val batteryMonitor = BatteryMonitor(context)
-    val storageMonitor = StorageMonitor()
+    val storageMonitor = StorageMonitor(context)
     val batteryPercentage = batteryMonitor.getBatteryLevel()
     val availableStorage = storageMonitor.getAvailableStorageInGB()
     val totalStorage = storageMonitor.getTotalStorageInGB()
