@@ -1,7 +1,6 @@
 package dev.hossain.remotenotify.model
 
 import dev.hossain.remotenotify.db.NotificationEntity
-import dev.hossain.remotenotify.db.NotificationType
 
 const val BATTERY_PERCENTAGE_NONE = -1
 const val STORAGE_MIN_SPACE_GB_NONE = -1
