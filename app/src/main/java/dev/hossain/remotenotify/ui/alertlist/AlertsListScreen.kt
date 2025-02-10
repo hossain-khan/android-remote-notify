@@ -20,8 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
@@ -41,7 +41,7 @@ import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 
 @Parcelize
-data object HomeScreen : Screen {
+data object AlertsListScreen : Screen {
     data class State(
         val notifications: List<RemoteNotification>,
         val eventSink: (Event) -> Unit,
@@ -56,14 +56,14 @@ data object HomeScreen : Screen {
     }
 }
 
-class HomePresenter
+class AlertsListPresenter
     @AssistedInject
     constructor(
         @Assisted private val navigator: Navigator,
         private val remoteAlertRepository: RemoteAlertRepository,
-    ) : Presenter<HomeScreen.State> {
+    ) : Presenter<AlertsListScreen.State> {
         @Composable
-        override fun present(): HomeScreen.State {
+        override fun present(): AlertsListScreen.State {
             val scope = rememberCoroutineScope()
 
             val notifications by produceState<List<RemoteNotification>>(emptyList()) {
@@ -74,38 +74,38 @@ class HomePresenter
                     }
             }
 
-            return HomeScreen.State(notifications) { event ->
+            return AlertsListScreen.State(notifications) { event ->
                 when (event) {
-                    is HomeScreen.Event.DeleteNotification -> {
+                    is AlertsListScreen.Event.DeleteNotification -> {
                         Timber.d("Deleting notification: $event")
                         scope.launch {
                             remoteAlertRepository.deleteRemoteNotification(event.notification)
                         }
                     }
-                    HomeScreen.Event.AddNotification -> {
+                    AlertsListScreen.Event.AddNotification -> {
                         navigator.goTo(AddNewRemoteAlertScreen)
                     }
                 }
             }
         }
 
-        @CircuitInject(HomeScreen::class, AppScope::class)
+        @CircuitInject(AlertsListScreen::class, AppScope::class)
         @AssistedFactory
         fun interface Factory {
-            fun create(navigator: Navigator): HomePresenter
+            fun create(navigator: Navigator): AlertsListPresenter
         }
     }
 
-@CircuitInject(screen = HomeScreen::class, scope = AppScope::class)
+@CircuitInject(screen = AlertsListScreen::class, scope = AppScope::class)
 @Composable
-fun Home(
-    state: HomeScreen.State,
+fun AlertsListUi(
+    state: AlertsListScreen.State,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            FloatingActionButton(onClick = { state.eventSink(HomeScreen.Event.AddNotification) }) {
+            FloatingActionButton(onClick = { state.eventSink(AlertsListScreen.Event.AddNotification) }) {
                 Icon(Icons.Default.Add, contentDescription = "Add Notification")
             }
         },
@@ -113,7 +113,7 @@ fun Home(
         LazyColumn(modifier = Modifier.padding(innerPadding)) {
             items(state.notifications) { notification ->
                 NotificationItem(notification = notification, onDelete = {
-                    state.eventSink(HomeScreen.Event.DeleteNotification(notification))
+                    state.eventSink(AlertsListScreen.Event.DeleteNotification(notification))
                 })
             }
         }
@@ -146,4 +146,21 @@ fun NotificationItem(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewAlertsListUi() {
+    val sampleNotifications =
+        listOf(
+            RemoteNotification.BatteryNotification(batteryPercentage = 50),
+            RemoteNotification.StorageNotification(storageMinSpaceGb = 10),
+        )
+    AlertsListUi(
+        state =
+            AlertsListScreen.State(
+                notifications = sampleNotifications,
+                eventSink = {},
+            ),
+    )
 }

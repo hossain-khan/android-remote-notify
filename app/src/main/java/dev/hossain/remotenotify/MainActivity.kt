@@ -15,7 +15,7 @@ import com.squareup.anvil.annotations.ContributesMultibinding
 import dev.hossain.remotenotify.di.ActivityKey
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.theme.ComposeAppTheme
-import dev.hossain.remotenotify.ui.alertlist.HomeScreen
+import dev.hossain.remotenotify.ui.alertlist.AlertsListScreen
 import javax.inject.Inject
 
 @ContributesMultibinding(AppScope::class, boundType = Activity::class)
@@ -32,7 +32,7 @@ class MainActivity
             setContent {
                 ComposeAppTheme {
                     // See https://slackhq.github.io/circuit/navigation/
-                    val backStack = rememberSaveableBackStack(root = HomeScreen)
+                    val backStack = rememberSaveableBackStack(root = AlertsListScreen)
                     val navigator = rememberCircuitNavigator(backStack)
 
                     // See https://slackhq.github.io/circuit/circuit-content/
