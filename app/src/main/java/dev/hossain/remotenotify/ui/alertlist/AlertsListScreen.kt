@@ -37,6 +37,7 @@ import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteNotification
 import dev.hossain.remotenotify.monitor.BatteryMonitor
+import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -104,8 +105,12 @@ fun AlertsListUi(
     state: AlertsListScreen.State,
     modifier: Modifier = Modifier,
 ) {
-    val batteryMonitor = BatteryMonitor(LocalContext.current)
+    val context = LocalContext.current
+    val batteryMonitor = BatteryMonitor(context)
+    val storageMonitor = StorageMonitor()
     val batteryPercentage = batteryMonitor.getBatteryLevel()
+    val availableStorage = storageMonitor.getAvailableStorageInGB()
+    val totalStorage = storageMonitor.getTotalStorageInGB()
 
     Scaffold(
         modifier = modifier,
@@ -119,7 +124,16 @@ fun AlertsListUi(
             // Display battery percentage at the top
             Text(
                 text = "Battery Percentage: $batteryPercentage%",
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(2.dp),
+            )
+            // Display storage data under battery level
+            Text(
+                text = "Available Storage: $availableStorage GB",
+                modifier = Modifier.padding(2.dp),
+            )
+            Text(
+                text = "Total Storage: $totalStorage GB",
+                modifier = Modifier.padding(2.dp),
             )
             LazyColumn {
                 items(state.notifications) { notification ->
