@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
@@ -39,6 +40,7 @@ import dev.hossain.remotenotify.model.RemoteNotification
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
+import dev.hossain.remotenotify.ui.addterminus.AddNotificationMediumScreen
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
@@ -56,6 +58,8 @@ data object AlertsListScreen : Screen {
         ) : Event()
 
         data object AddNotification : Event()
+
+        data object AddNotificationDestination : Event()
     }
 }
 
@@ -88,6 +92,10 @@ class AlertsListPresenter
                     AlertsListScreen.Event.AddNotification -> {
                         navigator.goTo(AddNewRemoteAlertScreen)
                     }
+
+                    AlertsListScreen.Event.AddNotificationDestination -> {
+                        navigator.goTo(AddNotificationMediumScreen)
+                    }
                 }
             }
         }
@@ -115,8 +123,16 @@ fun AlertsListUi(
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            FloatingActionButton(onClick = { state.eventSink(AlertsListScreen.Event.AddNotification) }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Notification")
+            Column {
+                FloatingActionButton(onClick = { state.eventSink(AlertsListScreen.Event.AddNotification) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Notification")
+                }
+                Spacer(modifier = Modifier.size(16.dp))
+                FloatingActionButton(onClick = {
+                    state.eventSink(AlertsListScreen.Event.AddNotificationDestination)
+                }) {
+                    Icon(Icons.Default.Notifications, contentDescription = "Add Notification Medium")
+                }
             }
         },
     ) { innerPadding ->
