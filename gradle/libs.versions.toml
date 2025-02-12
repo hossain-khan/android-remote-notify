@@ -32,7 +32,7 @@ espressoCore = "3.6.1"
 firebaseBom = "33.9.0"
 
 # https://developer.android.com/develop/ui/compose/text/fonts
-googleFonts = "1.7.7"
+googleFonts = "1.7.8"
 
 # Fluent assertions for Java and Android
 # https://truth.dev/ | https://github.com/google/truth
