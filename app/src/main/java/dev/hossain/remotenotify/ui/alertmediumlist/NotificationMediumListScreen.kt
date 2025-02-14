@@ -30,7 +30,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -50,7 +55,6 @@ import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.ui.addalertmedium.ConfigureNotificationMediumScreen
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -86,28 +90,38 @@ class NotificationMediumListPresenter
         @Composable
         override fun present(): NotificationMediumListScreen.State {
             val scope = rememberCoroutineScope()
-            val notifierInfoList =
-                notifiers.map { sender ->
-                    NotificationMediumListScreen.NotifierInfo(
-                        id = sender.notifierType,
-                        name = sender.notifierType.displayName,
-                        // TODO FIX THIS LATER
-                        isConfigured = runBlocking { sender.hasValidConfiguration() },
-                    )
-                }
+            // Use remember and mutableStateOf to make the list observable
+            var notifierInfoList by remember { mutableStateOf(emptyList<NotificationMediumListScreen.NotifierInfo>()) }
+
+            // Helper function to update the list
+            suspend fun updateNotifierList() {
+                notifierInfoList =
+                    notifiers.map { sender ->
+                        NotificationMediumListScreen.NotifierInfo(
+                            id = sender.notifierType,
+                            name = sender.notifierType.displayName,
+                            isConfigured = sender.hasValidConfiguration(),
+                        )
+                    }
+            }
+
+            // Load initial state
+            LaunchedEffect(Unit) {
+                updateNotifierList()
+            }
 
             return NotificationMediumListScreen.State(
                 notifiers = notifierInfoList,
             ) { event ->
                 when (event) {
                     is NotificationMediumListScreen.Event.EditMedium -> {
-                        // Navigate to edit screen with the ID
                         navigator.goTo(ConfigureNotificationMediumScreen(event.id))
                     }
                     is NotificationMediumListScreen.Event.DeleteMedium -> {
                         scope.launch {
-                            // TODO - find out how to update list after delete
                             notifiers.find { it.notifierType == event.id }?.clearConfig()
+                            // Update the list after clearing config
+                            updateNotifierList()
                         }
                     }
                 }
