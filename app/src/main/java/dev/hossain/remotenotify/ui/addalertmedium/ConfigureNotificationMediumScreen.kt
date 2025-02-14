@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
@@ -29,6 +30,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.data.TelegramConfigDataStore
+import dev.hossain.remotenotify.data.WebhookConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.notifier.NotifierType
 import kotlinx.coroutines.flow.first
@@ -44,6 +46,7 @@ data class ConfigureNotificationMediumScreen(
         val notifierType: NotifierType,
         val botToken: String,
         val chatId: String,
+        val webhookUrl: String,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -57,6 +60,10 @@ data class ConfigureNotificationMediumScreen(
         data class OnChatIdUpdated(
             val chatId: String,
         ) : Event()
+
+        data class OnWebhookUrlUpdated(
+            val url: String,
+        ) : Event()
     }
 }
 
@@ -66,17 +73,25 @@ class ConfigureNotificationMediumPresenter
         @Assisted private val screen: ConfigureNotificationMediumScreen,
         @Assisted private val navigator: Navigator,
         private val telegramConfigDataStore: TelegramConfigDataStore,
+        private val webhookConfigDataStore: WebhookConfigDataStore,
     ) : Presenter<ConfigureNotificationMediumScreen.State> {
         @Composable
         override fun present(): ConfigureNotificationMediumScreen.State {
             val scope = rememberCoroutineScope()
             var savedBotToken by remember { mutableStateOf("") }
             var savedChatId by remember { mutableStateOf("") }
+            var savedWebhookUrl by remember { mutableStateOf("") } // Add webhook state
 
             LaunchedEffect(Unit) {
-                if (screen.notifierType == NotifierType.TELEGRAM) {
-                    savedBotToken = telegramConfigDataStore.botToken.first() ?: ""
-                    savedChatId = telegramConfigDataStore.chatId.first() ?: ""
+                when (screen.notifierType) {
+                    NotifierType.TELEGRAM -> {
+                        savedBotToken = telegramConfigDataStore.botToken.first() ?: ""
+                        savedChatId = telegramConfigDataStore.chatId.first() ?: ""
+                    }
+
+                    NotifierType.WEBHOOK_REST_API -> {
+                        savedWebhookUrl = webhookConfigDataStore.webhookUrl.first() ?: ""
+                    }
                 }
             }
 
@@ -84,6 +99,7 @@ class ConfigureNotificationMediumPresenter
                 notifierType = screen.notifierType,
                 botToken = savedBotToken,
                 chatId = savedChatId,
+                webhookUrl = savedWebhookUrl,
             ) { event ->
                 when (event) {
                     is ConfigureNotificationMediumScreen.Event.SaveConfig -> {
@@ -98,16 +114,28 @@ class ConfigureNotificationMediumPresenter
                                     }
                                 }
 
-                                NotifierType.WEBHOOK_REST_API -> TODO()
+                                NotifierType.WEBHOOK_REST_API -> {
+                                    runCatching {
+                                        webhookConfigDataStore.saveWebhookUrl(savedWebhookUrl)
+                                    }.onFailure {
+                                        Timber.e(it, "Error saving Webhook config")
+                                    }
+                                }
                             }
                             navigator.pop()
                         }
                     }
+
                     is ConfigureNotificationMediumScreen.Event.OnBotTokenUpdated -> {
                         savedBotToken = event.botToken
                     }
+
                     is ConfigureNotificationMediumScreen.Event.OnChatIdUpdated -> {
                         savedChatId = event.chatId
+                    }
+
+                    is ConfigureNotificationMediumScreen.Event.OnWebhookUrlUpdated -> {
+                        savedWebhookUrl = event.url
                     }
                 }
             }
@@ -168,8 +196,19 @@ fun ConfigureNotificationMediumUi(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-
-                NotifierType.WEBHOOK_REST_API -> TODO()
+                NotifierType.WEBHOOK_REST_API -> {
+                    TextField(
+                        value = state.webhookUrl,
+                        onValueChange = {
+                            state.eventSink(
+                                ConfigureNotificationMediumScreen.Event.OnWebhookUrlUpdated(it),
+                            )
+                        },
+                        label = { Text("Webhook URL") },
+                        modifier = Modifier.fillMaxWidth(),
+                        supportingText = { Text("Enter the URL to receive notifications") },
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -181,5 +220,39 @@ fun ConfigureNotificationMediumUi(
                 Text("Save Configuration")
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewTelegramConfigurationUi() {
+    MaterialTheme {
+        ConfigureNotificationMediumUi(
+            state =
+                ConfigureNotificationMediumScreen.State(
+                    notifierType = NotifierType.TELEGRAM,
+                    botToken = "1234567890:ABCdefGHIjklMNOpqrsTUVwxyz",
+                    chatId = "123456789",
+                    webhookUrl = "",
+                    eventSink = {},
+                ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewWebhookConfigurationUi() {
+    MaterialTheme {
+        ConfigureNotificationMediumUi(
+            state =
+                ConfigureNotificationMediumScreen.State(
+                    notifierType = NotifierType.WEBHOOK_REST_API,
+                    botToken = "",
+                    chatId = "",
+                    webhookUrl = "https://api.example.com/webhook",
+                    eventSink = {},
+                ),
+        )
     }
 }
