@@ -97,13 +97,15 @@ class NotificationMediumListPresenter
             // Helper function to update the list
             suspend fun updateNotifierList() {
                 notifierInfoList =
-                    notifiers.map { sender ->
-                        NotificationMediumListScreen.NotifierInfo(
-                            id = sender.notifierType,
-                            name = sender.notifierType.displayName,
-                            isConfigured = sender.hasValidConfiguration(),
-                        )
-                    }
+                    notifiers
+                        .sortedBy { it.notifierType.displayName }
+                        .map { sender ->
+                            NotificationMediumListScreen.NotifierInfo(
+                                id = sender.notifierType,
+                                name = sender.notifierType.displayName,
+                                isConfigured = sender.hasValidConfiguration(),
+                            )
+                        }
             }
 
             // Load initial state
