@@ -1,10 +1,12 @@
 package dev.hossain.remotenotify.ui.addalertmedium
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -35,15 +37,18 @@ import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 
 @Parcelize
-data object ConfigureNotificationMediumScreen : Screen {
+data class ConfigureNotificationMediumScreen(
+    val notifierType: NotifierType,
+) : Screen {
     data class State(
+        val notifierType: NotifierType,
         val botToken: String,
         val chatId: String,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
     sealed class Event : CircuitUiEvent {
-        data object SaveTelegramConfig : Event()
+        data object SaveConfig : Event()
 
         data class OnBotTokenUpdated(
             val botToken: String,
@@ -58,6 +63,7 @@ data object ConfigureNotificationMediumScreen : Screen {
 class ConfigureNotificationMediumPresenter
     @AssistedInject
     constructor(
+        @Assisted private val screen: ConfigureNotificationMediumScreen,
         @Assisted private val navigator: Navigator,
         private val telegramConfigDataStore: TelegramConfigDataStore,
     ) : Presenter<ConfigureNotificationMediumScreen.State> {
@@ -68,25 +74,33 @@ class ConfigureNotificationMediumPresenter
             var savedChatId by remember { mutableStateOf("") }
 
             LaunchedEffect(Unit) {
-                savedBotToken = telegramConfigDataStore.botToken.first() ?: ""
-                savedChatId = telegramConfigDataStore.chatId.first() ?: ""
+                if (screen.notifierType == NotifierType.TELEGRAM) {
+                    savedBotToken = telegramConfigDataStore.botToken.first() ?: ""
+                    savedChatId = telegramConfigDataStore.chatId.first() ?: ""
+                }
             }
 
-            return ConfigureNotificationMediumScreen.State(savedBotToken, savedChatId) { event ->
+            return ConfigureNotificationMediumScreen.State(
+                notifierType = screen.notifierType,
+                botToken = savedBotToken,
+                chatId = savedChatId,
+            ) { event ->
                 when (event) {
-                    is ConfigureNotificationMediumScreen.Event.SaveTelegramConfig -> {
+                    is ConfigureNotificationMediumScreen.Event.SaveConfig -> {
                         scope.launch {
-                            runCatching {
-                                telegramConfigDataStore.saveBotToken(savedBotToken)
-                            }.onFailure { Timber.e(it, "Got error saving bot") }
-
-                            runCatching {
-                                telegramConfigDataStore.saveChatId(savedChatId)
-                            }.onFailure { Timber.e(it, "Got error chat id") }
+                            when (screen.notifierType) {
+                                NotifierType.TELEGRAM -> {
+                                    runCatching {
+                                        telegramConfigDataStore.saveBotToken(savedBotToken)
+                                        telegramConfigDataStore.saveChatId(savedChatId)
+                                    }.onFailure {
+                                        Timber.e(it, "Error saving Telegram config")
+                                    }
+                                }
+                            }
                             navigator.pop()
                         }
                     }
-
                     is ConfigureNotificationMediumScreen.Event.OnBotTokenUpdated -> {
                         savedBotToken = event.botToken
                     }
@@ -100,7 +114,10 @@ class ConfigureNotificationMediumPresenter
         @CircuitInject(ConfigureNotificationMediumScreen::class, AppScope::class)
         @AssistedFactory
         fun interface Factory {
-            fun create(navigator: Navigator): ConfigureNotificationMediumPresenter
+            fun create(
+                screen: ConfigureNotificationMediumScreen,
+                navigator: Navigator,
+            ): ConfigureNotificationMediumPresenter
         }
     }
 
@@ -110,8 +127,6 @@ fun ConfigureNotificationMediumUi(
     state: ConfigureNotificationMediumScreen.State,
     modifier: Modifier = Modifier,
 ) {
-    var selectedType by remember { mutableStateOf(NotifierType.TELEGRAM) }
-
     Scaffold(modifier = modifier) { innerPadding ->
         Column(
             modifier =
@@ -119,52 +134,47 @@ fun ConfigureNotificationMediumUi(
                     .padding(innerPadding)
                     .padding(16.dp),
         ) {
-            // UI for selecting notification medium
-            Text("Select Notification Medium")
-            Row {
-                NotifierType.entries.forEach { type ->
-                    RadioButton(
-                        selected = selectedType == type,
-                        onClick = { selectedType = type },
+            Text(
+                text = "Configure ${state.notifierType.displayName}",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 16.dp),
+            )
+
+            when (state.notifierType) {
+                NotifierType.TELEGRAM -> {
+                    TextField(
+                        value = state.botToken,
+                        onValueChange = {
+                            state.eventSink(
+                                ConfigureNotificationMediumScreen.Event.OnBotTokenUpdated(it),
+                            )
+                        },
+                        label = { Text("Bot Token") },
+                        modifier = Modifier.fillMaxWidth(),
                     )
-                    Text(type.name)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    TextField(
+                        value = state.chatId,
+                        onValueChange = {
+                            state.eventSink(
+                                ConfigureNotificationMediumScreen.Event.OnChatIdUpdated(it),
+                            )
+                        },
+                        label = { Text("Chat ID") },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
             }
 
-            // UI for Telegram configuration
-            if (selectedType == NotifierType.TELEGRAM) {
-                Text("Enter Telegram Bot Token")
-                // Add TextField for botToken input
-                TextField(
-                    value = state.botToken,
-                    onValueChange = {
-                        state.eventSink(
-                            ConfigureNotificationMediumScreen.Event.OnBotTokenUpdated(it),
-                        )
-                    },
-                    label = { Text("Bot Token") },
-                )
+            Spacer(modifier = Modifier.height(24.dp))
 
-                Text("Enter Telegram Chat ID")
-                // Add TextField for chatId input
-                TextField(
-                    value = state.chatId,
-                    onValueChange = {
-                        state.eventSink(
-                            ConfigureNotificationMediumScreen.Event.OnChatIdUpdated(it),
-                        )
-                    },
-                    label = { Text("Chat ID") },
-                )
-            }
-
-            // Save button
-            Button(onClick = {
-                if (selectedType == NotifierType.TELEGRAM) {
-                    state.eventSink(ConfigureNotificationMediumScreen.Event.SaveTelegramConfig)
-                }
-            }) {
-                Text("Save")
+            Button(
+                onClick = { state.eventSink(ConfigureNotificationMediumScreen.Event.SaveConfig) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Save Configuration")
             }
         }
     }

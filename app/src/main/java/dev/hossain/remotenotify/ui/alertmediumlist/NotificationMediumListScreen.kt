@@ -67,8 +67,6 @@ data object NotificationMediumListScreen : Screen {
     )
 
     sealed class Event : CircuitUiEvent {
-        data object AddNewMedium : Event()
-
         data class EditMedium(
             val id: NotifierType,
         ) : Event()
@@ -102,12 +100,9 @@ class NotificationMediumListPresenter
                 notifiers = notifierInfoList,
             ) { event ->
                 when (event) {
-                    is NotificationMediumListScreen.Event.AddNewMedium -> {
-                        navigator.goTo(ConfigureNotificationMediumScreen)
-                    }
                     is NotificationMediumListScreen.Event.EditMedium -> {
                         // Navigate to edit screen with the ID
-                        navigator.goTo(ConfigureNotificationMediumScreen)
+                        navigator.goTo(ConfigureNotificationMediumScreen(event.id))
                     }
                     is NotificationMediumListScreen.Event.DeleteMedium -> {
                         scope.launch {
