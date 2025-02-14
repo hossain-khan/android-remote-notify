@@ -196,11 +196,18 @@ fun AlertsListUi(
                     }
                 }
 
-                // Show all user configured alerts
-                items(state.notifications) { notification ->
-                    NotificationItem(notification = notification, onDelete = {
-                        state.eventSink(AlertsListScreen.Event.DeleteNotification(notification))
-                    })
+                // Show empty state or user configured alerts
+                if (state.notifications.isEmpty()) {
+                    item { EmptyNotificationsState() }
+                } else {
+                    items(state.notifications) { notification ->
+                        NotificationItem(
+                            notification = notification,
+                            onDelete = {
+                                state.eventSink(AlertsListScreen.Event.DeleteNotification(notification))
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -381,6 +388,26 @@ fun NotificationItem(
                 }
             },
             modifier = Modifier.padding(horizontal = 4.dp),
+        )
+    }
+}
+
+@Composable
+private fun EmptyNotificationsState() {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            Icons.Default.Notifications,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.secondary,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            "No alerts configured",
+            style = MaterialTheme.typography.titleMedium,
         )
     }
 }
