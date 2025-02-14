@@ -1,6 +1,8 @@
 package dev.hossain.remotenotify.ui.alertlist
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,7 +36,6 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -180,9 +180,13 @@ fun AlertsListUi(
             modifier =
                 Modifier
                     .padding(innerPadding)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp),
         ) {
-            LazyColumn {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(8.dp),
+            ) {
                 // Display battery percentage at the top
                 item { DeviceCurrentStateUi(state) }
 
@@ -349,47 +353,75 @@ private fun NoNotifierConfiguredCard(
 fun NotificationItem(
     notification: RemoteNotification,
     onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Card(
-        modifier =
-            Modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
-    ) {
-        ListItem(
-            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-            headlineContent = {
+    ListItem(
+        shadowElevation = 4.dp,
+        leadingContent = {
+            Icon(
+                painter =
+                    when (notification) {
+                        is RemoteNotification.BatteryNotification ->
+                            painterResource(id = R.drawable.battery_3_bar_24dp)
+                        is RemoteNotification.StorageNotification ->
+                            painterResource(id = R.drawable.hard_disk_24dp)
+                    },
+                contentDescription = null,
+                modifier = modifier.size(32.dp),
+            )
+        },
+        headlineContent = {
+            Text(
+                text =
+                    when (notification) {
+                        is RemoteNotification.BatteryNotification -> "Battery Alert"
+                        is RemoteNotification.StorageNotification -> "Storage Alert"
+                    },
+                style = MaterialTheme.typography.titleMedium,
+            )
+        },
+        supportingContent = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(top = 4.dp),
+            ) {
                 when (notification) {
                     is RemoteNotification.BatteryNotification -> {
-                        Text(text = "Battery Alert")
+                        LinearProgressIndicator(
+                            progress = { notification.batteryPercentage / 100f },
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .height(4.dp),
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "${notification.batteryPercentage}%",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
                     }
                     is RemoteNotification.StorageNotification -> {
-                        Text(text = "Storage Alert")
+                        Text(
+                            text = "Min Storage: ${notification.storageMinSpaceGb} GB",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
                     }
                 }
-            },
-            supportingContent = {
-                when (notification) {
-                    is RemoteNotification.BatteryNotification -> {
-                        Text(text = "Battery Percentage: ${notification.batteryPercentage}%")
-                    }
-                    is RemoteNotification.StorageNotification -> {
-                        Text(text = "Minimum Storage Space: ${notification.storageMinSpaceGb} GB")
-                    }
-                }
-            },
-            trailingContent = {
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Delete Alert",
-                        modifier = Modifier.size(24.dp),
-                    )
-                }
-            },
-            modifier = Modifier.padding(horizontal = 4.dp),
-        )
-    }
+            }
+        },
+        trailingContent = {
+            IconButton(
+                onClick = onDelete,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete Alert",
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+        },
+        modifier = Modifier.padding(horizontal = 4.dp),
+    )
 }
 
 @Composable
