@@ -152,8 +152,8 @@ fun NotificationMediumListUi(
                 items(state.notifiers) { notifier ->
                     NotifierCard(
                         notifier = notifier,
-                        onEdit = { state.eventSink(NotificationMediumListScreen.Event.EditMedium(notifier.id)) },
-                        onDelete = { state.eventSink(NotificationMediumListScreen.Event.DeleteMedium(notifier.id)) },
+                        onEditConfiguration = { state.eventSink(NotificationMediumListScreen.Event.EditMedium(notifier.id)) },
+                        onResetConfiguration = { state.eventSink(NotificationMediumListScreen.Event.DeleteMedium(notifier.id)) },
                     )
                 }
             }
@@ -164,8 +164,8 @@ fun NotificationMediumListUi(
 @Composable
 private fun NotifierCard(
     notifier: NotificationMediumListScreen.NotifierInfo,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
+    onEditConfiguration: () -> Unit,
+    onResetConfiguration: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -197,7 +197,7 @@ private fun NotifierCard(
             },
             trailingContent = {
                 Row {
-                    IconButton(onClick = onEdit) {
+                    IconButton(onClick = onEditConfiguration) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Edit",
@@ -208,7 +208,7 @@ private fun NotifierCard(
                         enter = fadeIn() + expandHorizontally(),
                         exit = fadeOut() + shrinkHorizontally(),
                     ) {
-                        IconButton(onClick = onDelete) {
+                        IconButton(onClick = onResetConfiguration) {
                             Icon(
                                 painter = painterResource(id = R.drawable.reset_settings_24dp),
                                 contentDescription = "Delete",
