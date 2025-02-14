@@ -6,6 +6,7 @@ import dagger.Module
 import dagger.Provides
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
+import java.time.Clock
 
 @ContributesTo(AppScope::class)
 @Module
@@ -19,4 +20,7 @@ class AppModule {
     fun provideStorageMonitor(
         @ApplicationContext context: Context,
     ): StorageMonitor = StorageMonitor(context)
+
+    @Provides
+    fun provideClock(): Clock = Clock.systemUTC()
 }
