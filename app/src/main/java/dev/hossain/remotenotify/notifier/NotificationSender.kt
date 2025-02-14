@@ -8,7 +8,10 @@ import dev.hossain.remotenotify.model.RemoteNotification
 interface NotificationSender {
     val notifierType: NotifierType
 
-    suspend fun sendNotification(remoteNotification: RemoteNotification)
+    /**
+     * Sends remote notification and provides result as boolean representing success or failure
+     */
+    suspend fun sendNotification(remoteNotification: RemoteNotification): Boolean
 
     /**
      * Checks if all the required configuration is set for the notifier.

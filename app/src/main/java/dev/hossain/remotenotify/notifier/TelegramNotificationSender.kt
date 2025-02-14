@@ -23,7 +23,7 @@ class TelegramNotificationSender
     ) : NotificationSender {
         override val notifierType: NotifierType = NotifierType.TELEGRAM
 
-        override suspend fun sendNotification(remoteNotification: RemoteNotification) {
+        override suspend fun sendNotification(remoteNotification: RemoteNotification): Boolean {
             val message =
                 when (remoteNotification) {
                     is RemoteNotification.BatteryNotification -> "Battery Alert: ${remoteNotification.batteryPercentage}%"
@@ -59,8 +59,10 @@ class TelegramNotificationSender
             okHttpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
                     Timber.e("Failed to send notification: ${response.code} - ${response.message}")
+                    return false
                 } else {
                     Timber.d("Notification sent successfully: $message")
+                    return true
                 }
             }
         }

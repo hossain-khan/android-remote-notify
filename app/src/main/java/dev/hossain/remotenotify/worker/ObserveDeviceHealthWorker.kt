@@ -27,40 +27,52 @@ class ObserveDeviceHealthWorker(
         private const val WORKER_LOG_TAG = "RA-Worker"
     }
 
-    override suspend fun doWork(): Result =
+    override suspend fun doWork(): Result {
+        Timber.tag(WORKER_LOG_TAG).i("Schedule worker has started the job.")
         try {
             // Load all alerts from the repository
             val alerts = repository.getAllRemoteNotifications()
+            Timber.tag(WORKER_LOG_TAG).d("Loaded alerts: $alerts")
 
             // Check battery and storage levels
-            val batteryLevel = batteryMonitor.getBatteryLevel()
-            val availableStorage = storageMonitor.getAvailableStorageInGB()
+            val deviceCurrentBatteryLevel = batteryMonitor.getBatteryLevel()
+            Timber.tag(WORKER_LOG_TAG).d("Battery level: $deviceCurrentBatteryLevel")
+
+            val deviceCurrentAvailableStorage = storageMonitor.getAvailableStorageInGB()
+            Timber.tag(WORKER_LOG_TAG).d("Available storage: $deviceCurrentAvailableStorage")
 
             // Send notifications if thresholds are met
             alerts.forEach { alert ->
                 when (alert) {
                     is RemoteNotification.BatteryNotification -> {
-                        if (batteryLevel <= alert.batteryPercentage) {
+                        if (alert.batteryPercentage <= deviceCurrentBatteryLevel) {
                             sendNotification(alert)
+                        } else {
+                            Timber.tag(WORKER_LOG_TAG).d("Notification threshold not met. Not sending: $alert")
                         }
                     }
+
                     is RemoteNotification.StorageNotification -> {
-                        if (availableStorage <= alert.storageMinSpaceGb) {
+                        if (alert.storageMinSpaceGb <= deviceCurrentAvailableStorage) {
                             sendNotification(alert)
+                        } else {
+                            Timber.tag(WORKER_LOG_TAG).d("Notification threshold not met. Not sending: $alert")
                         }
                     }
                 }
             }
-            Result.success()
+            return Result.success()
         } catch (e: Exception) {
             Timber.tag(WORKER_LOG_TAG).e(e, "Failed to observe device health")
-            Result.failure()
+            return Result.failure()
         }
+    }
 
     private suspend fun sendNotification(notification: RemoteNotification) {
+        Timber.i("Notification triggered - sending: $notification")
         if (notifiers.isEmpty()) {
             // This should ideally not happen unless dagger setup has failed
-            Timber.e("No remote notifier has been registered")
+            Timber.tag(WORKER_LOG_TAG).e("No remote notifier has been registered")
         }
 
         notifiers
@@ -68,7 +80,13 @@ class ObserveDeviceHealthWorker(
             .forEach { notifier ->
                 try {
                     Timber.tag(WORKER_LOG_TAG).i("Sending notification with ${notifier.notifierType}")
-                    notifier.sendNotification(notification)
+                    kotlin
+                        .runCatching { notifier.sendNotification(notification) }
+                        .onFailure {
+                            Timber.tag(WORKER_LOG_TAG).e(it)
+                        }.onSuccess {
+                            Timber.tag(WORKER_LOG_TAG).d("Notifier status: $it")
+                        }
 
                     // Add some delay to avoid spamming the notification
                     delay(10_000)
