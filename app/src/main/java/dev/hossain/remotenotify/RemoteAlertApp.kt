@@ -33,11 +33,10 @@ class RemoteAlertApp :
 
     override fun onCreate() {
         super.onCreate()
+        installLoggingTree()
         appComponent.inject(this)
 
-        installLoggingTree()
-
-        // TEST CODE
+        // TEST WORKER CODE
         // sendOneTimeWorkRequest(this)
     }
 
