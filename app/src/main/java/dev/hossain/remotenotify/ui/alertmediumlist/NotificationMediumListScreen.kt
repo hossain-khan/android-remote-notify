@@ -17,13 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -50,7 +48,7 @@ import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
-import dev.hossain.remotenotify.ui.addalertmedium.AddNotificationMediumScreen
+import dev.hossain.remotenotify.ui.addalertmedium.ConfigureNotificationMediumScreen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
@@ -105,11 +103,11 @@ class NotificationMediumListPresenter
             ) { event ->
                 when (event) {
                     is NotificationMediumListScreen.Event.AddNewMedium -> {
-                        navigator.goTo(AddNotificationMediumScreen)
+                        navigator.goTo(ConfigureNotificationMediumScreen)
                     }
                     is NotificationMediumListScreen.Event.EditMedium -> {
                         // Navigate to edit screen with the ID
-                        navigator.goTo(AddNotificationMediumScreen)
+                        navigator.goTo(ConfigureNotificationMediumScreen)
                     }
                     is NotificationMediumListScreen.Event.DeleteMedium -> {
                         scope.launch {
@@ -141,16 +139,6 @@ fun NotificationMediumListUi(
             TopAppBar(
                 title = { Text("Notification Mediums") },
             )
-        },
-        floatingActionButton = {
-            // Show FAB only if any medium is not configured
-            if (state.notifiers.any { !it.isConfigured }) {
-                ExtendedFloatingActionButton(
-                    onClick = { state.eventSink(NotificationMediumListScreen.Event.AddNewMedium) },
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Add Medium") },
-                )
-            }
         },
     ) { padding ->
         if (state.notifiers.isEmpty()) {

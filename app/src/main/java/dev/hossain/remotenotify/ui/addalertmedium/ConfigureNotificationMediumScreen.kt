@@ -35,7 +35,7 @@ import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 
 @Parcelize
-data object AddNotificationMediumScreen : Screen {
+data object ConfigureNotificationMediumScreen : Screen {
     data class State(
         val botToken: String,
         val chatId: String,
@@ -55,14 +55,14 @@ data object AddNotificationMediumScreen : Screen {
     }
 }
 
-class AddNotificationMediumPresenter
+class ConfigureNotificationMediumPresenter
     @AssistedInject
     constructor(
         @Assisted private val navigator: Navigator,
         private val telegramConfigDataStore: TelegramConfigDataStore,
-    ) : Presenter<AddNotificationMediumScreen.State> {
+    ) : Presenter<ConfigureNotificationMediumScreen.State> {
         @Composable
-        override fun present(): AddNotificationMediumScreen.State {
+        override fun present(): ConfigureNotificationMediumScreen.State {
             val scope = rememberCoroutineScope()
             var savedBotToken by remember { mutableStateOf("") }
             var savedChatId by remember { mutableStateOf("") }
@@ -72,9 +72,9 @@ class AddNotificationMediumPresenter
                 savedChatId = telegramConfigDataStore.chatId.first() ?: ""
             }
 
-            return AddNotificationMediumScreen.State(savedBotToken, savedChatId) { event ->
+            return ConfigureNotificationMediumScreen.State(savedBotToken, savedChatId) { event ->
                 when (event) {
-                    is AddNotificationMediumScreen.Event.SaveTelegramConfig -> {
+                    is ConfigureNotificationMediumScreen.Event.SaveTelegramConfig -> {
                         scope.launch {
                             runCatching {
                                 telegramConfigDataStore.saveBotToken(savedBotToken)
@@ -87,27 +87,27 @@ class AddNotificationMediumPresenter
                         }
                     }
 
-                    is AddNotificationMediumScreen.Event.OnBotTokenUpdated -> {
+                    is ConfigureNotificationMediumScreen.Event.OnBotTokenUpdated -> {
                         savedBotToken = event.botToken
                     }
-                    is AddNotificationMediumScreen.Event.OnChatIdUpdated -> {
+                    is ConfigureNotificationMediumScreen.Event.OnChatIdUpdated -> {
                         savedChatId = event.chatId
                     }
                 }
             }
         }
 
-        @CircuitInject(AddNotificationMediumScreen::class, AppScope::class)
+        @CircuitInject(ConfigureNotificationMediumScreen::class, AppScope::class)
         @AssistedFactory
         fun interface Factory {
-            fun create(navigator: Navigator): AddNotificationMediumPresenter
+            fun create(navigator: Navigator): ConfigureNotificationMediumPresenter
         }
     }
 
-@CircuitInject(screen = AddNotificationMediumScreen::class, scope = AppScope::class)
+@CircuitInject(screen = ConfigureNotificationMediumScreen::class, scope = AppScope::class)
 @Composable
-fun AddNotificationMediumUi(
-    state: AddNotificationMediumScreen.State,
+fun ConfigureNotificationMediumUi(
+    state: ConfigureNotificationMediumScreen.State,
     modifier: Modifier = Modifier,
 ) {
     var selectedType by remember { mutableStateOf(NotifierType.TELEGRAM) }
@@ -139,7 +139,7 @@ fun AddNotificationMediumUi(
                     value = state.botToken,
                     onValueChange = {
                         state.eventSink(
-                            AddNotificationMediumScreen.Event.OnBotTokenUpdated(it),
+                            ConfigureNotificationMediumScreen.Event.OnBotTokenUpdated(it),
                         )
                     },
                     label = { Text("Bot Token") },
@@ -151,7 +151,7 @@ fun AddNotificationMediumUi(
                     value = state.chatId,
                     onValueChange = {
                         state.eventSink(
-                            AddNotificationMediumScreen.Event.OnChatIdUpdated(it),
+                            ConfigureNotificationMediumScreen.Event.OnChatIdUpdated(it),
                         )
                     },
                     label = { Text("Chat ID") },
@@ -161,7 +161,7 @@ fun AddNotificationMediumUi(
             // Save button
             Button(onClick = {
                 if (selectedType == NotifierType.TELEGRAM) {
-                    state.eventSink(AddNotificationMediumScreen.Event.SaveTelegramConfig)
+                    state.eventSink(ConfigureNotificationMediumScreen.Event.SaveTelegramConfig)
                 }
             }) {
                 Text("Save")
