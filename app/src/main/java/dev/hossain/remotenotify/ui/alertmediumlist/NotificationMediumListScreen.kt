@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.ui.alertmediumlist
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -203,7 +204,7 @@ private fun NotifierCard(
             },
             leadingContent = {
                 Icon(
-                    painter = painterResource(id = R.drawable.telegram_logo_outline),
+                    painter = painterResource(id = notifier.id.iconResId()),
                     contentDescription = "Notification Icon",
                     tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(32.dp),
@@ -255,3 +256,10 @@ private fun EmptyMediumState(modifier: Modifier = Modifier) {
         )
     }
 }
+
+@DrawableRes
+private fun NotifierType.iconResId(): Int =
+    when (this) {
+        NotifierType.TELEGRAM -> R.drawable.telegram_logo_outline
+        NotifierType.WEBHOOK_REST_API -> R.drawable.webhook_24dp
+    }

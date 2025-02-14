@@ -7,4 +7,5 @@ enum class NotifierType(
     val displayName: String,
 ) {
     TELEGRAM("Telegram"),
+    WEBHOOK_REST_API("Webhook"),
 }

@@ -97,6 +97,8 @@ class ConfigureNotificationMediumPresenter
                                         Timber.e(it, "Error saving Telegram config")
                                     }
                                 }
+
+                                NotifierType.WEBHOOK_REST_API -> TODO()
                             }
                             navigator.pop()
                         }
@@ -166,6 +168,8 @@ fun ConfigureNotificationMediumUi(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
+
+                NotifierType.WEBHOOK_REST_API -> TODO()
             }
 
             Spacer(modifier = Modifier.height(24.dp))
