@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:name="dev.hossain.remotenotify.ComposeApp"
+        android:name="dev.hossain.remotenotify.RemoteAlertApp"
         android:appComponentFactory=".di.ComposeAppComponentFactory"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"

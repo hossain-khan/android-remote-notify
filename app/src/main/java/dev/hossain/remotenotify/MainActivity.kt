@@ -16,6 +16,7 @@ import dev.hossain.remotenotify.di.ActivityKey
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertlist.AlertsListScreen
+import dev.hossain.remotenotify.worker.sendOneTimeWorkRequest
 import javax.inject.Inject
 
 @ContributesMultibinding(AppScope::class, boundType = Activity::class)
@@ -48,5 +49,10 @@ class MainActivity
                     }
                 }
             }
+        }
+
+        override fun onStart() {
+            super.onStart()
+            sendOneTimeWorkRequest(this)
         }
     }

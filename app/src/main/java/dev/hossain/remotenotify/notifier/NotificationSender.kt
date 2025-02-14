@@ -9,4 +9,9 @@ interface NotificationSender {
     val notifierType: NotifierType
 
     suspend fun sendNotification(remoteNotification: RemoteNotification)
+
+    /**
+     * Checks if all the required configuration is set for the notifier.
+     */
+    suspend fun hasValidConfiguration(): Boolean
 }
