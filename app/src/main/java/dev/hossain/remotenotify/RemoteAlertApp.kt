@@ -1,6 +1,7 @@
 package dev.hossain.remotenotify
 
 import android.app.Application
+import android.util.Log
 import androidx.work.Configuration
 import androidx.work.WorkerFactory
 import dev.hossain.remotenotify.di.AppComponent
@@ -25,7 +26,7 @@ class RemoteAlertApp :
             Timber.i("Setting up custom WorkManager configuration")
             return Configuration
                 .Builder()
-                .setMinimumLoggingLevel(android.util.Log.DEBUG)
+                .setMinimumLoggingLevel(if (BuildConfig.DEBUG) Log.DEBUG else Log.WARN)
                 .setWorkerFactory(workerFactory)
                 .build()
         }
@@ -33,5 +34,17 @@ class RemoteAlertApp :
     override fun onCreate() {
         super.onCreate()
         appComponent.inject(this)
+
+        installLoggingTree()
+
+        // TEST CODE
+        // sendOneTimeWorkRequest(this)
+    }
+
+    private fun installLoggingTree() {
+        if (BuildConfig.DEBUG) {
+            // Plant a debug tree for development builds
+            Timber.plant(Timber.DebugTree())
+        }
     }
 }
