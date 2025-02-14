@@ -1,5 +1,10 @@
 package dev.hossain.remotenotify.ui.alertmediumlist
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -29,8 +33,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
@@ -41,10 +47,12 @@ import com.slack.circuit.runtime.screen.Screen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.ui.addterminus.AddNotificationMediumScreen
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 
@@ -82,6 +90,7 @@ class NotificationMediumListPresenter
     ) : Presenter<NotificationMediumListScreen.State> {
         @Composable
         override fun present(): NotificationMediumListScreen.State {
+            val scope = rememberCoroutineScope()
             val notifierInfoList =
                 notifiers.map { sender ->
                     NotificationMediumListScreen.NotifierInfo(
@@ -104,7 +113,10 @@ class NotificationMediumListPresenter
                         navigator.goTo(AddNotificationMediumScreen)
                     }
                     is NotificationMediumListScreen.Event.DeleteMedium -> {
-                        // Handle deletion through repository
+                        scope.launch {
+                            // TODO - find out how to update list after delete
+                            notifiers.find { it.notifierType == event.id }?.clearConfig()
+                        }
                     }
                 }
             }
@@ -132,11 +144,14 @@ fun NotificationMediumListUi(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { state.eventSink(NotificationMediumListScreen.Event.AddNewMedium) },
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Add Medium") },
-            )
+            // Show FAB only if any medium is not configured
+            if (state.notifiers.any { !it.isConfigured }) {
+                ExtendedFloatingActionButton(
+                    onClick = { state.eventSink(NotificationMediumListScreen.Event.AddNewMedium) },
+                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                    text = { Text("Add Medium") },
+                )
+            }
         },
     ) { padding ->
         if (state.notifiers.isEmpty()) {
@@ -177,7 +192,7 @@ private fun NotifierCard(
     ) {
         ListItem(
             headlineContent = {
-                Text(notifier.name)
+                Text(text = notifier.name, style = MaterialTheme.typography.titleMedium)
             },
             supportingContent = {
                 Text(
@@ -192,14 +207,10 @@ private fun NotifierCard(
             },
             leadingContent = {
                 Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = null,
-                    tint =
-                        if (notifier.isConfigured) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.error
-                        },
+                    painter = painterResource(id = R.drawable.telegram_logo_outline),
+                    contentDescription = "Notification Icon",
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(32.dp),
                 )
             },
             trailingContent = {
@@ -210,12 +221,17 @@ private fun NotifierCard(
                             contentDescription = "Edit",
                         )
                     }
-                    IconButton(onClick = onDelete) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = MaterialTheme.colorScheme.error,
-                        )
+                    AnimatedVisibility(
+                        visible = notifier.isConfigured,
+                        enter = fadeIn() + expandHorizontally(),
+                        exit = fadeOut() + shrinkHorizontally(),
+                    ) {
+                        IconButton(onClick = onDelete) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.reset_settings_24dp),
+                                contentDescription = "Delete",
+                            )
+                        }
                     }
                 }
             },
