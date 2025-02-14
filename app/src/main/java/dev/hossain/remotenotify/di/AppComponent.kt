@@ -5,15 +5,27 @@ import android.content.Context
 import com.squareup.anvil.annotations.MergeComponent
 import com.squareup.anvil.annotations.optional.SingleIn
 import dagger.BindsInstance
+import dev.hossain.remotenotify.RemoteAlertApp
 import javax.inject.Provider
 
 @MergeComponent(
     scope = AppScope::class,
-    modules = [AppModule::class, CircuitModule::class, DatabaseModule::class, NetworkModule::class],
+    modules = [
+        AppModule::class,
+        CircuitModule::class,
+        DatabaseModule::class,
+        NetworkModule::class,
+        NotificationSenderModule::class,
+    ],
 )
 @SingleIn(AppScope::class)
 interface AppComponent {
     val activityProviders: Map<Class<out Activity>, @JvmSuppressWildcards Provider<Activity>>
+
+    /**
+     * Injects dependencies into [RemoteAlertApp].
+     */
+    fun inject(app: RemoteAlertApp)
 
     @MergeComponent.Factory
     interface Factory {

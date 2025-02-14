@@ -30,13 +30,14 @@ class TelegramNotificationSender
                     is RemoteNotification.StorageNotification -> "Storage Alert: ${remoteNotification.storageMinSpaceGb}GB available"
                 }
 
-            val botToken = telegramConfigDataStore.botToken.first() ?: ""
-            val chatId = telegramConfigDataStore.chatId.first() ?: ""
-
-            if (botToken.isBlank() || chatId.isBlank()) {
-                Timber.e("Bot token or chat ID is not configured.")
-                return
-            }
+            val botToken =
+                requireNotNull(telegramConfigDataStore.botToken.first()) {
+                    "Bot token is required. Check `hasValidConfiguration` before using the notifier."
+                }
+            val chatId =
+                requireNotNull(telegramConfigDataStore.chatId.first()) {
+                    "Telegram chat id is required. Check `hasValidConfiguration` before using the notifier."
+                }
 
             val url = "https://api.telegram.org/bot$botToken/sendMessage"
             val json =
@@ -61,6 +62,18 @@ class TelegramNotificationSender
                 } else {
                     Timber.d("Notification sent successfully: $message")
                 }
+            }
+        }
+
+        override suspend fun hasValidConfiguration(): Boolean {
+            val botToken = telegramConfigDataStore.botToken.first()
+            val chatId = telegramConfigDataStore.chatId.first()
+
+            if (botToken.isNullOrBlank() || chatId.isNullOrBlank()) {
+                Timber.e("Bot token or chat ID is not configured.")
+                return false
+            } else {
+                return true
             }
         }
     }

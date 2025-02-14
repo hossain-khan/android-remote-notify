@@ -23,6 +23,10 @@ class ObserveDeviceHealthWorker(
     private val repository: RemoteAlertRepository,
     private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
 ) : CoroutineWorker(context, workerParams) {
+    companion object {
+        private const val WORKER_LOG_TAG = "RAWorker"
+    }
+
     override suspend fun doWork(): Result =
         try {
             // Load all alerts from the repository
@@ -49,21 +53,23 @@ class ObserveDeviceHealthWorker(
             }
             Result.success()
         } catch (e: Exception) {
-            Timber.e(e, "Failed to observe device health")
+            Timber.tag(WORKER_LOG_TAG).e(e, "Failed to observe device health")
             Result.failure()
         }
 
     private suspend fun sendNotification(notification: RemoteNotification) {
-        notifiers.forEach { notifier ->
-            try {
-                Timber.i("Sending notification with ${notifier.notifierType}")
-                notifier.sendNotification(notification)
+        notifiers
+            .filter { it.hasValidConfiguration() }
+            .forEach { notifier ->
+                try {
+                    Timber.tag(WORKER_LOG_TAG).i("Sending notification with ${notifier.notifierType}")
+                    notifier.sendNotification(notification)
 
-                // Add some delay to avoid spamming the notification
-                delay(10_000)
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to send notification with ${notifier.notifierType}")
+                    // Add some delay to avoid spamming the notification
+                    delay(10_000)
+                } catch (e: Exception) {
+                    Timber.tag(WORKER_LOG_TAG).e(e, "Failed to send notification with ${notifier.notifierType}")
+                }
             }
-        }
     }
 }
