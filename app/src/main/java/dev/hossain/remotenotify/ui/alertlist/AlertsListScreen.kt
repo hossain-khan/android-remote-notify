@@ -22,7 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.codegen.annotations.CircuitInject
@@ -49,6 +48,9 @@ import timber.log.Timber
 data object AlertsListScreen : Screen {
     data class State(
         val notifications: List<RemoteNotification>,
+        val batteryPercentage: Int,
+        val availableStorage: Long,
+        val totalStorage: Long,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -68,10 +70,15 @@ class AlertsListPresenter
     constructor(
         @Assisted private val navigator: Navigator,
         private val remoteAlertRepository: RemoteAlertRepository,
+        private val batteryMonitor: BatteryMonitor,
+        private val storageMonitor: StorageMonitor,
     ) : Presenter<AlertsListScreen.State> {
         @Composable
         override fun present(): AlertsListScreen.State {
             val scope = rememberCoroutineScope()
+            val batteryPercentage = batteryMonitor.getBatteryLevel()
+            val availableStorage = storageMonitor.getAvailableStorageInGB()
+            val totalStorage = storageMonitor.getTotalStorageInGB()
 
             val notifications by produceState<List<RemoteNotification>>(emptyList()) {
                 remoteAlertRepository
@@ -81,7 +88,12 @@ class AlertsListPresenter
                     }
             }
 
-            return AlertsListScreen.State(notifications) { event ->
+            return AlertsListScreen.State(
+                notifications = notifications,
+                batteryPercentage = batteryPercentage,
+                availableStorage = availableStorage,
+                totalStorage = totalStorage,
+            ) { event ->
                 when (event) {
                     is AlertsListScreen.Event.DeleteNotification -> {
                         Timber.d("Deleting notification: $event")
@@ -113,13 +125,6 @@ fun AlertsListUi(
     state: AlertsListScreen.State,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val batteryMonitor = BatteryMonitor(context)
-    val storageMonitor = StorageMonitor(context)
-    val batteryPercentage = batteryMonitor.getBatteryLevel()
-    val availableStorage = storageMonitor.getAvailableStorageInGB()
-    val totalStorage = storageMonitor.getTotalStorageInGB()
-
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
@@ -139,16 +144,16 @@ fun AlertsListUi(
         Column(modifier = Modifier.padding(innerPadding)) {
             // Display battery percentage at the top
             Text(
-                text = "Battery Percentage: $batteryPercentage%",
+                text = "Battery Percentage: ${state.batteryPercentage}%",
                 modifier = Modifier.padding(2.dp),
             )
             // Display storage data under battery level
             Text(
-                text = "Available Storage: $availableStorage GB",
+                text = "Available Storage: ${state.availableStorage} GB",
                 modifier = Modifier.padding(2.dp),
             )
             Text(
-                text = "Total Storage: $totalStorage GB",
+                text = "Total Storage: ${state.totalStorage} GB",
                 modifier = Modifier.padding(2.dp),
             )
             LazyColumn {
@@ -202,6 +207,9 @@ fun PreviewAlertsListUi() {
         state =
             AlertsListScreen.State(
                 notifications = sampleNotifications,
+                batteryPercentage = 50,
+                availableStorage = 10,
+                totalStorage = 100,
                 eventSink = {},
             ),
     )
