@@ -32,6 +32,7 @@ import dev.hossain.remotenotify.notifier.NotifierType
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
 
 @Parcelize
 data object AddNotificationMediumScreen : Screen {
@@ -42,8 +43,13 @@ data object AddNotificationMediumScreen : Screen {
     ) : CircuitUiState
 
     sealed class Event : CircuitUiEvent {
-        data class SaveTelegramConfig(
+        data object SaveTelegramConfig : Event()
+
+        data class OnBotTokenUpdated(
             val botToken: String,
+        ) : Event()
+
+        data class OnChatIdUpdated(
             val chatId: String,
         ) : Event()
     }
@@ -70,10 +76,22 @@ class AddNotificationMediumPresenter
                 when (event) {
                     is AddNotificationMediumScreen.Event.SaveTelegramConfig -> {
                         scope.launch {
-                            telegramConfigDataStore.saveBotToken(event.botToken)
-                            telegramConfigDataStore.saveChatId(event.chatId)
+                            runCatching {
+                                telegramConfigDataStore.saveBotToken(savedBotToken)
+                            }.onFailure { Timber.e(it, "Got error saving bot") }
+
+                            runCatching {
+                                telegramConfigDataStore.saveChatId(savedChatId)
+                            }.onFailure { Timber.e(it, "Got error chat id") }
+                            navigator.pop()
                         }
-                        navigator.pop()
+                    }
+
+                    is AddNotificationMediumScreen.Event.OnBotTokenUpdated -> {
+                        savedBotToken = event.botToken
+                    }
+                    is AddNotificationMediumScreen.Event.OnChatIdUpdated -> {
+                        savedChatId = event.chatId
                     }
                 }
             }
@@ -93,8 +111,6 @@ fun AddNotificationMediumUi(
     modifier: Modifier = Modifier,
 ) {
     var selectedType by remember { mutableStateOf(NotifierType.TELEGRAM) }
-    var botToken by remember { mutableStateOf(state.botToken) }
-    var chatId by remember { mutableStateOf(state.chatId) }
 
     Scaffold(modifier = modifier) { innerPadding ->
         Column(
@@ -120,16 +136,24 @@ fun AddNotificationMediumUi(
                 Text("Enter Telegram Bot Token")
                 // Add TextField for botToken input
                 TextField(
-                    value = botToken,
-                    onValueChange = { botToken = it },
+                    value = state.botToken,
+                    onValueChange = {
+                        state.eventSink(
+                            AddNotificationMediumScreen.Event.OnBotTokenUpdated(it),
+                        )
+                    },
                     label = { Text("Bot Token") },
                 )
 
                 Text("Enter Telegram Chat ID")
                 // Add TextField for chatId input
                 TextField(
-                    value = chatId,
-                    onValueChange = { chatId = it },
+                    value = state.chatId,
+                    onValueChange = {
+                        state.eventSink(
+                            AddNotificationMediumScreen.Event.OnChatIdUpdated(it),
+                        )
+                    },
                     label = { Text("Chat ID") },
                 )
             }
@@ -137,12 +161,7 @@ fun AddNotificationMediumUi(
             // Save button
             Button(onClick = {
                 if (selectedType == NotifierType.TELEGRAM) {
-                    state.eventSink(
-                        AddNotificationMediumScreen.Event.SaveTelegramConfig(
-                            botToken = botToken,
-                            chatId = chatId,
-                        ),
-                    )
+                    state.eventSink(AddNotificationMediumScreen.Event.SaveTelegramConfig)
                 }
             }) {
                 Text("Save")
