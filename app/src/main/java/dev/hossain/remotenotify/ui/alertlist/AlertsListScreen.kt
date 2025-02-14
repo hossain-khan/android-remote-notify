@@ -56,7 +56,7 @@ import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
-import dev.hossain.remotenotify.ui.addterminus.AddNotificationMediumScreen
+import dev.hossain.remotenotify.ui.alertmediumlist.NotificationMediumListScreen
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
@@ -131,7 +131,7 @@ class AlertsListPresenter
                     }
 
                     AlertsListScreen.Event.AddNotificationDestination -> {
-                        navigator.goTo(AddNotificationMediumScreen)
+                        navigator.goTo(NotificationMediumListScreen)
                     }
                 }
             }
