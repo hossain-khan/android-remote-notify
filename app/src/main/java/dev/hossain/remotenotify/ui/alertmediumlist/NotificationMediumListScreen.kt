@@ -32,7 +32,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +50,7 @@ import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
-import dev.hossain.remotenotify.ui.addterminus.AddNotificationMediumScreen
+import dev.hossain.remotenotify.ui.addalertmedium.AddNotificationMediumScreen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize

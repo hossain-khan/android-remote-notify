@@ -204,6 +204,12 @@ fun AlertsListUi(
                 if (state.notifications.isEmpty()) {
                     item { EmptyNotificationsState() }
                 } else {
+                    item {
+                        Text(
+                            text = "Your Alerts",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
                     items(state.notifications) { notification ->
                         NotificationItem(
                             notification = notification,
