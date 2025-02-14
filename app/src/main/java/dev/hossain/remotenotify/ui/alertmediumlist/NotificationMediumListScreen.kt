@@ -17,13 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -32,7 +30,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -50,9 +53,8 @@ import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
-import dev.hossain.remotenotify.ui.addalertmedium.AddNotificationMediumScreen
+import dev.hossain.remotenotify.ui.addalertmedium.ConfigureNotificationMediumScreen
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -69,8 +71,6 @@ data object NotificationMediumListScreen : Screen {
     )
 
     sealed class Event : CircuitUiEvent {
-        data object AddNewMedium : Event()
-
         data class EditMedium(
             val id: NotifierType,
         ) : Event()
@@ -90,31 +90,38 @@ class NotificationMediumListPresenter
         @Composable
         override fun present(): NotificationMediumListScreen.State {
             val scope = rememberCoroutineScope()
-            val notifierInfoList =
-                notifiers.map { sender ->
-                    NotificationMediumListScreen.NotifierInfo(
-                        id = sender.notifierType,
-                        name = sender.notifierType.displayName,
-                        // TODO FIX THIS LATER
-                        isConfigured = runBlocking { sender.hasValidConfiguration() },
-                    )
-                }
+            // Use remember and mutableStateOf to make the list observable
+            var notifierInfoList by remember { mutableStateOf(emptyList<NotificationMediumListScreen.NotifierInfo>()) }
+
+            // Helper function to update the list
+            suspend fun updateNotifierList() {
+                notifierInfoList =
+                    notifiers.map { sender ->
+                        NotificationMediumListScreen.NotifierInfo(
+                            id = sender.notifierType,
+                            name = sender.notifierType.displayName,
+                            isConfigured = sender.hasValidConfiguration(),
+                        )
+                    }
+            }
+
+            // Load initial state
+            LaunchedEffect(Unit) {
+                updateNotifierList()
+            }
 
             return NotificationMediumListScreen.State(
                 notifiers = notifierInfoList,
             ) { event ->
                 when (event) {
-                    is NotificationMediumListScreen.Event.AddNewMedium -> {
-                        navigator.goTo(AddNotificationMediumScreen)
-                    }
                     is NotificationMediumListScreen.Event.EditMedium -> {
-                        // Navigate to edit screen with the ID
-                        navigator.goTo(AddNotificationMediumScreen)
+                        navigator.goTo(ConfigureNotificationMediumScreen(event.id))
                     }
                     is NotificationMediumListScreen.Event.DeleteMedium -> {
                         scope.launch {
-                            // TODO - find out how to update list after delete
                             notifiers.find { it.notifierType == event.id }?.clearConfig()
+                            // Update the list after clearing config
+                            updateNotifierList()
                         }
                     }
                 }
@@ -142,16 +149,6 @@ fun NotificationMediumListUi(
                 title = { Text("Notification Mediums") },
             )
         },
-        floatingActionButton = {
-            // Show FAB only if any medium is not configured
-            if (state.notifiers.any { !it.isConfigured }) {
-                ExtendedFloatingActionButton(
-                    onClick = { state.eventSink(NotificationMediumListScreen.Event.AddNewMedium) },
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Add Medium") },
-                )
-            }
-        },
     ) { padding ->
         if (state.notifiers.isEmpty()) {
             EmptyMediumState(
@@ -169,8 +166,8 @@ fun NotificationMediumListUi(
                 items(state.notifiers) { notifier ->
                     NotifierCard(
                         notifier = notifier,
-                        onEdit = { state.eventSink(NotificationMediumListScreen.Event.EditMedium(notifier.id)) },
-                        onDelete = { state.eventSink(NotificationMediumListScreen.Event.DeleteMedium(notifier.id)) },
+                        onEditConfiguration = { state.eventSink(NotificationMediumListScreen.Event.EditMedium(notifier.id)) },
+                        onResetConfiguration = { state.eventSink(NotificationMediumListScreen.Event.DeleteMedium(notifier.id)) },
                     )
                 }
             }
@@ -181,8 +178,8 @@ fun NotificationMediumListUi(
 @Composable
 private fun NotifierCard(
     notifier: NotificationMediumListScreen.NotifierInfo,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
+    onEditConfiguration: () -> Unit,
+    onResetConfiguration: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -214,7 +211,7 @@ private fun NotifierCard(
             },
             trailingContent = {
                 Row {
-                    IconButton(onClick = onEdit) {
+                    IconButton(onClick = onEditConfiguration) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Edit",
@@ -225,7 +222,7 @@ private fun NotifierCard(
                         enter = fadeIn() + expandHorizontally(),
                         exit = fadeOut() + shrinkHorizontally(),
                     ) {
-                        IconButton(onClick = onDelete) {
+                        IconButton(onClick = onResetConfiguration) {
                             Icon(
                                 painter = painterResource(id = R.drawable.reset_settings_24dp),
                                 contentDescription = "Delete",
