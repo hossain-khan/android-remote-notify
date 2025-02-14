@@ -79,4 +79,8 @@ class TelegramNotificationSender
                 return true
             }
         }
+
+        override suspend fun clearConfig() {
+            telegramConfigDataStore.clearConfig()
+        }
     }

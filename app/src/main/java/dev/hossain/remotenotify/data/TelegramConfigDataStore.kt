@@ -12,41 +12,49 @@ import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import javax.inject.Inject
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "telegram_config")
+private val Context.telegramConfigDataStore: DataStore<Preferences> by preferencesDataStore(name = "telegram_config")
 
 class TelegramConfigDataStore
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
-    ) {
+    ) : AlertMediumConfigStore {
         companion object {
             private val BOT_TOKEN_KEY = stringPreferencesKey("bot_token")
             private val CHAT_ID_KEY = stringPreferencesKey("chat_id")
         }
 
         val botToken: Flow<String?> =
-            context.dataStore.data
+            context.telegramConfigDataStore.data
                 .map { preferences ->
                     preferences[BOT_TOKEN_KEY]
                 }
 
         val chatId: Flow<String?> =
-            context.dataStore.data
+            context.telegramConfigDataStore.data
                 .map { preferences ->
                     preferences[CHAT_ID_KEY]
                 }
 
         suspend fun saveBotToken(botToken: String) {
             Timber.d("Saving bot token: $botToken")
-            context.dataStore.edit { preferences ->
+            context.telegramConfigDataStore.edit { preferences ->
                 preferences[BOT_TOKEN_KEY] = botToken
             }
         }
 
         suspend fun saveChatId(chatId: String) {
             Timber.d("Saving chat id: $chatId")
-            context.dataStore.edit { preferences ->
+            context.telegramConfigDataStore.edit { preferences ->
                 preferences[CHAT_ID_KEY] = chatId
+            }
+        }
+
+        override suspend fun clearConfig() {
+            Timber.d("Clearing Telegram configuration")
+            context.telegramConfigDataStore.edit { preferences ->
+                preferences.remove(BOT_TOKEN_KEY)
+                preferences.remove(CHAT_ID_KEY)
             }
         }
     }
