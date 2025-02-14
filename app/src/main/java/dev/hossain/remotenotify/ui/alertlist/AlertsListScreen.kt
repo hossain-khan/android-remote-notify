@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -24,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,6 +43,7 @@ import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteNotification
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
+import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
 import dev.hossain.remotenotify.ui.addterminus.AddNotificationMediumScreen
 import kotlinx.coroutines.launch
@@ -54,6 +57,7 @@ data object AlertsListScreen : Screen {
         val batteryPercentage: Int,
         val availableStorage: Long,
         val totalStorage: Long,
+        val isAnyNotifierConfigured: Boolean,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -75,6 +79,7 @@ class AlertsListPresenter
         private val remoteAlertRepository: RemoteAlertRepository,
         private val batteryMonitor: BatteryMonitor,
         private val storageMonitor: StorageMonitor,
+        private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
     ) : Presenter<AlertsListScreen.State> {
         @Composable
         override fun present(): AlertsListScreen.State {
@@ -91,11 +96,16 @@ class AlertsListPresenter
                     }
             }
 
+            val isAnyNotifierConfigured by produceState(false) {
+                value = notifiers.any { it.hasValidConfiguration() }
+            }
+
             return AlertsListScreen.State(
                 notifications = notifications,
                 batteryPercentage = batteryPercentage,
                 availableStorage = availableStorage,
                 totalStorage = totalStorage,
+                isAnyNotifierConfigured = isAnyNotifierConfigured,
             ) { event ->
                 when (event) {
                     is AlertsListScreen.Event.DeleteNotification -> {
@@ -164,6 +174,18 @@ fun AlertsListUi(
             LazyColumn {
                 // Display battery percentage at the top
                 item { DeviceCurrentStateUi(state) }
+
+                if (state.isAnyNotifierConfigured.not()) {
+                    item {
+                        NoNotifierConfiguredCard(
+                            onConfigureClick = {
+                                state.eventSink(AlertsListScreen.Event.AddNotificationDestination)
+                            },
+                        )
+                    }
+                }
+
+                // Show all user configured alerts
                 items(state.notifications) { notification ->
                     NotificationItem(notification = notification, onDelete = {
                         state.eventSink(AlertsListScreen.Event.DeleteNotification(notification))
@@ -190,6 +212,39 @@ private fun DeviceCurrentStateUi(state: AlertsListScreen.State) {
             text = "Total Storage: ${state.totalStorage} GB",
             modifier = Modifier.padding(2.dp),
         )
+    }
+}
+
+@Composable
+private fun NoNotifierConfiguredCard(
+    onConfigureClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+        ) {
+            Text(text = "No notification medium configured. Please configure one.")
+            Spacer(modifier = Modifier.size(8.dp))
+            Button(onClick = onConfigureClick) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        Icons.Default.Notifications,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(text = "Configure")
+                }
+            }
+        }
     }
 }
 
@@ -242,6 +297,7 @@ fun PreviewAlertsListUi() {
                 batteryPercentage = 50,
                 availableStorage = 10,
                 totalStorage = 100,
+                isAnyNotifierConfigured = false,
                 eventSink = {},
             ),
     )
