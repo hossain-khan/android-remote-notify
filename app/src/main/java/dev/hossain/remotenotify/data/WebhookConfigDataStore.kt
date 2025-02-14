@@ -10,6 +10,7 @@ import com.squareup.anvil.annotations.optional.SingleIn
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.di.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import javax.inject.Inject
@@ -43,6 +44,17 @@ class WebhookConfigDataStore
             Timber.d("Clearing Webhook configuration")
             context.webhookConfigDataStore.edit { preferences ->
                 preferences.remove(WEBHOOK_URL_KEY)
+            }
+        }
+
+        override suspend fun hasValidConfig(): Boolean {
+            val url = webhookUrl.first()
+            return if (url.isNullOrBlank()) {
+                Timber.e("Webhook URL is not configured")
+                false
+            } else {
+                Timber.i("Webhook config is set correctly")
+                true
             }
         }
     }

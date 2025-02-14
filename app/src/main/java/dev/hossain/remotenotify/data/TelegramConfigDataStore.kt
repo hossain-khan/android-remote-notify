@@ -10,6 +10,7 @@ import com.squareup.anvil.annotations.optional.SingleIn
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.di.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import javax.inject.Inject
@@ -58,6 +59,19 @@ class TelegramConfigDataStore
             context.telegramConfigDataStore.edit { preferences ->
                 preferences.remove(BOT_TOKEN_KEY)
                 preferences.remove(CHAT_ID_KEY)
+            }
+        }
+
+        override suspend fun hasValidConfig(): Boolean {
+            val botToken = botToken.first()
+            val chatId = chatId.first()
+
+            if (botToken.isNullOrBlank() || chatId.isNullOrBlank()) {
+                Timber.e("Bot token or chat ID is not configured.")
+                return false
+            } else {
+                Timber.i("Telegram config is set correctly.")
+                return true
             }
         }
     }

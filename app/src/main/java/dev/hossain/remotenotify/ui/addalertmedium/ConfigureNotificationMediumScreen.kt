@@ -44,6 +44,7 @@ data class ConfigureNotificationMediumScreen(
 ) : Screen {
     data class State(
         val notifierType: NotifierType,
+        val isConfigured: Boolean,
         val botToken: String,
         val chatId: String,
         val webhookUrl: String,
@@ -80,11 +81,13 @@ class ConfigureNotificationMediumPresenter
             val scope = rememberCoroutineScope()
             var savedBotToken by remember { mutableStateOf("") }
             var savedChatId by remember { mutableStateOf("") }
-            var savedWebhookUrl by remember { mutableStateOf("") } // Add webhook state
+            var savedWebhookUrl by remember { mutableStateOf("") }
+            var isConfigured by remember { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
                 when (screen.notifierType) {
                     NotifierType.TELEGRAM -> {
+                        isConfigured = telegramConfigDataStore.hasValidConfig()
                         savedBotToken = telegramConfigDataStore.botToken.first() ?: ""
                         savedChatId = telegramConfigDataStore.chatId.first() ?: ""
                     }
@@ -97,6 +100,7 @@ class ConfigureNotificationMediumPresenter
 
             return ConfigureNotificationMediumScreen.State(
                 notifierType = screen.notifierType,
+                isConfigured = isConfigured,
                 botToken = savedBotToken,
                 chatId = savedChatId,
                 webhookUrl = savedWebhookUrl,
@@ -217,7 +221,7 @@ fun ConfigureNotificationMediumUi(
                 onClick = { state.eventSink(ConfigureNotificationMediumScreen.Event.SaveConfig) },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Save Configuration")
+                Text(if (state.isConfigured) "Update Configuration" else "Save Configuration")
             }
         }
     }
@@ -231,6 +235,7 @@ private fun PreviewTelegramConfigurationUi() {
             state =
                 ConfigureNotificationMediumScreen.State(
                     notifierType = NotifierType.TELEGRAM,
+                    isConfigured = false,
                     botToken = "1234567890:ABCdefGHIjklMNOpqrsTUVwxyz",
                     chatId = "123456789",
                     webhookUrl = "",
@@ -248,6 +253,7 @@ private fun PreviewWebhookConfigurationUi() {
             state =
                 ConfigureNotificationMediumScreen.State(
                     notifierType = NotifierType.WEBHOOK_REST_API,
+                    isConfigured = true,
                     botToken = "",
                     chatId = "",
                     webhookUrl = "https://api.example.com/webhook",

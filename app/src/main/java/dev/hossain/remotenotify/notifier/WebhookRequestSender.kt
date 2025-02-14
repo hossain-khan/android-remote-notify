@@ -73,16 +73,7 @@ class WebhookRequestSender
             }
         }
 
-        override suspend fun hasValidConfiguration(): Boolean {
-            val url = webhookConfigDataStore.webhookUrl.first()
-            return if (url.isNullOrBlank()) {
-                Timber.e("Webhook URL is not configured")
-                false
-            } else {
-                Timber.i("Webhook config is set correctly")
-                true
-            }
-        }
+        override suspend fun hasValidConfiguration(): Boolean = webhookConfigDataStore.hasValidConfig()
 
         override suspend fun clearConfig() {
             webhookConfigDataStore.clearConfig()

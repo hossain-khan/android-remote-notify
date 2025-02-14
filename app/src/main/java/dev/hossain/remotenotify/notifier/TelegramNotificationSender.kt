@@ -67,18 +67,7 @@ class TelegramNotificationSender
             }
         }
 
-        override suspend fun hasValidConfiguration(): Boolean {
-            val botToken = telegramConfigDataStore.botToken.first()
-            val chatId = telegramConfigDataStore.chatId.first()
-
-            if (botToken.isNullOrBlank() || chatId.isNullOrBlank()) {
-                Timber.e("Bot token or chat ID is not configured.")
-                return false
-            } else {
-                Timber.i("Telegram config is set correctly.")
-                return true
-            }
-        }
+        override suspend fun hasValidConfiguration(): Boolean = telegramConfigDataStore.hasValidConfig()
 
         override suspend fun clearConfig() {
             telegramConfigDataStore.clearConfig()

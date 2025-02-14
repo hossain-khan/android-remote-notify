@@ -5,4 +5,6 @@ interface AlertMediumConfigStore {
      * Clears all configuration for the alert medium.
      */
     suspend fun clearConfig()
+
+    suspend fun hasValidConfig(): Boolean
 }
