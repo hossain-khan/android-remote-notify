@@ -19,7 +19,7 @@ class TelegramNotificationSender
     @Inject
     constructor(
         private val telegramConfigDataStore: TelegramConfigDataStore,
-        private val client: OkHttpClient,
+        private val okHttpClient: OkHttpClient,
     ) : NotificationSender {
         override val notifierType: NotifierType = NotifierType.TELEGRAM
 
@@ -56,7 +56,7 @@ class TelegramNotificationSender
                     .post(body)
                     .build()
 
-            client.newCall(request).execute().use { response ->
+            okHttpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
                     Timber.e("Failed to send notification: ${response.code} - ${response.message}")
                 } else {
@@ -73,6 +73,7 @@ class TelegramNotificationSender
                 Timber.e("Bot token or chat ID is not configured.")
                 return false
             } else {
+                Timber.i("Telegram config is set correctly.")
                 return true
             }
         }

@@ -27,13 +27,13 @@ class TelegramConfigDataStore
         val botToken: Flow<String?> =
             context.dataStore.data
                 .map { preferences ->
-                    preferences[BOT_TOKEN_KEY] ?: "WHICH-BOT?"
+                    preferences[BOT_TOKEN_KEY]
                 }
 
         val chatId: Flow<String?> =
             context.dataStore.data
                 .map { preferences ->
-                    preferences[CHAT_ID_KEY] ?: "WHICH-CHAT-ID?"
+                    preferences[CHAT_ID_KEY]
                 }
 
         suspend fun saveBotToken(botToken: String) {

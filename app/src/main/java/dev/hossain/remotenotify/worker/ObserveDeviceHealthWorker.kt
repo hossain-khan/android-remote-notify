@@ -24,7 +24,7 @@ class ObserveDeviceHealthWorker(
     private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
 ) : CoroutineWorker(context, workerParams) {
     companion object {
-        private const val WORKER_LOG_TAG = "RAWorker"
+        private const val WORKER_LOG_TAG = "RA-Worker"
     }
 
     override suspend fun doWork(): Result =
@@ -58,6 +58,11 @@ class ObserveDeviceHealthWorker(
         }
 
     private suspend fun sendNotification(notification: RemoteNotification) {
+        if (notifiers.isEmpty()) {
+            // This should ideally not happen unless dagger setup has failed
+            Timber.e("No remote notifier has been registered")
+        }
+
         notifiers
             .filter { it.hasValidConfiguration() }
             .forEach { notifier ->
