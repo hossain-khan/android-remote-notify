@@ -1,4 +1,4 @@
-package dev.hossain.remotenotify.ui.addterminus
+package dev.hossain.remotenotify.ui.addalertmedium
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
