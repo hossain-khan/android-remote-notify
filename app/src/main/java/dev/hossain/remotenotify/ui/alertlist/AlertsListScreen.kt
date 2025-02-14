@@ -104,6 +104,7 @@ class AlertsListPresenter
                             remoteAlertRepository.deleteRemoteNotification(event.notification)
                         }
                     }
+
                     AlertsListScreen.Event.AddNotification -> {
                         navigator.goTo(AddNewRemoteAlertScreen)
                     }
@@ -154,22 +155,15 @@ fun AlertsListUi(
             )
         },
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding).padding(horizontal = 16.dp)) {
-            // Display battery percentage at the top
-            Text(
-                text = "Battery Percentage: ${state.batteryPercentage}%",
-                modifier = Modifier.padding(2.dp),
-            )
-            // Display storage data under battery level
-            Text(
-                text = "Available Storage: ${state.availableStorage} GB",
-                modifier = Modifier.padding(2.dp),
-            )
-            Text(
-                text = "Total Storage: ${state.totalStorage} GB",
-                modifier = Modifier.padding(2.dp),
-            )
+        Column(
+            modifier =
+                Modifier
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp),
+        ) {
             LazyColumn {
+                // Display battery percentage at the top
+                item { DeviceCurrentStateUi(state) }
                 items(state.notifications) { notification ->
                     NotificationItem(notification = notification, onDelete = {
                         state.eventSink(AlertsListScreen.Event.DeleteNotification(notification))
@@ -181,17 +175,42 @@ fun AlertsListUi(
 }
 
 @Composable
+private fun DeviceCurrentStateUi(state: AlertsListScreen.State) {
+    Column {
+        Text(
+            text = "Battery Percentage: ${state.batteryPercentage}%",
+            modifier = Modifier.padding(2.dp),
+        )
+        // Display storage data under battery level
+        Text(
+            text = "Available Storage: ${state.availableStorage} GB",
+            modifier = Modifier.padding(2.dp),
+        )
+        Text(
+            text = "Total Storage: ${state.totalStorage} GB",
+            modifier = Modifier.padding(2.dp),
+        )
+    }
+}
+
+@Composable
 fun NotificationItem(
     notification: RemoteNotification,
     onDelete: () -> Unit,
 ) {
-    Card(modifier = Modifier.padding(8.dp).fillMaxWidth()) {
+    Card(
+        modifier =
+            Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
             when (notification) {
                 is RemoteNotification.BatteryNotification -> {
                     Text(text = "Battery Alert")
                     Text(text = "Battery Percentage: ${notification.batteryPercentage}%")
                 }
+
                 is RemoteNotification.StorageNotification -> {
                     Text(text = "Storage Alert")
                     Text(text = "Minimum Storage Space: ${notification.storageMinSpaceGb} GB")
