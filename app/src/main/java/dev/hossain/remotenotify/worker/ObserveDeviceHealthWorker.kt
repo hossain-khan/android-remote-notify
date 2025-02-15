@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dev.hossain.remotenotify.data.RemoteAlertRepository
-import dev.hossain.remotenotify.model.NotificationType
-import dev.hossain.remotenotify.model.RemoteNotification
+import dev.hossain.remotenotify.model.AlertType
+import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
@@ -13,7 +13,7 @@ import kotlinx.coroutines.delay
 import timber.log.Timber
 
 /**
- * Worker to observe device health for supported [NotificationType] and send notification if thresholds are met.
+ * Worker to observe device health for supported [AlertType] and send notification if thresholds are met.
  */
 class ObserveDeviceHealthWorker(
     context: Context,
@@ -44,7 +44,7 @@ class ObserveDeviceHealthWorker(
             // Send notifications if thresholds are met
             alerts.forEach { alert ->
                 when (alert) {
-                    is RemoteNotification.BatteryNotification -> {
+                    is RemoteAlert.BatteryAlert -> {
                         if (alert.batteryPercentage <= deviceCurrentBatteryLevel) {
                             sendNotification(alert)
                         } else {
@@ -52,7 +52,7 @@ class ObserveDeviceHealthWorker(
                         }
                     }
 
-                    is RemoteNotification.StorageNotification -> {
+                    is RemoteAlert.StorageAlert -> {
                         if (alert.storageMinSpaceGb <= deviceCurrentAvailableStorage) {
                             sendNotification(alert)
                         } else {
@@ -68,7 +68,7 @@ class ObserveDeviceHealthWorker(
         }
     }
 
-    private suspend fun sendNotification(notification: RemoteNotification) {
+    private suspend fun sendNotification(notification: RemoteAlert) {
         Timber.i("Notification triggered - sending: $notification")
         if (notifiers.isEmpty()) {
             // This should ideally not happen unless dagger setup has failed

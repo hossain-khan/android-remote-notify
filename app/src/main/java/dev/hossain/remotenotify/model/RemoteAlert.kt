@@ -5,40 +5,40 @@ import dev.hossain.remotenotify.db.NotificationEntity
 const val BATTERY_PERCENTAGE_NONE = -1
 const val STORAGE_MIN_SPACE_GB_NONE = -1
 
-sealed interface RemoteNotification {
+sealed interface RemoteAlert {
     val alertId: Long
 
-    data class BatteryNotification(
+    data class BatteryAlert(
         override val alertId: Long = 0,
         val batteryPercentage: Int,
-    ) : RemoteNotification
+    ) : RemoteAlert
 
-    data class StorageNotification(
+    data class StorageAlert(
         override val alertId: Long = 0,
         val storageMinSpaceGb: Int,
-    ) : RemoteNotification
+    ) : RemoteAlert
 }
 
-fun RemoteNotification.toNotificationEntity(): NotificationEntity =
+fun RemoteAlert.toNotificationEntity(): NotificationEntity =
     when (this) {
-        is RemoteNotification.BatteryNotification ->
+        is RemoteAlert.BatteryAlert ->
             NotificationEntity(
                 id = alertId,
                 batteryPercentage = batteryPercentage,
-                type = NotificationType.BATTERY,
+                type = AlertType.BATTERY,
                 storageMinSpaceGb = 0,
             )
-        is RemoteNotification.StorageNotification ->
+        is RemoteAlert.StorageAlert ->
             NotificationEntity(
                 id = alertId,
                 storageMinSpaceGb = storageMinSpaceGb,
-                type = NotificationType.STORAGE,
+                type = AlertType.STORAGE,
                 batteryPercentage = 0,
             )
     }
 
-fun NotificationEntity.toRemoteNotification(): RemoteNotification =
+fun NotificationEntity.toRemoteNotification(): RemoteAlert =
     when (type) {
-        NotificationType.BATTERY -> RemoteNotification.BatteryNotification(id, batteryPercentage)
-        NotificationType.STORAGE -> RemoteNotification.StorageNotification(id, storageMinSpaceGb)
+        AlertType.BATTERY -> RemoteAlert.BatteryAlert(id, batteryPercentage)
+        AlertType.STORAGE -> RemoteAlert.StorageAlert(id, storageMinSpaceGb)
     }

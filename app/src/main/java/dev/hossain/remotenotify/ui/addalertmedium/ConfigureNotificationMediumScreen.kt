@@ -41,7 +41,7 @@ import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
-import dev.hossain.remotenotify.model.RemoteNotification
+import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.notifier.of
@@ -141,7 +141,7 @@ class ConfigureNotificationMediumPresenter
                             try {
                                 val success =
                                     withContext(Dispatchers.IO) {
-                                        val testNotification = RemoteNotification.BatteryNotification(batteryPercentage = 5)
+                                        val testNotification = RemoteAlert.BatteryAlert(batteryPercentage = 5)
                                         notificationSender.sendNotification(testNotification)
                                     }
                                 snackbarMessage =

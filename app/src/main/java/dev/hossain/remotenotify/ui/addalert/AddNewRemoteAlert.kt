@@ -28,8 +28,8 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
-import dev.hossain.remotenotify.model.NotificationType
-import dev.hossain.remotenotify.model.RemoteNotification
+import dev.hossain.remotenotify.model.AlertType
+import dev.hossain.remotenotify.model.RemoteAlert
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -41,7 +41,7 @@ data object AddNewRemoteAlertScreen : Screen {
 
     sealed class Event : CircuitUiEvent {
         data class SaveNotification(
-            val notification: RemoteNotification,
+            val notification: RemoteAlert,
         ) : Event()
     }
 }
@@ -80,7 +80,7 @@ fun AddNewRemoteAlertUi(
     state: AddNewRemoteAlertScreen.State,
     modifier: Modifier = Modifier,
 ) {
-    var type by remember { mutableStateOf(NotificationType.BATTERY) }
+    var type by remember { mutableStateOf(AlertType.BATTERY) }
     var threshold by remember { mutableStateOf(0) }
 
     Scaffold(modifier = modifier) { innerPadding ->
@@ -94,13 +94,13 @@ fun AddNewRemoteAlertUi(
             Text("Select Alert Type")
             Row {
                 RadioButton(
-                    selected = type == NotificationType.BATTERY,
-                    onClick = { type = NotificationType.BATTERY },
+                    selected = type == AlertType.BATTERY,
+                    onClick = { type = AlertType.BATTERY },
                 )
                 Text("Battery")
                 RadioButton(
-                    selected = type == NotificationType.STORAGE,
-                    onClick = { type = NotificationType.STORAGE },
+                    selected = type == AlertType.STORAGE,
+                    onClick = { type = AlertType.STORAGE },
                 )
                 Text("Storage")
             }
@@ -119,12 +119,12 @@ fun AddNewRemoteAlertUi(
             Button(onClick = {
                 val notification =
                     when (type) {
-                        NotificationType.BATTERY ->
-                            RemoteNotification.BatteryNotification(
+                        AlertType.BATTERY ->
+                            RemoteAlert.BatteryAlert(
                                 batteryPercentage = threshold,
                             )
-                        NotificationType.STORAGE ->
-                            RemoteNotification.StorageNotification(
+                        AlertType.STORAGE ->
+                            RemoteAlert.StorageAlert(
                                 storageMinSpaceGb = threshold,
                             )
                     }

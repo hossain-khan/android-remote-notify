@@ -5,7 +5,7 @@ import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.WebhookConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
-import dev.hossain.remotenotify.model.RemoteNotification
+import dev.hossain.remotenotify.model.RemoteAlert
 import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -28,13 +28,13 @@ class WebhookRequestSender
     ) : NotificationSender {
         override val notifierType: NotifierType = NotifierType.WEBHOOK_REST_API
 
-        override suspend fun sendNotification(remoteNotification: RemoteNotification): Boolean {
+        override suspend fun sendNotification(remoteAlert: RemoteAlert): Boolean {
             val webhookUrl =
                 requireNotNull(webhookConfigDataStore.webhookUrl.first()) {
                     "Webhook URL is required. Check `hasValidConfiguration` before using the notifier."
                 }
 
-            val json = buildJsonPayload(remoteNotification)
+            val json = buildJsonPayload(remoteAlert)
             val body = json.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
             val request =
                 Request
@@ -53,10 +53,10 @@ class WebhookRequestSender
             }
         }
 
-        private fun buildJsonPayload(notification: RemoteNotification): String {
+        private fun buildJsonPayload(notification: RemoteAlert): String {
             val timestamp = Instant.now(clock).toString()
             return when (notification) {
-                is RemoteNotification.BatteryNotification ->
+                is RemoteAlert.BatteryAlert ->
                     """
                     {
                         "alert_type": "BATTERY",
@@ -64,7 +64,7 @@ class WebhookRequestSender
                         "sent_on": "$timestamp"
                     }
                     """.trimIndent()
-                is RemoteNotification.StorageNotification ->
+                is RemoteAlert.StorageAlert ->
                     """
                     {
                         "alert_type": "STORAGE",

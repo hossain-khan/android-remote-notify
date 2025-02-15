@@ -51,7 +51,7 @@ import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
-import dev.hossain.remotenotify.model.RemoteNotification
+import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
@@ -64,7 +64,7 @@ import timber.log.Timber
 @Parcelize
 data object AlertsListScreen : Screen {
     data class State(
-        val notifications: List<RemoteNotification>,
+        val notifications: List<RemoteAlert>,
         val batteryPercentage: Int,
         val availableStorage: Long,
         val totalStorage: Long,
@@ -74,7 +74,7 @@ data object AlertsListScreen : Screen {
 
     sealed class Event : CircuitUiEvent {
         data class DeleteNotification(
-            val notification: RemoteNotification,
+            val notification: RemoteAlert,
         ) : Event()
 
         data object AddNotification : Event()
@@ -99,7 +99,7 @@ class AlertsListPresenter
             val availableStorage = storageMonitor.getAvailableStorageInGB()
             val totalStorage = storageMonitor.getTotalStorageInGB()
 
-            val notifications by produceState<List<RemoteNotification>>(emptyList()) {
+            val notifications by produceState<List<RemoteAlert>>(emptyList()) {
                 remoteAlertRepository
                     .getAllRemoteNotificationsFlow()
                     .collect {
@@ -357,7 +357,7 @@ private fun NoNotifierConfiguredCard(
 
 @Composable
 fun NotificationItem(
-    notification: RemoteNotification,
+    notification: RemoteAlert,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -367,9 +367,9 @@ fun NotificationItem(
             Icon(
                 painter =
                     when (notification) {
-                        is RemoteNotification.BatteryNotification ->
+                        is RemoteAlert.BatteryAlert ->
                             painterResource(id = R.drawable.battery_3_bar_24dp)
-                        is RemoteNotification.StorageNotification ->
+                        is RemoteAlert.StorageAlert ->
                             painterResource(id = R.drawable.hard_disk_24dp)
                     },
                 contentDescription = null,
@@ -380,8 +380,8 @@ fun NotificationItem(
             Text(
                 text =
                     when (notification) {
-                        is RemoteNotification.BatteryNotification -> "Battery Alert"
-                        is RemoteNotification.StorageNotification -> "Storage Alert"
+                        is RemoteAlert.BatteryAlert -> "Battery Alert"
+                        is RemoteAlert.StorageAlert -> "Storage Alert"
                     },
                 style = MaterialTheme.typography.titleMedium,
             )
@@ -392,7 +392,7 @@ fun NotificationItem(
                 modifier = Modifier.padding(top = 4.dp),
             ) {
                 when (notification) {
-                    is RemoteNotification.BatteryNotification -> {
+                    is RemoteAlert.BatteryAlert -> {
                         LinearProgressIndicator(
                             progress = { notification.batteryPercentage / 100f },
                             modifier =
@@ -406,7 +406,7 @@ fun NotificationItem(
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
-                    is RemoteNotification.StorageNotification -> {
+                    is RemoteAlert.StorageAlert -> {
                         Text(
                             text = "Min Storage: ${notification.storageMinSpaceGb} GB",
                             style = MaterialTheme.typography.bodyMedium,
@@ -455,8 +455,8 @@ private fun EmptyNotificationsState() {
 fun PreviewAlertsListUi() {
     val sampleNotifications =
         listOf(
-            RemoteNotification.BatteryNotification(batteryPercentage = 50),
-            RemoteNotification.StorageNotification(storageMinSpaceGb = 10),
+            RemoteAlert.BatteryAlert(batteryPercentage = 50),
+            RemoteAlert.StorageAlert(storageMinSpaceGb = 10),
         )
     AlertsListUi(
         state =
