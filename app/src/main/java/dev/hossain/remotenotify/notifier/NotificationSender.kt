@@ -1,6 +1,7 @@
 package dev.hossain.remotenotify.notifier
 
 import dev.hossain.remotenotify.data.AlertMediumConfig
+import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.model.RemoteNotification
 
 /**
@@ -37,7 +38,7 @@ interface NotificationSender {
     /**
      * Validates the configuration for the notifier.
      */
-    suspend fun isValidConfig(alertMediumConfig: AlertMediumConfig): Boolean
+    suspend fun isValidConfig(alertMediumConfig: AlertMediumConfig): ConfigValidationResult
 }
 
 /**

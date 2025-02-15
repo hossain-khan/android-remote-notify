@@ -39,6 +39,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.data.AlertMediumConfig
+import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteNotification
 import dev.hossain.remotenotify.notifier.NotificationSender
@@ -57,7 +58,7 @@ data class ConfigureNotificationMediumScreen(
     data class State(
         val notifierType: NotifierType,
         val isConfigured: Boolean,
-        val isValidInput: Boolean,
+        val configValidationResult: ConfigValidationResult,
         val alertMediumConfig: AlertMediumConfig?,
         val snackbarMessage: String?,
         val eventSink: (Event) -> Unit,
@@ -92,11 +93,11 @@ class ConfigureNotificationMediumPresenter
 
             val notificationSender = notifiers.of(senderNotifierType = screen.notifierType)
 
-            val isValidInput by produceState(false, alertMediumConfig) {
+            val isValidInput by produceState(ConfigValidationResult(false, emptyMap()), alertMediumConfig) {
                 val config = alertMediumConfig
                 value =
                     if (config == null) {
-                        false
+                        ConfigValidationResult(false, emptyMap())
                     } else {
                         notificationSender.isValidConfig(config)
                     }
@@ -110,7 +111,7 @@ class ConfigureNotificationMediumPresenter
             return ConfigureNotificationMediumScreen.State(
                 notifierType = screen.notifierType,
                 isConfigured = isConfigured,
-                isValidInput = isValidInput,
+                configValidationResult = isValidInput,
                 alertMediumConfig = alertMediumConfig,
                 snackbarMessage = snackbarMessage,
             ) { event ->
@@ -233,7 +234,7 @@ fun ConfigureNotificationMediumUi(
 
             // Only show test button if configuration exists
             AnimatedVisibility(
-                visible = state.isValidInput,
+                visible = state.configValidationResult.isValid,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
@@ -257,7 +258,7 @@ private fun PreviewTelegramConfigurationUi() {
                 ConfigureNotificationMediumScreen.State(
                     notifierType = NotifierType.TELEGRAM,
                     isConfigured = false,
-                    isValidInput = true,
+                    configValidationResult = ConfigValidationResult(true, emptyMap()),
                     alertMediumConfig = AlertMediumConfig.TelegramConfig("bot-token", "chat-id"),
                     snackbarMessage = null,
                     eventSink = {},
@@ -275,7 +276,7 @@ private fun PreviewWebhookConfigurationUi() {
                 ConfigureNotificationMediumScreen.State(
                     notifierType = NotifierType.WEBHOOK_REST_API,
                     isConfigured = true,
-                    isValidInput = true,
+                    configValidationResult = ConfigValidationResult(true, emptyMap()),
                     alertMediumConfig = AlertMediumConfig.WebhookConfig("https://example.com"),
                     snackbarMessage = null,
                     eventSink = {},

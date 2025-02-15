@@ -26,6 +26,11 @@ class TelegramConfigDataStore
         companion object {
             private val BOT_TOKEN_KEY = stringPreferencesKey("bot_token")
             private val CHAT_ID_KEY = stringPreferencesKey("chat_id")
+
+            private object ValidationKeys {
+                const val BOT_TOKEN = "botToken"
+                const val CHAT_ID = "chatId"
+            }
         }
 
         val botToken: Flow<String?> =
@@ -71,21 +76,23 @@ class TelegramConfigDataStore
         override suspend fun hasValidConfig(): Boolean {
             val botToken = botToken.first() ?: return false
             val chatId = chatId.first() ?: return false
-            return isValidConfig(AlertMediumConfig.TelegramConfig(botToken, chatId))
+            return isValidConfig(AlertMediumConfig.TelegramConfig(botToken, chatId)).isValid
         }
 
-        override suspend fun isValidConfig(config: AlertMediumConfig): Boolean {
+        override suspend fun isValidConfig(config: AlertMediumConfig): ConfigValidationResult {
             val (botToken, chatId) =
                 when (config) {
                     is AlertMediumConfig.TelegramConfig -> Pair(config.botToken, config.chatId)
-                    else -> return false
+                    else -> return ConfigValidationResult(false, emptyMap())
                 }
+
+            val errors = mutableMapOf<String, String>()
 
             // Bot token format: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
             val isValidBotToken = botToken.matches(Regex("""\d+:[A-Za-z0-9_-]{35}"""))
             if (!isValidBotToken) {
                 Timber.e("Invalid bot token format")
-                return false
+                errors[ValidationKeys.BOT_TOKEN] = "Invalid bot token format"
             }
 
             // Chat ID can be numeric or @channelusername
@@ -94,10 +101,13 @@ class TelegramConfigDataStore
                     (chatId.startsWith("@") && chatId.length > 1)
             if (!isValidChatId) {
                 Timber.e("Invalid chat ID format")
-                return false
+                errors[ValidationKeys.CHAT_ID] = "Invalid chat ID format"
             }
 
             Timber.i("Telegram config is valid")
-            return true
+            return ConfigValidationResult(
+                isValid = errors.isEmpty(),
+                errors = errors,
+            )
         }
     }
