@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -29,7 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -105,7 +105,7 @@ fun AddNewRemoteAlertUi(
     modifier: Modifier = Modifier,
 ) {
     var type by remember { mutableStateOf(AlertType.BATTERY) }
-    var threshold by remember { mutableIntStateOf(0) }
+    var threshold by remember { mutableIntStateOf(10) }
 
     Scaffold(
         modifier = modifier,
@@ -114,7 +114,7 @@ fun AddNewRemoteAlertUi(
                 title = { Text("Add New Alert") },
                 navigationIcon = {
                     IconButton(onClick = { state.eventSink(AddNewRemoteAlertScreen.Event.NavigateBack) }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
             )
@@ -142,7 +142,7 @@ fun AddNewRemoteAlertUi(
                 ) {
                     Text(
                         "Alert Type",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.labelMedium,
                     )
                     AlertTypeSelector(
                         selectedType = type,
@@ -169,7 +169,7 @@ fun AddNewRemoteAlertUi(
                             AlertType.BATTERY -> "Battery Level Threshold"
                             AlertType.STORAGE -> "Storage Space Threshold"
                         },
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.labelMedium,
                     )
 
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -186,13 +186,15 @@ fun AddNewRemoteAlertUi(
                             onValueChange = { threshold = it.toInt() },
                             valueRange =
                                 when (type) {
-                                    AlertType.BATTERY -> 0f..100f
-                                    AlertType.STORAGE -> 0f..64f // Assuming max storage threshold
+                                    AlertType.BATTERY -> 5f..50f
+                                    AlertType.STORAGE -> 1f..32f
                                 },
                             steps =
                                 when (type) {
-                                    AlertType.BATTERY -> 100
-                                    AlertType.STORAGE -> 64
+                                    // Creates 45 possible values: 5,6,7,...,49,50
+                                    AlertType.BATTERY -> 44
+                                    // Creates 31 possible values: 1,2,3,...,31,32
+                                    AlertType.STORAGE -> 30
                                 },
                         )
                     }
@@ -280,13 +282,11 @@ private fun AlertTypeSelector(
                                     },
                                 ),
                             contentDescription = null,
-                            modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
                         )
                     }
                 },
                 onClick = { onTypeSelected(alertType) },
                 selected = alertType == selectedType,
-                modifier = Modifier.align(Alignment.CenterVertically),
             ) {
                 Text(
                     when (alertType) {
