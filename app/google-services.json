@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "891716211723",
+    "project_id": "android-remote-alert",
+    "storage_bucket": "android-remote-alert.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:891716211723:android:b379384e5fe581fcb9230e",
+        "android_client_info": {
+          "package_name": "dev.hossain.remotenotify"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEdK0HHC2F6lUiyKk5MV8HbxDlr1jpS1M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
