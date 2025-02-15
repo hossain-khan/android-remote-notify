@@ -94,27 +94,21 @@ class ConfigureNotificationMediumPresenter
             var snackbarMessage by remember { mutableStateOf<String?>(null) }
             var isConfigured by remember { mutableStateOf(false) }
 
+            val notificationSender = notifiers.of(screen.notifierType)
+
             val isValidInput by produceState(false, alertMediumConfig) {
                 val config = alertMediumConfig
-                if (config == null) {
-                    value = false
-                } else {
-                    value = notifiers.of(screen.notifierType).isValidConfig(config)
-                }
+                value =
+                    if (config == null) {
+                        false
+                    } else {
+                        notificationSender.isValidConfig(config)
+                    }
             }
 
             LaunchedEffect(Unit) {
-                when (screen.notifierType) {
-                    NotifierType.TELEGRAM -> {
-                        isConfigured = telegramConfigDataStore.hasValidConfig()
-                        alertMediumConfig = telegramConfigDataStore.getConfig()
-                    }
-
-                    NotifierType.WEBHOOK_REST_API -> {
-                        isConfigured = webhookConfigDataStore.hasValidConfig()
-                        alertMediumConfig = webhookConfigDataStore.getConfig()
-                    }
-                }
+                isConfigured = notificationSender.hasValidConfig()
+                alertMediumConfig = notificationSender.getConfig()
             }
 
             return ConfigureNotificationMediumScreen.State(
@@ -157,7 +151,7 @@ class ConfigureNotificationMediumPresenter
                                 val success =
                                     withContext(Dispatchers.IO) {
                                         val testNotification = RemoteNotification.BatteryNotification(batteryPercentage = 5)
-                                        notifiers.of(screen.notifierType).sendNotification(testNotification)
+                                        notificationSender.sendNotification(testNotification)
                                     }
                                 snackbarMessage =
                                     if (success) {

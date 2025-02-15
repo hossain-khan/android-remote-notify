@@ -74,7 +74,9 @@ class WebhookRequestSender
             }
         }
 
-        override suspend fun hasValidConfiguration(): Boolean = webhookConfigDataStore.hasValidConfig()
+        override suspend fun hasValidConfig(): Boolean = webhookConfigDataStore.hasValidConfig()
+
+        override suspend fun getConfig(): AlertMediumConfig = webhookConfigDataStore.getConfig()
 
         override suspend fun clearConfig() {
             webhookConfigDataStore.clearConfig()

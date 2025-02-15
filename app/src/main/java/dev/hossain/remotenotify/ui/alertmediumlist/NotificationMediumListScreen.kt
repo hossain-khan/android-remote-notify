@@ -103,7 +103,7 @@ class NotificationMediumListPresenter
                             NotificationMediumListScreen.NotifierInfo(
                                 id = sender.notifierType,
                                 name = sender.notifierType.displayName,
-                                isConfigured = sender.hasValidConfiguration(),
+                                isConfigured = sender.hasValidConfig(),
                             )
                         }
             }

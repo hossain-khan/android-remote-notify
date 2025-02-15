@@ -74,7 +74,9 @@ class TelegramNotificationSender
             }
         }
 
-        override suspend fun hasValidConfiguration(): Boolean = telegramConfigDataStore.hasValidConfig()
+        override suspend fun hasValidConfig(): Boolean = telegramConfigDataStore.hasValidConfig()
+
+        override suspend fun getConfig(): AlertMediumConfig = telegramConfigDataStore.getConfig()
 
         override suspend fun clearConfig() {
             telegramConfigDataStore.clearConfig()

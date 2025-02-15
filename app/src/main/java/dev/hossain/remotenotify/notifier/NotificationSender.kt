@@ -17,7 +17,9 @@ interface NotificationSender {
     /**
      * Checks if all the required configuration is set for the notifier.
      */
-    suspend fun hasValidConfiguration(): Boolean
+    suspend fun hasValidConfig(): Boolean
+
+    suspend fun getConfig(): AlertMediumConfig
 
     /**
      * Clears all configuration for the notifier.
