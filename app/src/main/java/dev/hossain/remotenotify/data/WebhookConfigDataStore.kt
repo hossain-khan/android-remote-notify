@@ -25,6 +25,10 @@ class WebhookConfigDataStore
     ) : AlertMediumConfigStore {
         companion object {
             private val WEBHOOK_URL_KEY = stringPreferencesKey("webhook_url")
+
+            object ValidationKeys {
+                const val URL = "url"
+            }
         }
 
         val webhookUrl: Flow<String?> =
@@ -54,14 +58,16 @@ class WebhookConfigDataStore
                 return false
             }
 
-            return isValidConfig(AlertMediumConfig.WebhookConfig(url))
+            return isValidConfig(AlertMediumConfig.WebhookConfig(url)).isValid
         }
 
-        override suspend fun isValidConfig(config: AlertMediumConfig): Boolean {
+        override suspend fun isValidConfig(config: AlertMediumConfig): ConfigValidationResult {
+            val errors = mutableMapOf<String, String>()
+
             val url =
                 when (config) {
                     is AlertMediumConfig.WebhookConfig -> config.url
-                    else -> return false
+                    else -> return ConfigValidationResult(false, emptyMap())
                 }
 
             // Basic URL validation for HTTP/HTTPS
@@ -74,12 +80,15 @@ class WebhookConfigDataStore
                 }
 
             if (!isValidUrl) {
+                errors[ValidationKeys.URL] = "Invalid URL format"
                 Timber.e("Invalid webhook URL format: $url")
-                return false
             }
 
             Timber.i("Webhook config is valid")
-            return true
+            return ConfigValidationResult(
+                isValid = errors.isEmpty(),
+                errors = errors,
+            )
         }
 
         suspend fun getConfig(): AlertMediumConfig.WebhookConfig {

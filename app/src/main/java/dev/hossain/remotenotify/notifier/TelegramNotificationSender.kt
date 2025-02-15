@@ -2,6 +2,7 @@ package dev.hossain.remotenotify.notifier
 
 import com.squareup.anvil.annotations.ContributesMultibinding
 import dev.hossain.remotenotify.data.AlertMediumConfig
+import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.TelegramConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteNotification
@@ -33,7 +34,7 @@ class TelegramNotificationSender
                 }
 
             // Each bot is given a unique authentication token when it is created.
-            // The token looks something like 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11 or 110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw
+            // The token looks something like 123456:ABCDEF1234ghIklzyx57W2v1u123ew11 or 110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw
             val botToken =
                 requireNotNull(telegramConfigDataStore.botToken.first()) {
                     "Bot token is required. Check `hasValidConfiguration` before using the notifier."
@@ -92,6 +93,6 @@ class TelegramNotificationSender
             telegramConfigDataStore.clearConfig()
         }
 
-        override suspend fun isValidConfig(alertMediumConfig: AlertMediumConfig): Boolean =
+        override suspend fun isValidConfig(alertMediumConfig: AlertMediumConfig): ConfigValidationResult =
             telegramConfigDataStore.isValidConfig(alertMediumConfig)
     }

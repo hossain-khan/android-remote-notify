@@ -39,6 +39,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.data.AlertMediumConfig
+import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteNotification
 import dev.hossain.remotenotify.notifier.NotificationSender
@@ -57,8 +58,9 @@ data class ConfigureNotificationMediumScreen(
     data class State(
         val notifierType: NotifierType,
         val isConfigured: Boolean,
-        val isValidInput: Boolean,
+        val configValidationResult: ConfigValidationResult,
         val alertMediumConfig: AlertMediumConfig?,
+        val showValidationError: Boolean,
         val snackbarMessage: String?,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
@@ -89,14 +91,15 @@ class ConfigureNotificationMediumPresenter
             var alertMediumConfig by remember { mutableStateOf<AlertMediumConfig?>(null) }
             var snackbarMessage by remember { mutableStateOf<String?>(null) }
             var isConfigured by remember { mutableStateOf(false) }
+            var shouldShowValidationError by remember { mutableStateOf(false) }
 
             val notificationSender = notifiers.of(senderNotifierType = screen.notifierType)
 
-            val isValidInput by produceState(false, alertMediumConfig) {
+            val isValidInput by produceState(ConfigValidationResult(false, emptyMap()), alertMediumConfig, shouldShowValidationError) {
                 val config = alertMediumConfig
                 value =
                     if (config == null) {
-                        false
+                        ConfigValidationResult(false, emptyMap())
                     } else {
                         notificationSender.isValidConfig(config)
                     }
@@ -110,13 +113,18 @@ class ConfigureNotificationMediumPresenter
             return ConfigureNotificationMediumScreen.State(
                 notifierType = screen.notifierType,
                 isConfigured = isConfigured,
-                isValidInput = isValidInput,
+                configValidationResult = isValidInput,
                 alertMediumConfig = alertMediumConfig,
+                showValidationError = shouldShowValidationError,
                 snackbarMessage = snackbarMessage,
             ) { event ->
                 when (event) {
                     is ConfigureNotificationMediumScreen.Event.SaveConfig -> {
                         scope.launch {
+                            shouldShowValidationError = true // Show validation on save attempt
+                            if (isValidInput.isValid.not()) {
+                                return@launch
+                            }
                             alertMediumConfig?.let { config ->
                                 runCatching {
                                     notificationSender.saveConfig(config)
@@ -154,6 +162,7 @@ class ConfigureNotificationMediumPresenter
                     }
 
                     is ConfigureNotificationMediumScreen.Event.UpdateConfigValue -> {
+                        shouldShowValidationError = false // Reset validation on config change
                         alertMediumConfig = event.alertMediumConfig
                     }
                 }
@@ -213,10 +222,20 @@ fun ConfigureNotificationMediumUi(
 
             when (state.notifierType) {
                 NotifierType.TELEGRAM -> {
-                    TelegramConfigInputUi(state.alertMediumConfig, onConfigUpdate)
+                    TelegramConfigInputUi(
+                        alertMediumConfig = state.alertMediumConfig,
+                        configValidationResult = state.configValidationResult,
+                        shouldShowValidationError = state.showValidationError,
+                        onConfigUpdate = onConfigUpdate,
+                    )
                 }
                 NotifierType.WEBHOOK_REST_API -> {
-                    WebhookConfigInputUi(state.alertMediumConfig, onConfigUpdate)
+                    WebhookConfigInputUi(
+                        alertMediumConfig = state.alertMediumConfig,
+                        configValidationResult = state.configValidationResult,
+                        shouldShowValidationError = state.showValidationError,
+                        onConfigUpdate = onConfigUpdate,
+                    )
                 }
             }
 
@@ -233,7 +252,7 @@ fun ConfigureNotificationMediumUi(
 
             // Only show test button if configuration exists
             AnimatedVisibility(
-                visible = state.isValidInput,
+                visible = state.configValidationResult.isValid,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
@@ -257,8 +276,9 @@ private fun PreviewTelegramConfigurationUi() {
                 ConfigureNotificationMediumScreen.State(
                     notifierType = NotifierType.TELEGRAM,
                     isConfigured = false,
-                    isValidInput = true,
+                    configValidationResult = ConfigValidationResult(true, emptyMap()),
                     alertMediumConfig = AlertMediumConfig.TelegramConfig("bot-token", "chat-id"),
+                    showValidationError = false,
                     snackbarMessage = null,
                     eventSink = {},
                 ),
@@ -275,8 +295,9 @@ private fun PreviewWebhookConfigurationUi() {
                 ConfigureNotificationMediumScreen.State(
                     notifierType = NotifierType.WEBHOOK_REST_API,
                     isConfigured = true,
-                    isValidInput = true,
+                    configValidationResult = ConfigValidationResult(true, emptyMap()),
                     alertMediumConfig = AlertMediumConfig.WebhookConfig("https://example.com"),
+                    showValidationError = false,
                     snackbarMessage = null,
                     eventSink = {},
                 ),

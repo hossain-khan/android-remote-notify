@@ -8,5 +8,5 @@ interface AlertMediumConfigStore {
 
     suspend fun hasValidConfig(): Boolean
 
-    suspend fun isValidConfig(config: AlertMediumConfig): Boolean
+    suspend fun isValidConfig(config: AlertMediumConfig): ConfigValidationResult
 }
