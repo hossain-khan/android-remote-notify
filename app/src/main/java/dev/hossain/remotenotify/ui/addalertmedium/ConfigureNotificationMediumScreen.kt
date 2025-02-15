@@ -38,7 +38,7 @@ import com.slack.circuit.runtime.screen.Screen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import dev.hossain.remotenotify.data.AlertMediumConfig
+import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteNotification

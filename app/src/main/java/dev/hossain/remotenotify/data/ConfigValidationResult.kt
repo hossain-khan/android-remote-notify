@@ -4,7 +4,7 @@ data class ConfigValidationResult(
     /**
      * If the [AlertMediumConfig] is valid.
      *
-     * @see AlertMediumConfigStore.isValidConfig
+     * @see AlertMediumConfigStore.validateConfig
      */
     val isValid: Boolean,
     /**

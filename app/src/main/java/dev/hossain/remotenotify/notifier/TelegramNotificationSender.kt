@@ -1,7 +1,7 @@
 package dev.hossain.remotenotify.notifier
 
 import com.squareup.anvil.annotations.ContributesMultibinding
-import dev.hossain.remotenotify.data.AlertMediumConfig
+import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.TelegramConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
@@ -94,5 +94,5 @@ class TelegramNotificationSender
         }
 
         override suspend fun isValidConfig(alertMediumConfig: AlertMediumConfig): ConfigValidationResult =
-            telegramConfigDataStore.isValidConfig(alertMediumConfig)
+            telegramConfigDataStore.validateConfig(alertMediumConfig)
     }

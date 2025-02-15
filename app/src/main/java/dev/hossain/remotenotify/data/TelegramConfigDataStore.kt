@@ -9,6 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.squareup.anvil.annotations.optional.SingleIn
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.di.ApplicationContext
+import dev.hossain.remotenotify.model.AlertMediumConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -76,10 +77,10 @@ class TelegramConfigDataStore
         override suspend fun hasValidConfig(): Boolean {
             val botToken = botToken.first() ?: return false
             val chatId = chatId.first() ?: return false
-            return isValidConfig(AlertMediumConfig.TelegramConfig(botToken, chatId)).isValid
+            return validateConfig(AlertMediumConfig.TelegramConfig(botToken, chatId)).isValid
         }
 
-        override suspend fun isValidConfig(config: AlertMediumConfig): ConfigValidationResult {
+        override suspend fun validateConfig(config: AlertMediumConfig): ConfigValidationResult {
             val (botToken, chatId) =
                 when (config) {
                     is AlertMediumConfig.TelegramConfig -> Pair(config.botToken, config.chatId)
