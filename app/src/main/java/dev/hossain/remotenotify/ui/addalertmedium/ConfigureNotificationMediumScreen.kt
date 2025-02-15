@@ -1,5 +1,10 @@
 package dev.hossain.remotenotify.ui.addalertmedium
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,8 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,9 +40,13 @@ import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.data.TelegramConfigDataStore
 import dev.hossain.remotenotify.data.WebhookConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
+import dev.hossain.remotenotify.model.RemoteNotification
+import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 
@@ -45,14 +57,20 @@ data class ConfigureNotificationMediumScreen(
     data class State(
         val notifierType: NotifierType,
         val isConfigured: Boolean,
+        val isValidInput: Boolean,
         val botToken: String,
         val chatId: String,
         val webhookUrl: String,
+        val snackbarMessage: String?,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
     sealed class Event : CircuitUiEvent {
         data object SaveConfig : Event()
+
+        data object TestConfig : Event()
+
+        data object DismissSnackbar : Event()
 
         data class OnBotTokenUpdated(
             val botToken: String,
@@ -75,14 +93,27 @@ class ConfigureNotificationMediumPresenter
         @Assisted private val navigator: Navigator,
         private val telegramConfigDataStore: TelegramConfigDataStore,
         private val webhookConfigDataStore: WebhookConfigDataStore,
+        private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
     ) : Presenter<ConfigureNotificationMediumScreen.State> {
         @Composable
         override fun present(): ConfigureNotificationMediumScreen.State {
             val scope = rememberCoroutineScope()
+            var snackbarMessage by remember { mutableStateOf<String?>(null) }
             var savedBotToken by remember { mutableStateOf("") }
             var savedChatId by remember { mutableStateOf("") }
             var savedWebhookUrl by remember { mutableStateOf("") }
             var isConfigured by remember { mutableStateOf(false) }
+
+            val isValidInput: Boolean by remember(savedBotToken, savedChatId, savedWebhookUrl, screen.notifierType) {
+                mutableStateOf(
+                    when (screen.notifierType) {
+                        NotifierType.TELEGRAM -> savedBotToken.isNotBlank() && savedChatId.isNotBlank()
+                        NotifierType.WEBHOOK_REST_API ->
+                            savedWebhookUrl.isNotBlank() &&
+                                savedWebhookUrl.startsWith("http", ignoreCase = true)
+                    },
+                )
+            }
 
             LaunchedEffect(Unit) {
                 when (screen.notifierType) {
@@ -93,6 +124,7 @@ class ConfigureNotificationMediumPresenter
                     }
 
                     NotifierType.WEBHOOK_REST_API -> {
+                        isConfigured = webhookConfigDataStore.hasValidConfig()
                         savedWebhookUrl = webhookConfigDataStore.webhookUrl.first() ?: ""
                     }
                 }
@@ -101,9 +133,11 @@ class ConfigureNotificationMediumPresenter
             return ConfigureNotificationMediumScreen.State(
                 notifierType = screen.notifierType,
                 isConfigured = isConfigured,
+                isValidInput = isValidInput,
                 botToken = savedBotToken,
                 chatId = savedChatId,
                 webhookUrl = savedWebhookUrl,
+                snackbarMessage = snackbarMessage,
             ) { event ->
                 when (event) {
                     is ConfigureNotificationMediumScreen.Event.SaveConfig -> {
@@ -141,6 +175,30 @@ class ConfigureNotificationMediumPresenter
                     is ConfigureNotificationMediumScreen.Event.OnWebhookUrlUpdated -> {
                         savedWebhookUrl = event.url
                     }
+                    is ConfigureNotificationMediumScreen.Event.TestConfig -> {
+                        scope.launch {
+                            try {
+                                val success =
+                                    withContext(Dispatchers.IO) {
+                                        val testNotification = RemoteNotification.BatteryNotification(batteryPercentage = 5)
+                                        notifiers.find { it.notifierType == screen.notifierType }!!.sendNotification(testNotification)
+                                    }
+                                snackbarMessage =
+                                    if (success) {
+                                        "Test notification sent successfully!"
+                                    } else {
+                                        "Failed to send test notification"
+                                    }
+                            } catch (e: Exception) {
+                                Timber.e(e, "Error sending test notification")
+                                snackbarMessage = "Error: ${e.message ?: e.toString()}"
+                            }
+                        }
+                    }
+
+                    ConfigureNotificationMediumScreen.Event.DismissSnackbar -> {
+                        snackbarMessage = null
+                    }
                 }
             }
         }
@@ -161,7 +219,24 @@ fun ConfigureNotificationMediumUi(
     state: ConfigureNotificationMediumScreen.State,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(modifier = modifier) { innerPadding ->
+    Scaffold(
+        modifier = modifier,
+        snackbarHost = {
+            state.snackbarMessage?.let { message ->
+                Snackbar(
+                    action = {
+                        TextButton(onClick = {
+                            state.eventSink(ConfigureNotificationMediumScreen.Event.DismissSnackbar)
+                        }) {
+                            Text("Dismiss")
+                        }
+                    },
+                ) {
+                    Text(message)
+                }
+            }
+        },
+    ) { innerPadding ->
         Column(
             modifier =
                 Modifier
@@ -223,6 +298,22 @@ fun ConfigureNotificationMediumUi(
             ) {
                 Text(if (state.isConfigured) "Update Configuration" else "Save Configuration")
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Only show test button if configuration exists
+            AnimatedVisibility(
+                visible = state.isValidInput,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                OutlinedButton(
+                    onClick = { state.eventSink(ConfigureNotificationMediumScreen.Event.TestConfig) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Test Configuration")
+                }
+            }
         }
     }
 }
@@ -236,9 +327,11 @@ private fun PreviewTelegramConfigurationUi() {
                 ConfigureNotificationMediumScreen.State(
                     notifierType = NotifierType.TELEGRAM,
                     isConfigured = false,
+                    isValidInput = true,
                     botToken = "1234567890:ABCdefGHIjklMNOpqrsTUVwxyz",
                     chatId = "123456789",
                     webhookUrl = "",
+                    snackbarMessage = null,
                     eventSink = {},
                 ),
         )
@@ -254,9 +347,11 @@ private fun PreviewWebhookConfigurationUi() {
                 ConfigureNotificationMediumScreen.State(
                     notifierType = NotifierType.WEBHOOK_REST_API,
                     isConfigured = true,
+                    isValidInput = true,
                     botToken = "",
                     chatId = "",
                     webhookUrl = "https://api.example.com/webhook",
+                    snackbarMessage = null,
                     eventSink = {},
                 ),
         )
