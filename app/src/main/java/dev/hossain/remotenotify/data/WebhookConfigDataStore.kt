@@ -81,4 +81,9 @@ class WebhookConfigDataStore
             Timber.i("Webhook config is valid")
             return true
         }
+
+        suspend fun getConfig(): AlertMediumConfig.WebhookConfig {
+            val url = webhookUrl.first() ?: ""
+            return AlertMediumConfig.WebhookConfig(url)
+        }
     }

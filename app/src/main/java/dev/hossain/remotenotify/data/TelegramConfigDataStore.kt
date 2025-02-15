@@ -40,6 +40,12 @@ class TelegramConfigDataStore
                     preferences[CHAT_ID_KEY]
                 }
 
+        suspend fun getConfig(): AlertMediumConfig.TelegramConfig {
+            val botToken = botToken.first() ?: ""
+            val chatId = chatId.first() ?: ""
+            return AlertMediumConfig.TelegramConfig(botToken, chatId)
+        }
+
         suspend fun saveBotToken(botToken: String) {
             Timber.d("Saving bot token: $botToken")
             context.telegramConfigDataStore.edit { preferences ->

@@ -17,11 +17,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -37,6 +38,7 @@ import com.slack.circuit.runtime.screen.Screen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dev.hossain.remotenotify.data.AlertMediumConfig
 import dev.hossain.remotenotify.data.TelegramConfigDataStore
 import dev.hossain.remotenotify.data.WebhookConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
@@ -44,7 +46,6 @@ import dev.hossain.remotenotify.model.RemoteNotification
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
@@ -58,31 +59,21 @@ data class ConfigureNotificationMediumScreen(
         val notifierType: NotifierType,
         val isConfigured: Boolean,
         val isValidInput: Boolean,
-        val botToken: String,
-        val chatId: String,
-        val webhookUrl: String,
+        val alertMediumConfig: AlertMediumConfig?,
         val snackbarMessage: String?,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
     sealed class Event : CircuitUiEvent {
+        data class UpdateConfigValue(
+            val alertMediumConfig: AlertMediumConfig?,
+        ) : Event()
+
         data object SaveConfig : Event()
 
         data object TestConfig : Event()
 
         data object DismissSnackbar : Event()
-
-        data class OnBotTokenUpdated(
-            val botToken: String,
-        ) : Event()
-
-        data class OnChatIdUpdated(
-            val chatId: String,
-        ) : Event()
-
-        data class OnWebhookUrlUpdated(
-            val url: String,
-        ) : Event()
     }
 }
 
@@ -98,34 +89,33 @@ class ConfigureNotificationMediumPresenter
         @Composable
         override fun present(): ConfigureNotificationMediumScreen.State {
             val scope = rememberCoroutineScope()
+            var alertMediumConfig by remember { mutableStateOf<AlertMediumConfig?>(null) }
             var snackbarMessage by remember { mutableStateOf<String?>(null) }
-            var savedBotToken by remember { mutableStateOf("") }
-            var savedChatId by remember { mutableStateOf("") }
-            var savedWebhookUrl by remember { mutableStateOf("") }
             var isConfigured by remember { mutableStateOf(false) }
 
-            val isValidInput: Boolean by remember(savedBotToken, savedChatId, savedWebhookUrl, screen.notifierType) {
-                mutableStateOf(
-                    when (screen.notifierType) {
-                        NotifierType.TELEGRAM -> savedBotToken.isNotBlank() && savedChatId.isNotBlank()
-                        NotifierType.WEBHOOK_REST_API ->
-                            savedWebhookUrl.isNotBlank() &&
-                                savedWebhookUrl.startsWith("http", ignoreCase = true)
-                    },
-                )
+            val isValidInput by produceState(false, alertMediumConfig) {
+                val config = alertMediumConfig
+                value =
+                    when (config) {
+                        is AlertMediumConfig.TelegramConfig -> telegramConfigDataStore.isValidConfig(config)
+                        is AlertMediumConfig.WebhookConfig -> webhookConfigDataStore.isValidConfig(config)
+                        else -> {
+                            Timber.e("Unknown alert medium config type: $alertMediumConfig")
+                            false
+                        }
+                    }
             }
 
             LaunchedEffect(Unit) {
                 when (screen.notifierType) {
                     NotifierType.TELEGRAM -> {
                         isConfigured = telegramConfigDataStore.hasValidConfig()
-                        savedBotToken = telegramConfigDataStore.botToken.first() ?: ""
-                        savedChatId = telegramConfigDataStore.chatId.first() ?: ""
+                        alertMediumConfig = telegramConfigDataStore.getConfig()
                     }
 
                     NotifierType.WEBHOOK_REST_API -> {
                         isConfigured = webhookConfigDataStore.hasValidConfig()
-                        savedWebhookUrl = webhookConfigDataStore.webhookUrl.first() ?: ""
+                        alertMediumConfig = webhookConfigDataStore.getConfig()
                     }
                 }
             }
@@ -134,46 +124,35 @@ class ConfigureNotificationMediumPresenter
                 notifierType = screen.notifierType,
                 isConfigured = isConfigured,
                 isValidInput = isValidInput,
-                botToken = savedBotToken,
-                chatId = savedChatId,
-                webhookUrl = savedWebhookUrl,
+                alertMediumConfig = alertMediumConfig,
                 snackbarMessage = snackbarMessage,
             ) { event ->
                 when (event) {
                     is ConfigureNotificationMediumScreen.Event.SaveConfig -> {
                         scope.launch {
-                            when (screen.notifierType) {
-                                NotifierType.TELEGRAM -> {
+                            when (val config = alertMediumConfig) {
+                                is AlertMediumConfig.TelegramConfig -> {
                                     runCatching {
-                                        telegramConfigDataStore.saveBotToken(savedBotToken)
-                                        telegramConfigDataStore.saveChatId(savedChatId)
+                                        telegramConfigDataStore.saveBotToken(config.botToken)
+                                        telegramConfigDataStore.saveChatId(config.chatId)
                                     }.onFailure {
                                         Timber.e(it, "Error saving Telegram config")
                                     }
                                 }
 
-                                NotifierType.WEBHOOK_REST_API -> {
+                                is AlertMediumConfig.WebhookConfig -> {
                                     runCatching {
-                                        webhookConfigDataStore.saveWebhookUrl(savedWebhookUrl)
+                                        webhookConfigDataStore.saveWebhookUrl(config.url)
                                     }.onFailure {
                                         Timber.e(it, "Error saving Webhook config")
                                     }
                                 }
+                                else -> {
+                                    Timber.e("Unknown alert medium config type: $alertMediumConfig")
+                                }
                             }
                             navigator.pop()
                         }
-                    }
-
-                    is ConfigureNotificationMediumScreen.Event.OnBotTokenUpdated -> {
-                        savedBotToken = event.botToken
-                    }
-
-                    is ConfigureNotificationMediumScreen.Event.OnChatIdUpdated -> {
-                        savedChatId = event.chatId
-                    }
-
-                    is ConfigureNotificationMediumScreen.Event.OnWebhookUrlUpdated -> {
-                        savedWebhookUrl = event.url
                     }
                     is ConfigureNotificationMediumScreen.Event.TestConfig -> {
                         scope.launch {
@@ -199,6 +178,10 @@ class ConfigureNotificationMediumPresenter
                     ConfigureNotificationMediumScreen.Event.DismissSnackbar -> {
                         snackbarMessage = null
                     }
+
+                    is ConfigureNotificationMediumScreen.Event.UpdateConfigValue -> {
+                        alertMediumConfig = event.alertMediumConfig
+                    }
                 }
             }
         }
@@ -219,6 +202,7 @@ fun ConfigureNotificationMediumUi(
     state: ConfigureNotificationMediumScreen.State,
     modifier: Modifier = Modifier,
 ) {
+    SideEffect { Timber.d("ConfigureNotificationMediumUi: ${state.alertMediumConfig}") }
     Scaffold(
         modifier = modifier,
         snackbarHost = {
@@ -249,44 +233,16 @@ fun ConfigureNotificationMediumUi(
                 modifier = Modifier.padding(bottom = 16.dp),
             )
 
+            val onConfigUpdate: (AlertMediumConfig?) -> Unit = {
+                state.eventSink(ConfigureNotificationMediumScreen.Event.UpdateConfigValue(it))
+            }
+
             when (state.notifierType) {
                 NotifierType.TELEGRAM -> {
-                    TextField(
-                        value = state.botToken,
-                        onValueChange = {
-                            state.eventSink(
-                                ConfigureNotificationMediumScreen.Event.OnBotTokenUpdated(it),
-                            )
-                        },
-                        label = { Text("Bot Token") },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    TextField(
-                        value = state.chatId,
-                        onValueChange = {
-                            state.eventSink(
-                                ConfigureNotificationMediumScreen.Event.OnChatIdUpdated(it),
-                            )
-                        },
-                        label = { Text("Chat ID") },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    TelegramConfigInputUi(state.alertMediumConfig, onConfigUpdate)
                 }
                 NotifierType.WEBHOOK_REST_API -> {
-                    TextField(
-                        value = state.webhookUrl,
-                        onValueChange = {
-                            state.eventSink(
-                                ConfigureNotificationMediumScreen.Event.OnWebhookUrlUpdated(it),
-                            )
-                        },
-                        label = { Text("Webhook URL") },
-                        modifier = Modifier.fillMaxWidth(),
-                        supportingText = { Text("Enter the URL to receive notifications") },
-                    )
+                    WebhookConfigInputUi(state.alertMediumConfig, onConfigUpdate)
                 }
             }
 
@@ -328,9 +284,7 @@ private fun PreviewTelegramConfigurationUi() {
                     notifierType = NotifierType.TELEGRAM,
                     isConfigured = false,
                     isValidInput = true,
-                    botToken = "1234567890:ABCdefGHIjklMNOpqrsTUVwxyz",
-                    chatId = "123456789",
-                    webhookUrl = "",
+                    alertMediumConfig = AlertMediumConfig.TelegramConfig("bot-token", "chat-id"),
                     snackbarMessage = null,
                     eventSink = {},
                 ),
@@ -348,9 +302,7 @@ private fun PreviewWebhookConfigurationUi() {
                     notifierType = NotifierType.WEBHOOK_REST_API,
                     isConfigured = true,
                     isValidInput = true,
-                    botToken = "",
-                    chatId = "",
-                    webhookUrl = "https://api.example.com/webhook",
+                    alertMediumConfig = AlertMediumConfig.WebhookConfig("https://example.com"),
                     snackbarMessage = null,
                     eventSink = {},
                 ),
