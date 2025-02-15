@@ -38,9 +38,9 @@ import com.slack.circuit.runtime.screen.Screen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.di.AppScope
+import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.RemoteNotification
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
@@ -95,13 +95,13 @@ class ConfigureNotificationMediumPresenter
 
             val notificationSender = notifiers.of(senderNotifierType = screen.notifierType)
 
-            val isValidInput by produceState(ConfigValidationResult(false, emptyMap()), alertMediumConfig, shouldShowValidationError) {
+            val validationResult by produceState(ConfigValidationResult(false, emptyMap()), alertMediumConfig, shouldShowValidationError) {
                 val config = alertMediumConfig
                 value =
                     if (config == null) {
                         ConfigValidationResult(false, emptyMap())
                     } else {
-                        notificationSender.isValidConfig(config)
+                        notificationSender.validateConfig(config)
                     }
             }
 
@@ -113,7 +113,7 @@ class ConfigureNotificationMediumPresenter
             return ConfigureNotificationMediumScreen.State(
                 notifierType = screen.notifierType,
                 isConfigured = isConfigured,
-                configValidationResult = isValidInput,
+                configValidationResult = validationResult,
                 alertMediumConfig = alertMediumConfig,
                 showValidationError = shouldShowValidationError,
                 snackbarMessage = snackbarMessage,
@@ -122,7 +122,7 @@ class ConfigureNotificationMediumPresenter
                     is ConfigureNotificationMediumScreen.Event.SaveConfig -> {
                         scope.launch {
                             shouldShowValidationError = true // Show validation on save attempt
-                            if (isValidInput.isValid.not()) {
+                            if (validationResult.isValid.not()) {
                                 return@launch
                             }
                             alertMediumConfig?.let { config ->

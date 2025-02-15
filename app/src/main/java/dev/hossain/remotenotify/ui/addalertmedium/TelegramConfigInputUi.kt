@@ -10,9 +10,9 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.TelegramConfigDataStore.Companion.ValidationKeys
+import dev.hossain.remotenotify.model.AlertMediumConfig
 
 @Composable
 internal fun TelegramConfigInputUi(

@@ -7,9 +7,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.WebhookConfigDataStore.Companion.ValidationKeys
+import dev.hossain.remotenotify.model.AlertMediumConfig
 
 @Composable
 internal fun WebhookConfigInputUi(
