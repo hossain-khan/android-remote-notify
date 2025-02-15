@@ -27,7 +27,7 @@ class TelegramConfigDataStore
             private val BOT_TOKEN_KEY = stringPreferencesKey("bot_token")
             private val CHAT_ID_KEY = stringPreferencesKey("chat_id")
 
-            private object ValidationKeys {
+            object ValidationKeys {
                 const val BOT_TOKEN = "botToken"
                 const val CHAT_ID = "chatId"
             }
@@ -92,7 +92,7 @@ class TelegramConfigDataStore
             val isValidBotToken = botToken.matches(Regex("""\d+:[A-Za-z0-9_-]{35}"""))
             if (!isValidBotToken) {
                 Timber.e("Invalid bot token format")
-                errors[ValidationKeys.BOT_TOKEN] = "Invalid bot token format"
+                errors[ValidationKeys.BOT_TOKEN] = "Invalid bot token format. Example format: 123456:ABCDEF1234ghIklzyx57W2v1u123ew11"
             }
 
             // Chat ID can be numeric or @channelusername
@@ -101,7 +101,7 @@ class TelegramConfigDataStore
                     (chatId.startsWith("@") && chatId.length > 1)
             if (!isValidChatId) {
                 Timber.e("Invalid chat ID format")
-                errors[ValidationKeys.CHAT_ID] = "Invalid chat ID format"
+                errors[ValidationKeys.CHAT_ID] = "Invalid chat ID format. Chat ID should be numeric or @channelusername"
             }
 
             Timber.i("Telegram config is valid")

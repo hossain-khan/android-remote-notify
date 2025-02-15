@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.hossain.remotenotify.data.AlertMediumConfig
 import dev.hossain.remotenotify.data.ConfigValidationResult
+import dev.hossain.remotenotify.data.TelegramConfigDataStore.Companion.ValidationKeys
 
 @Composable
 internal fun TelegramConfigInputUi(
@@ -33,10 +34,10 @@ internal fun TelegramConfigInputUi(
             },
             label = { Text("Bot Token") },
             modifier = Modifier.fillMaxWidth(),
-            isError = shouldShowValidationError && errors["botToken"] != null,
+            isError = shouldShowValidationError && errors[ValidationKeys.BOT_TOKEN] != null,
             supportingText = {
-                if (shouldShowValidationError && errors["botToken"] != null) {
-                    Text(errors["botToken"]!!, color = MaterialTheme.colorScheme.error)
+                if (shouldShowValidationError && errors[ValidationKeys.BOT_TOKEN] != null) {
+                    Text(errors[ValidationKeys.BOT_TOKEN]!!, color = MaterialTheme.colorScheme.error)
                 } else {
                     Text("Enter bot token provided by BotFather")
                 }
@@ -52,10 +53,10 @@ internal fun TelegramConfigInputUi(
             },
             label = { Text("Chat ID") },
             modifier = Modifier.fillMaxWidth(),
-            isError = shouldShowValidationError && errors["chatId"] != null,
+            isError = shouldShowValidationError && errors[ValidationKeys.CHAT_ID] != null,
             supportingText = {
-                if (shouldShowValidationError && errors["chatId"] != null) {
-                    Text(errors["chatId"]!!, color = MaterialTheme.colorScheme.error)
+                if (shouldShowValidationError && errors[ValidationKeys.CHAT_ID] != null) {
+                    Text(errors[ValidationKeys.CHAT_ID]!!, color = MaterialTheme.colorScheme.error)
                 } else {
                     Text("Enter chat ID or @channel username")
                 }

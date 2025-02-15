@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dev.hossain.remotenotify.data.AlertMediumConfig
 import dev.hossain.remotenotify.data.ConfigValidationResult
+import dev.hossain.remotenotify.data.WebhookConfigDataStore.Companion.ValidationKeys
 
 @Composable
 internal fun WebhookConfigInputUi(
@@ -30,10 +31,10 @@ internal fun WebhookConfigInputUi(
             },
             label = { Text("Webhook URL") },
             modifier = Modifier.fillMaxWidth(),
-            isError = shouldShowValidationError && errors["url"] != null,
+            isError = shouldShowValidationError && errors[ValidationKeys.URL] != null,
             supportingText = {
-                if (shouldShowValidationError && errors["url"] != null) {
-                    Text(errors["url"]!!, color = MaterialTheme.colorScheme.error)
+                if (shouldShowValidationError && errors[ValidationKeys.URL] != null) {
+                    Text(errors[ValidationKeys.URL]!!, color = MaterialTheme.colorScheme.error)
                 } else {
                     Text("Enter the URL to receive notifications")
                 }

@@ -26,7 +26,7 @@ class WebhookConfigDataStore
         companion object {
             private val WEBHOOK_URL_KEY = stringPreferencesKey("webhook_url")
 
-            private object ValidationKeys {
+            object ValidationKeys {
                 const val URL = "url"
             }
         }
