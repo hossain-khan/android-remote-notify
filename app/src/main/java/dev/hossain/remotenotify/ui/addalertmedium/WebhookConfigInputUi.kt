@@ -2,25 +2,24 @@ package dev.hossain.remotenotify.ui.addalertmedium
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import dev.hossain.remotenotify.data.AlertMediumConfig
-import timber.log.Timber
+import dev.hossain.remotenotify.data.ConfigValidationResult
 
 @Composable
 internal fun WebhookConfigInputUi(
     alertMediumConfig: AlertMediumConfig?,
+    configValidationResult: ConfigValidationResult,
     onConfigUpdate: (AlertMediumConfig?) -> Unit,
 ) {
     val config = alertMediumConfig as AlertMediumConfig.WebhookConfig?
-    SideEffect {
-        Timber.d("Rendering WebhookConfigInputUi with: $alertMediumConfig")
-    }
+    val errors = configValidationResult.errors
 
     Column {
         TextField(
@@ -30,7 +29,14 @@ internal fun WebhookConfigInputUi(
             },
             label = { Text("Webhook URL") },
             modifier = Modifier.fillMaxWidth(),
-            supportingText = { Text("Enter the URL to receive notifications") },
+            isError = errors["url"] != null,
+            supportingText = {
+                if (errors["url"] != null) {
+                    Text(errors["url"]!!, color = MaterialTheme.colorScheme.error)
+                } else {
+                    Text("Enter the URL to receive notifications")
+                }
+            },
         )
     }
 }

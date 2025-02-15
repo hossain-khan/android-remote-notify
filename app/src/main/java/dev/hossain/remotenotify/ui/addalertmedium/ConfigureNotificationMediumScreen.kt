@@ -214,10 +214,18 @@ fun ConfigureNotificationMediumUi(
 
             when (state.notifierType) {
                 NotifierType.TELEGRAM -> {
-                    TelegramConfigInputUi(state.alertMediumConfig, onConfigUpdate)
+                    TelegramConfigInputUi(
+                        alertMediumConfig = state.alertMediumConfig,
+                        configValidationResult = state.configValidationResult,
+                        onConfigUpdate = onConfigUpdate,
+                    )
                 }
                 NotifierType.WEBHOOK_REST_API -> {
-                    WebhookConfigInputUi(state.alertMediumConfig, onConfigUpdate)
+                    WebhookConfigInputUi(
+                        alertMediumConfig = state.alertMediumConfig,
+                        configValidationResult = state.configValidationResult,
+                        onConfigUpdate = onConfigUpdate,
+                    )
                 }
             }
 
