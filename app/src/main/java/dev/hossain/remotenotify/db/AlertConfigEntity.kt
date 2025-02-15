@@ -15,4 +15,6 @@ data class AlertConfigEntity(
     val batteryPercentage: Int,
     @ColumnInfo(name = "storage_min_space_gb", defaultValue = STORAGE_MIN_SPACE_GB_NONE.toString())
     val storageMinSpaceGb: Int,
+    @ColumnInfo(name = "created_on")
+    val createdOn: Long = System.currentTimeMillis(),
 )

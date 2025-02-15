@@ -189,10 +189,10 @@ fun AlertsListUi(
                 contentPadding = PaddingValues(8.dp),
             ) {
                 // Display battery percentage at the top
-                item { DeviceCurrentStateUi(state) }
+                item(key = "device_state_info") { DeviceCurrentStateUi(state) }
 
                 if (state.isAnyNotifierConfigured.not()) {
-                    item {
+                    item(key = "no_notifier_configured") {
                         NoNotifierConfiguredCard(
                             onConfigureClick = {
                                 state.eventSink(AlertsListScreen.Event.AddNotificationDestination)
@@ -203,15 +203,18 @@ fun AlertsListUi(
 
                 // Show empty state or user configured alerts
                 if (state.remoteAlertConfigs.isEmpty()) {
-                    item { EmptyNotificationsState() }
+                    item(key = "alert_empty_view") { EmptyNotificationsState() }
                 } else {
-                    item {
+                    item(key = "alerts_header") {
                         Text(
                             text = "Your Alerts",
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }
-                    itemsIndexed(state.remoteAlertConfigs) { _: Int, remoteAlert: RemoteAlert ->
+                    itemsIndexed(
+                        items = state.remoteAlertConfigs,
+                        key = { _, remoteAlert -> remoteAlert.alertId },
+                    ) { _: Int, remoteAlert: RemoteAlert ->
                         NotificationItem(
                             remoteAlert = remoteAlert,
                             onDelete = {
@@ -364,7 +367,7 @@ fun NotificationItem(
     modifier: Modifier = Modifier,
 ) {
     ListItem(
-        shadowElevation = 4.dp,
+        shadowElevation = 2.dp,
         leadingContent = {
             Icon(
                 painter =
