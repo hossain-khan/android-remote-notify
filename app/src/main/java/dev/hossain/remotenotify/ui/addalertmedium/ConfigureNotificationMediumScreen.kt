@@ -60,6 +60,7 @@ data class ConfigureNotificationMediumScreen(
         val isConfigured: Boolean,
         val configValidationResult: ConfigValidationResult,
         val alertMediumConfig: AlertMediumConfig?,
+        val showValidationError: Boolean,
         val snackbarMessage: String?,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
@@ -90,10 +91,11 @@ class ConfigureNotificationMediumPresenter
             var alertMediumConfig by remember { mutableStateOf<AlertMediumConfig?>(null) }
             var snackbarMessage by remember { mutableStateOf<String?>(null) }
             var isConfigured by remember { mutableStateOf(false) }
+            var shouldShowValidationError by remember { mutableStateOf(false) }
 
             val notificationSender = notifiers.of(senderNotifierType = screen.notifierType)
 
-            val isValidInput by produceState(ConfigValidationResult(false, emptyMap()), alertMediumConfig) {
+            val isValidInput by produceState(ConfigValidationResult(false, emptyMap()), alertMediumConfig, shouldShowValidationError) {
                 val config = alertMediumConfig
                 value =
                     if (config == null) {
@@ -113,11 +115,16 @@ class ConfigureNotificationMediumPresenter
                 isConfigured = isConfigured,
                 configValidationResult = isValidInput,
                 alertMediumConfig = alertMediumConfig,
+                showValidationError = shouldShowValidationError,
                 snackbarMessage = snackbarMessage,
             ) { event ->
                 when (event) {
                     is ConfigureNotificationMediumScreen.Event.SaveConfig -> {
                         scope.launch {
+                            shouldShowValidationError = true // Show validation on save attempt
+                            if (isValidInput.isValid.not()) {
+                                return@launch
+                            }
                             alertMediumConfig?.let { config ->
                                 runCatching {
                                     notificationSender.saveConfig(config)
@@ -155,6 +162,7 @@ class ConfigureNotificationMediumPresenter
                     }
 
                     is ConfigureNotificationMediumScreen.Event.UpdateConfigValue -> {
+                        shouldShowValidationError = false // Reset validation on config change
                         alertMediumConfig = event.alertMediumConfig
                     }
                 }
@@ -217,6 +225,7 @@ fun ConfigureNotificationMediumUi(
                     TelegramConfigInputUi(
                         alertMediumConfig = state.alertMediumConfig,
                         configValidationResult = state.configValidationResult,
+                        shouldShowValidationError = state.showValidationError,
                         onConfigUpdate = onConfigUpdate,
                     )
                 }
@@ -224,6 +233,7 @@ fun ConfigureNotificationMediumUi(
                     WebhookConfigInputUi(
                         alertMediumConfig = state.alertMediumConfig,
                         configValidationResult = state.configValidationResult,
+                        shouldShowValidationError = state.showValidationError,
                         onConfigUpdate = onConfigUpdate,
                     )
                 }
@@ -268,6 +278,7 @@ private fun PreviewTelegramConfigurationUi() {
                     isConfigured = false,
                     configValidationResult = ConfigValidationResult(true, emptyMap()),
                     alertMediumConfig = AlertMediumConfig.TelegramConfig("bot-token", "chat-id"),
+                    showValidationError = false,
                     snackbarMessage = null,
                     eventSink = {},
                 ),
@@ -286,6 +297,7 @@ private fun PreviewWebhookConfigurationUi() {
                     isConfigured = true,
                     configValidationResult = ConfigValidationResult(true, emptyMap()),
                     alertMediumConfig = AlertMediumConfig.WebhookConfig("https://example.com"),
+                    showValidationError = false,
                     snackbarMessage = null,
                     eventSink = {},
                 ),

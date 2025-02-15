@@ -19,6 +19,7 @@ import dev.hossain.remotenotify.data.ConfigValidationResult
 internal fun TelegramConfigInputUi(
     alertMediumConfig: AlertMediumConfig?,
     configValidationResult: ConfigValidationResult,
+    shouldShowValidationError: Boolean,
     onConfigUpdate: (AlertMediumConfig?) -> Unit,
 ) {
     val config = alertMediumConfig as AlertMediumConfig.TelegramConfig?
@@ -32,11 +33,14 @@ internal fun TelegramConfigInputUi(
             },
             label = { Text("Bot Token") },
             modifier = Modifier.fillMaxWidth(),
-            isError = errors["botToken"] != null,
-            supportingText =
-                errors["botToken"]?.let { error ->
-                    { Text(error, color = MaterialTheme.colorScheme.error) }
-                },
+            isError = shouldShowValidationError && errors["botToken"] != null,
+            supportingText = {
+                if (shouldShowValidationError && errors["botToken"] != null) {
+                    Text(errors["botToken"]!!, color = MaterialTheme.colorScheme.error)
+                } else {
+                    Text("Enter bot token provided by BotFather")
+                }
+            },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -48,11 +52,14 @@ internal fun TelegramConfigInputUi(
             },
             label = { Text("Chat ID") },
             modifier = Modifier.fillMaxWidth(),
-            isError = errors["chatId"] != null,
-            supportingText =
-                errors["chatId"]?.let { error ->
-                    { Text(error, color = MaterialTheme.colorScheme.error) }
-                },
+            isError = shouldShowValidationError && errors["chatId"] != null,
+            supportingText = {
+                if (shouldShowValidationError && errors["chatId"] != null) {
+                    Text(errors["chatId"]!!, color = MaterialTheme.colorScheme.error)
+                } else {
+                    Text("Enter chat ID or @channel username")
+                }
+            },
         )
     }
 }

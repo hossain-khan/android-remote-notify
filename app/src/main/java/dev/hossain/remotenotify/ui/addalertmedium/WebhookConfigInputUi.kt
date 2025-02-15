@@ -16,6 +16,7 @@ import dev.hossain.remotenotify.data.ConfigValidationResult
 internal fun WebhookConfigInputUi(
     alertMediumConfig: AlertMediumConfig?,
     configValidationResult: ConfigValidationResult,
+    shouldShowValidationError: Boolean,
     onConfigUpdate: (AlertMediumConfig?) -> Unit,
 ) {
     val config = alertMediumConfig as AlertMediumConfig.WebhookConfig?
@@ -29,9 +30,9 @@ internal fun WebhookConfigInputUi(
             },
             label = { Text("Webhook URL") },
             modifier = Modifier.fillMaxWidth(),
-            isError = errors["url"] != null,
+            isError = shouldShowValidationError && errors["url"] != null,
             supportingText = {
-                if (errors["url"] != null) {
+                if (shouldShowValidationError && errors["url"] != null) {
                     Text(errors["url"]!!, color = MaterialTheme.colorScheme.error)
                 } else {
                     Text("Enter the URL to receive notifications")
