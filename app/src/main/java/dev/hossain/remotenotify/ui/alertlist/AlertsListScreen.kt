@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -210,12 +210,13 @@ fun AlertsListUi(
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }
-                    items(state.notifications) { notification ->
+                    itemsIndexed(state.notifications) { _: Int, remoteAlert: RemoteAlert ->
                         NotificationItem(
-                            notification = notification,
+                            notification = remoteAlert,
                             onDelete = {
-                                state.eventSink(AlertsListScreen.Event.DeleteNotification(notification))
+                                state.eventSink(AlertsListScreen.Event.DeleteNotification(remoteAlert))
                             },
+                            modifier = Modifier.animateItem(),
                         )
                     }
                 }
@@ -373,7 +374,7 @@ fun NotificationItem(
                             painterResource(id = R.drawable.hard_disk_24dp)
                     },
                 contentDescription = null,
-                modifier = modifier.size(32.dp),
+                modifier = Modifier.size(32.dp),
             )
         },
         headlineContent = {
@@ -426,7 +427,7 @@ fun NotificationItem(
                 )
             }
         },
-        modifier = Modifier.padding(horizontal = 4.dp),
+        modifier = modifier.padding(horizontal = 4.dp),
     )
 }
 
