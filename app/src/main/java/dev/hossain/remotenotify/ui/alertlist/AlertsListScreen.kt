@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -181,12 +182,12 @@ fun AlertsListUi(
             modifier =
                 Modifier
                     .padding(innerPadding)
-                    .padding(horizontal = 8.dp)
-                    .padding(bottom = 8.dp),
+                    .padding(horizontal = 8.dp),
         ) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(8.dp),
+                modifier = Modifier.fillMaxSize(),
             ) {
                 // Display battery percentage at the top
                 item(key = "device_state_info") { DeviceCurrentStateUi(state) }
