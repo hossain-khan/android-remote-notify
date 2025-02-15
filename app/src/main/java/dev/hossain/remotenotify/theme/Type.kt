@@ -16,7 +16,9 @@ val provider =
 val bodyFontFamily =
     FontFamily(
         Font(
-            googleFont = GoogleFont("Lato"),
+            // I liked "Aleo" font for body text
+            // "Arvo" is another good font for body text
+            googleFont = GoogleFont("Arvo"),
             fontProvider = provider,
         ),
     )
@@ -24,7 +26,8 @@ val bodyFontFamily =
 val displayFontFamily =
     FontFamily(
         Font(
-            googleFont = GoogleFont("Lato"),
+            // I liked "Bevan" font for bold look
+            googleFont = GoogleFont("Bevan"),
             fontProvider = provider,
         ),
     )
