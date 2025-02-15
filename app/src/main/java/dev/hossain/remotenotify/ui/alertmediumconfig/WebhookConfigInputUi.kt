@@ -1,4 +1,4 @@
-package dev.hossain.remotenotify.ui.addalertmedium
+package dev.hossain.remotenotify.ui.alertmediumconfig
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth

@@ -1,4 +1,4 @@
-package dev.hossain.remotenotify.ui.addalertmedium
+package dev.hossain.remotenotify.ui.alertmediumconfig
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -147,6 +147,9 @@ class ConfigureNotificationMediumPresenter
                     is ConfigureNotificationMediumScreen.Event.TestConfig -> {
                         scope.launch {
                             try {
+                                // Save the config first, which will be used to test out config
+                                val config = alertMediumConfig!!
+                                notificationSender.saveConfig(config)
                                 val success =
                                     withContext(Dispatchers.IO) {
                                         val testNotification = RemoteAlert.BatteryAlert(batteryPercentage = 5)

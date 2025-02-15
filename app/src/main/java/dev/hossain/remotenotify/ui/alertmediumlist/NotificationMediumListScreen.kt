@@ -55,7 +55,7 @@ import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
-import dev.hossain.remotenotify.ui.addalertmedium.ConfigureNotificationMediumScreen
+import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
