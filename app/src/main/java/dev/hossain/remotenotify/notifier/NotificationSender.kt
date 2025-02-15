@@ -19,6 +19,14 @@ interface NotificationSender {
      */
     suspend fun hasValidConfig(): Boolean
 
+    /**
+     * Saves the configuration for the notifier.
+     */
+    suspend fun saveConfig(alertMediumConfig: AlertMediumConfig)
+
+    /**
+     * Retrieves the current configuration for the notifier.
+     */
     suspend fun getConfig(): AlertMediumConfig
 
     /**

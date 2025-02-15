@@ -39,8 +39,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.data.AlertMediumConfig
-import dev.hossain.remotenotify.data.TelegramConfigDataStore
-import dev.hossain.remotenotify.data.WebhookConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteNotification
 import dev.hossain.remotenotify.notifier.NotificationSender
@@ -83,8 +81,6 @@ class ConfigureNotificationMediumPresenter
     constructor(
         @Assisted private val screen: ConfigureNotificationMediumScreen,
         @Assisted private val navigator: Navigator,
-        private val telegramConfigDataStore: TelegramConfigDataStore,
-        private val webhookConfigDataStore: WebhookConfigDataStore,
         private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
     ) : Presenter<ConfigureNotificationMediumScreen.State> {
         @Composable
@@ -121,28 +117,15 @@ class ConfigureNotificationMediumPresenter
                 when (event) {
                     is ConfigureNotificationMediumScreen.Event.SaveConfig -> {
                         scope.launch {
-                            when (val config = alertMediumConfig) {
-                                is AlertMediumConfig.TelegramConfig -> {
-                                    runCatching {
-                                        telegramConfigDataStore.saveBotToken(config.botToken)
-                                        telegramConfigDataStore.saveChatId(config.chatId)
-                                    }.onFailure {
-                                        Timber.e(it, "Error saving Telegram config")
-                                    }
-                                }
-
-                                is AlertMediumConfig.WebhookConfig -> {
-                                    runCatching {
-                                        webhookConfigDataStore.saveWebhookUrl(config.url)
-                                    }.onFailure {
-                                        Timber.e(it, "Error saving Webhook config")
-                                    }
-                                }
-                                else -> {
-                                    Timber.e("Unknown alert medium config type: $alertMediumConfig")
+                            alertMediumConfig?.let { config ->
+                                runCatching {
+                                    notificationSender.saveConfig(config)
+                                    navigator.pop()
+                                }.onFailure {
+                                    Timber.e(it, "Error saving config: $it")
+                                    snackbarMessage = "Unable to save configuration: ${it.message}"
                                 }
                             }
-                            navigator.pop()
                         }
                     }
                     is ConfigureNotificationMediumScreen.Event.TestConfig -> {

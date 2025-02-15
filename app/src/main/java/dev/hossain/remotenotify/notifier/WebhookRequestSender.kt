@@ -76,6 +76,13 @@ class WebhookRequestSender
 
         override suspend fun hasValidConfig(): Boolean = webhookConfigDataStore.hasValidConfig()
 
+        override suspend fun saveConfig(alertMediumConfig: AlertMediumConfig) {
+            when (alertMediumConfig) {
+                is AlertMediumConfig.WebhookConfig -> webhookConfigDataStore.saveWebhookUrl(alertMediumConfig.url)
+                else -> throw IllegalArgumentException("Invalid configuration type: $alertMediumConfig")
+            }
+        }
+
         override suspend fun getConfig(): AlertMediumConfig = webhookConfigDataStore.getConfig()
 
         override suspend fun clearConfig() {

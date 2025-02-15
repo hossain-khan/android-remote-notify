@@ -76,6 +76,16 @@ class TelegramNotificationSender
 
         override suspend fun hasValidConfig(): Boolean = telegramConfigDataStore.hasValidConfig()
 
+        override suspend fun saveConfig(alertMediumConfig: AlertMediumConfig) {
+            when (alertMediumConfig) {
+                is AlertMediumConfig.TelegramConfig -> {
+                    telegramConfigDataStore.saveBotToken(alertMediumConfig.botToken)
+                    telegramConfigDataStore.saveChatId(alertMediumConfig.chatId)
+                }
+                else -> throw IllegalArgumentException("Invalid configuration type: $alertMediumConfig")
+            }
+        }
+
         override suspend fun getConfig(): AlertMediumConfig = telegramConfigDataStore.getConfig()
 
         override suspend fun clearConfig() {
