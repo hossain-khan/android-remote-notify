@@ -9,22 +9,22 @@ data class DeviceAlert(
     val androidVersion: String = android.os.Build.VERSION.RELEASE,
     val batteryLevel: Int? = null,
     val availableStorageGb: Double? = null,
-    val timestamp: LocalDateTime = LocalDateTime.now()
+    val timestamp: LocalDateTime = LocalDateTime.now(),
 ) {
-
-    fun format(formatType: FormatType): String {
-        return when (formatType) {
+    fun format(formatType: FormatType): String =
+        when (formatType) {
             FormatType.JSON -> toJson()
             FormatType.TEXT -> toText()
             FormatType.EXTENDED_TEXT -> toExtendedText()
         }
-    }
 
     enum class FormatType {
-        JSON, TEXT, EXTENDED_TEXT
+        JSON,
+        TEXT,
+        EXTENDED_TEXT,
     }
 
-    private fun toJson(): String {
+    internal fun toJson(): String {
         val batteryLevelJson = batteryLevel?.let { ",\"batteryLevel\":$it" } ?: ""
         val storageGbJson = availableStorageGb?.let { ",\"availableStorageGb\":$it" } ?: ""
         val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
@@ -37,36 +37,39 @@ data class DeviceAlert(
                 "androidVersion": "$androidVersion",
                 "timestamp": "$formattedTimestamp"$batteryLevelJson$storageGbJson
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
-    private fun toText(): String {
+    internal fun toText(): String {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         val formattedTimestamp = timestamp.format(formatter)
-        val alertMessage = when (alertType) {
-            AlertType.BATTERY -> "Battery Level: $batteryLevel%"
-            AlertType.STORAGE -> "Available Storage: $availableStorageGb GB"
-        }
+        val alertMessage =
+            when (alertType) {
+                AlertType.BATTERY -> "Battery Level: $batteryLevel%"
+                AlertType.STORAGE -> "Available Storage: $availableStorageGb GB"
+            }
 
         return """
             ${alertType.name} Alert!
             Device: $deviceModel ($androidVersion)
             $alertMessage
             Time: $formattedTimestamp
-        """.trimIndent()
+            """.trimIndent()
     }
 
-    private fun toExtendedText(): String {
+    internal fun toExtendedText(): String {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         val formattedTimestamp = timestamp.format(formatter)
-        val alertMessage = when (alertType) {
-            AlertType.BATTERY -> "Battery Level: $batteryLevel%\nAction: Please check charging status."
-            AlertType.STORAGE -> "Available Storage: $availableStorageGb GB\nAction: Consider clearing storage space."
-        }
-        val emoji = when (alertType) {
-            AlertType.BATTERY -> "🪫"
-            AlertType.STORAGE -> "💾"
-        }
+        val alertMessage =
+            when (alertType) {
+                AlertType.BATTERY -> "Battery Level: $batteryLevel%\nAction: Please check charging status."
+                AlertType.STORAGE -> "Available Storage: $availableStorageGb GB\nAction: Consider clearing storage space."
+            }
+        val emoji =
+            when (alertType) {
+                AlertType.BATTERY -> "🪫"
+                AlertType.STORAGE -> "💾"
+            }
 
         return """
             $emoji ${alertType.name} Alert! $emoji
@@ -74,25 +77,27 @@ data class DeviceAlert(
             Device: $deviceModel ($androidVersion)
             $alertMessage
             Time: $formattedTimestamp
-        """.trimIndent()
+            """.trimIndent()
     }
 }
 
 // Example usage:
 fun main() {
-    val batteryAlert = DeviceAlert(
-        alertType = AlertType.BATTERY,
-        deviceModel = "Pixel 7",
-        androidVersion = "Android 14",
-        batteryLevel = 15
-    )
+    val batteryAlert =
+        DeviceAlert(
+            alertType = AlertType.BATTERY,
+            deviceModel = "Pixel 7",
+            androidVersion = "Android 14",
+            batteryLevel = 15,
+        )
 
-    val storageAlert = DeviceAlert(
-        alertType = AlertType.STORAGE,
-        deviceModel = "Samsung Galaxy S23",
-        androidVersion = "Android 13",
-        availableStorageGb = 3.2
-    )
+    val storageAlert =
+        DeviceAlert(
+            alertType = AlertType.STORAGE,
+            deviceModel = "Samsung Galaxy S23",
+            androidVersion = "Android 13",
+            availableStorageGb = 3.2,
+        )
 
     println("Battery Alert (JSON):")
     println(batteryAlert.format(DeviceAlert.FormatType.JSON))
