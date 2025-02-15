@@ -32,8 +32,7 @@ class RemoteAlertRepositoryImpl
             alertConfigDao.insert(entity)
         }
 
-        override suspend fun getAllRemoteAlert(): List<RemoteAlert> =
-            alertConfigDao.getAll().map { it.toRemoteAlert() }
+        override suspend fun getAllRemoteAlert(): List<RemoteAlert> = alertConfigDao.getAll().map { it.toRemoteAlert() }
 
         override fun getAllRemoteAlertFlow(): Flow<List<RemoteAlert>> =
             alertConfigDao.getAllFlow().map { notificationEntities: List<AlertConfigEntity> ->

@@ -1,10 +1,12 @@
 package dev.hossain.remotenotify.notifier
 
 import com.squareup.anvil.annotations.ContributesMultibinding
+import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.WebhookConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
+import dev.hossain.remotenotify.model.DeviceAlert.FormatType
 import dev.hossain.remotenotify.model.RemoteAlert
 import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -12,8 +14,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
-import java.time.Clock
-import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -24,7 +24,7 @@ class WebhookRequestSender
     constructor(
         private val webhookConfigDataStore: WebhookConfigDataStore,
         private val okHttpClient: OkHttpClient,
-        private val clock: Clock,
+        private val alertFormatter: AlertFormatter,
     ) : NotificationSender {
         override val notifierType: NotifierType = NotifierType.WEBHOOK_REST_API
 
@@ -34,7 +34,7 @@ class WebhookRequestSender
                     "Webhook URL is required. Check `hasValidConfiguration` before using the notifier."
                 }
 
-            val json = buildJsonPayload(remoteAlert)
+            val json = alertFormatter.format(remoteAlert, FormatType.JSON)
             val body = json.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
             val request =
                 Request
@@ -50,28 +50,6 @@ class WebhookRequestSender
                 }
                 Timber.d("Webhook sent successfully")
                 return true
-            }
-        }
-
-        private fun buildJsonPayload(notification: RemoteAlert): String {
-            val timestamp = Instant.now(clock).toString()
-            return when (notification) {
-                is RemoteAlert.BatteryAlert ->
-                    """
-                    {
-                        "alert_type": "BATTERY",
-                        "battery_level_percent": ${notification.batteryPercentage},
-                        "sent_on": "$timestamp"
-                    }
-                    """.trimIndent()
-                is RemoteAlert.StorageAlert ->
-                    """
-                    {
-                        "alert_type": "STORAGE",
-                        "storage_gb": ${notification.storageMinSpaceGb},
-                        "sent_on": "$timestamp"
-                    }
-                    """.trimIndent()
             }
         }
 

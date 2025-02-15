@@ -1,6 +1,7 @@
 package dev.hossain.remotenotify.notifier
 
 import com.squareup.anvil.annotations.ContributesMultibinding
+import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.TelegramConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
@@ -22,16 +23,13 @@ class TelegramNotificationSender
     constructor(
         private val telegramConfigDataStore: TelegramConfigDataStore,
         private val okHttpClient: OkHttpClient,
+        private val alertFormatter: AlertFormatter,
     ) : NotificationSender {
         override val notifierType: NotifierType = NotifierType.TELEGRAM
 
         override suspend fun sendNotification(remoteAlert: RemoteAlert): Boolean {
             // Text of the message to be sent, 1-4096 characters after entities parsing
-            val message =
-                when (remoteAlert) {
-                    is RemoteAlert.BatteryAlert -> "Battery Alert: ${remoteAlert.batteryPercentage}%"
-                    is RemoteAlert.StorageAlert -> "Storage Alert: ${remoteAlert.storageMinSpaceGb}GB available"
-                }
+            val message = alertFormatter.format(remoteAlert)
 
             // Each bot is given a unique authentication token when it is created.
             // The token looks something like 123456:ABCDEF1234ghIklzyx57W2v1u123ew11 or 110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw

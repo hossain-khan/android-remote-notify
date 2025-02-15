@@ -6,8 +6,8 @@ import com.squareup.anvil.annotations.ContributesTo
 import com.squareup.anvil.annotations.optional.SingleIn
 import dagger.Module
 import dagger.Provides
-import dev.hossain.remotenotify.db.AppDatabase
 import dev.hossain.remotenotify.db.AlertConfigDao
+import dev.hossain.remotenotify.db.AppDatabase
 
 @Module
 @ContributesTo(AppScope::class)
