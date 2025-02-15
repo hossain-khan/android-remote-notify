@@ -147,6 +147,9 @@ class ConfigureNotificationMediumPresenter
                     is ConfigureNotificationMediumScreen.Event.TestConfig -> {
                         scope.launch {
                             try {
+                                // Save the config first, which will be used to test out config
+                                val config = alertMediumConfig!!
+                                notificationSender.saveConfig(config)
                                 val success =
                                     withContext(Dispatchers.IO) {
                                         val testNotification = RemoteAlert.BatteryAlert(batteryPercentage = 5)
