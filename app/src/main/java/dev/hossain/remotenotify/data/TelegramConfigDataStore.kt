@@ -63,15 +63,35 @@ class TelegramConfigDataStore
         }
 
         override suspend fun hasValidConfig(): Boolean {
-            val botToken = botToken.first()
-            val chatId = chatId.first()
+            val botToken = botToken.first() ?: return false
+            val chatId = chatId.first() ?: return false
+            return isValidConfig(AlertMediumConfig.TelegramConfig(botToken, chatId))
+        }
 
-            if (botToken.isNullOrBlank() || chatId.isNullOrBlank()) {
-                Timber.e("Bot token or chat ID is not configured.")
+        override suspend fun isValidConfig(config: AlertMediumConfig): Boolean {
+            val (botToken, chatId) =
+                when (config) {
+                    is AlertMediumConfig.TelegramConfig -> Pair(config.botToken, config.chatId)
+                    else -> return false
+                }
+
+            // Bot token format: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
+            val isValidBotToken = botToken.matches(Regex("""\d+:[A-Za-z0-9_-]{35}"""))
+            if (!isValidBotToken) {
+                Timber.e("Invalid bot token format")
                 return false
-            } else {
-                Timber.i("Telegram config is set correctly.")
-                return true
             }
+
+            // Chat ID can be numeric or @channelusername
+            val isValidChatId =
+                chatId.matches(Regex("""^-?\d+$""")) ||
+                    (chatId.startsWith("@") && chatId.length > 1)
+            if (!isValidChatId) {
+                Timber.e("Invalid chat ID format")
+                return false
+            }
+
+            Timber.i("Telegram config is valid")
+            return true
         }
     }

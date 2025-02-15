@@ -7,4 +7,6 @@ interface AlertMediumConfigStore {
     suspend fun clearConfig()
 
     suspend fun hasValidConfig(): Boolean
+
+    suspend fun isValidConfig(config: AlertMediumConfig): Boolean
 }
