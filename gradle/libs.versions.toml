@@ -34,6 +34,8 @@ firebaseBom = "33.9.0"
 # https://developer.android.com/develop/ui/compose/text/fonts
 googleFonts = "1.7.8"
 
+googlePlayReview = "2.0.2"
+
 # Fluent assertions for Java and Android
 # https://truth.dev/ | https://github.com/google/truth
 googleTruth = "1.4.4"
@@ -189,6 +191,11 @@ openmeteo-api-kotlin = { group = "com.open-meteo", name = "open-meteo-api-kotlin
 # Adaptive library to create adaptive UIs
 # https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive
 androidx-adaptive-android = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "adaptiveAndroid" }
+
+# Google Play In-App Reviews API
+# https://developer.android.com/guide/playcore/in-app-review/kotlin-java
+google-play-review = { group = "com.google.android.play", name = "review", version.ref = "googlePlayReview" }
+google-play-review-ktx = { group = "com.google.android.play", name = "review-ktx", version.ref = "googlePlayReview" }
 
 [plugins]
 # Plugin for Android Applications

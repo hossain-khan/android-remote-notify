@@ -127,6 +127,10 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
 
+    // Google Play In-App Reviews
+    implementation(libs.google.play.review)
+    implementation(libs.google.play.review.ktx)
+
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Testing
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
