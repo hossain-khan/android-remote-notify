@@ -2,7 +2,7 @@ package dev.hossain.remotenotify.notifier
 
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.model.AlertMediumConfig
-import dev.hossain.remotenotify.model.RemoteNotification
+import dev.hossain.remotenotify.model.RemoteAlert
 
 /**
  * Interface to send notification to remote destination.
@@ -13,7 +13,7 @@ interface NotificationSender {
     /**
      * Sends remote notification and provides result as boolean representing success or failure
      */
-    suspend fun sendNotification(remoteNotification: RemoteNotification): Boolean
+    suspend fun sendNotification(remoteAlert: RemoteAlert): Boolean
 
     /**
      * Checks if all the required configuration is set for the notifier.

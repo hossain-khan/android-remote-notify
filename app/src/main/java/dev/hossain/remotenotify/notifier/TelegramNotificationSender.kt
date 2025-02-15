@@ -5,7 +5,7 @@ import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.TelegramConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
-import dev.hossain.remotenotify.model.RemoteNotification
+import dev.hossain.remotenotify.model.RemoteAlert
 import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -25,12 +25,12 @@ class TelegramNotificationSender
     ) : NotificationSender {
         override val notifierType: NotifierType = NotifierType.TELEGRAM
 
-        override suspend fun sendNotification(remoteNotification: RemoteNotification): Boolean {
+        override suspend fun sendNotification(remoteAlert: RemoteAlert): Boolean {
             // Text of the message to be sent, 1-4096 characters after entities parsing
             val message =
-                when (remoteNotification) {
-                    is RemoteNotification.BatteryNotification -> "Battery Alert: ${remoteNotification.batteryPercentage}%"
-                    is RemoteNotification.StorageNotification -> "Storage Alert: ${remoteNotification.storageMinSpaceGb}GB available"
+                when (remoteAlert) {
+                    is RemoteAlert.BatteryAlert -> "Battery Alert: ${remoteAlert.batteryPercentage}%"
+                    is RemoteAlert.StorageAlert -> "Storage Alert: ${remoteAlert.storageMinSpaceGb}GB available"
                 }
 
             // Each bot is given a unique authentication token when it is created.
