@@ -59,26 +59,29 @@ import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMedium
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
+/**
+ * Screen to list all notification mediums that allows user to configure, edit, and reset.
+ */
 @Parcelize
 data object NotificationMediumListScreen : Screen {
     data class State(
-        val notifiers: List<NotifierInfo>,
+        val notifiers: List<NotifierMediumInfo>,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
-    data class NotifierInfo(
-        val id: NotifierType,
+    data class NotifierMediumInfo(
+        val notifierType: NotifierType,
         val name: String,
         val isConfigured: Boolean,
     )
 
     sealed class Event : CircuitUiEvent {
-        data class EditMedium(
-            val id: NotifierType,
+        data class EditMediumConfig(
+            val notifierType: NotifierType,
         ) : Event()
 
-        data class DeleteMedium(
-            val id: NotifierType,
+        data class ResetMediumConfig(
+            val notifierType: NotifierType,
         ) : Event()
 
         data object NavigateBack : Event()
@@ -95,16 +98,16 @@ class NotificationMediumListPresenter
         override fun present(): NotificationMediumListScreen.State {
             val scope = rememberCoroutineScope()
             // Use remember and mutableStateOf to make the list observable
-            var notifierInfoList by remember { mutableStateOf(emptyList<NotificationMediumListScreen.NotifierInfo>()) }
+            var notifierMediumInfoList by remember { mutableStateOf(emptyList<NotificationMediumListScreen.NotifierMediumInfo>()) }
 
             // Helper function to update the list
             suspend fun updateNotifierList() {
-                notifierInfoList =
+                notifierMediumInfoList =
                     notifiers
                         .sortedBy { it.notifierType.displayName }
                         .map { sender ->
-                            NotificationMediumListScreen.NotifierInfo(
-                                id = sender.notifierType,
+                            NotificationMediumListScreen.NotifierMediumInfo(
+                                notifierType = sender.notifierType,
                                 name = sender.notifierType.displayName,
                                 isConfigured = sender.hasValidConfig(),
                             )
@@ -117,15 +120,15 @@ class NotificationMediumListPresenter
             }
 
             return NotificationMediumListScreen.State(
-                notifiers = notifierInfoList,
+                notifiers = notifierMediumInfoList,
             ) { event ->
                 when (event) {
-                    is NotificationMediumListScreen.Event.EditMedium -> {
-                        navigator.goTo(ConfigureNotificationMediumScreen(event.id))
+                    is NotificationMediumListScreen.Event.EditMediumConfig -> {
+                        navigator.goTo(ConfigureNotificationMediumScreen(event.notifierType))
                     }
-                    is NotificationMediumListScreen.Event.DeleteMedium -> {
+                    is NotificationMediumListScreen.Event.ResetMediumConfig -> {
                         scope.launch {
-                            notifiers.find { it.notifierType == event.id }?.clearConfig()
+                            notifiers.find { it.notifierType == event.notifierType }?.clearConfig()
                             // Update the list after clearing config
                             updateNotifierList()
                         }
@@ -182,12 +185,26 @@ fun NotificationMediumListUi(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items(state.notifiers) { notifier ->
+                items(
+                    items = state.notifiers,
+                    key = { it.notifierType },
+                ) { notifier ->
                     NotifierCard(
                         notifier = notifier,
-                        onEditConfiguration = { state.eventSink(NotificationMediumListScreen.Event.EditMedium(notifier.id)) },
-                        onResetConfiguration = { state.eventSink(NotificationMediumListScreen.Event.DeleteMedium(notifier.id)) },
+                        onEditConfiguration = {
+                            state.eventSink(
+                                NotificationMediumListScreen.Event.EditMediumConfig(notifier.notifierType),
+                            )
+                        },
+                        onResetConfiguration = {
+                            state.eventSink(
+                                NotificationMediumListScreen.Event.ResetMediumConfig(notifier.notifierType),
+                            )
+                        },
                     )
+                }
+                item(key = "bottom") {
+                    FeedbackAndRequestMediumUi()
                 }
             }
         }
@@ -196,7 +213,7 @@ fun NotificationMediumListUi(
 
 @Composable
 private fun NotifierCard(
-    notifier: NotificationMediumListScreen.NotifierInfo,
+    notifier: NotificationMediumListScreen.NotifierMediumInfo,
     onEditConfiguration: () -> Unit,
     onResetConfiguration: () -> Unit,
     modifier: Modifier = Modifier,
@@ -222,7 +239,7 @@ private fun NotifierCard(
             },
             leadingContent = {
                 Icon(
-                    painter = painterResource(id = notifier.id.iconResId()),
+                    painter = painterResource(id = notifier.notifierType.iconResId()),
                     contentDescription = "Notification Icon",
                     tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(32.dp),
