@@ -1,6 +1,7 @@
 package dev.hossain.remotenotify.notifier
 
 import com.squareup.anvil.annotations.ContributesMultibinding
+import dev.hossain.remotenotify.data.AlertMediumConfig
 import dev.hossain.remotenotify.data.WebhookConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteNotification
@@ -73,9 +74,21 @@ class WebhookRequestSender
             }
         }
 
-        override suspend fun hasValidConfiguration(): Boolean = webhookConfigDataStore.hasValidConfig()
+        override suspend fun hasValidConfig(): Boolean = webhookConfigDataStore.hasValidConfig()
+
+        override suspend fun saveConfig(alertMediumConfig: AlertMediumConfig) {
+            when (alertMediumConfig) {
+                is AlertMediumConfig.WebhookConfig -> webhookConfigDataStore.saveWebhookUrl(alertMediumConfig.url)
+                else -> throw IllegalArgumentException("Invalid configuration type: $alertMediumConfig")
+            }
+        }
+
+        override suspend fun getConfig(): AlertMediumConfig = webhookConfigDataStore.getConfig()
 
         override suspend fun clearConfig() {
             webhookConfigDataStore.clearConfig()
         }
+
+        override suspend fun isValidConfig(alertMediumConfig: AlertMediumConfig): Boolean =
+            webhookConfigDataStore.isValidConfig(alertMediumConfig)
     }

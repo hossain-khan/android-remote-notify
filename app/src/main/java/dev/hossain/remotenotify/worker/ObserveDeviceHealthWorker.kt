@@ -76,7 +76,7 @@ class ObserveDeviceHealthWorker(
         }
 
         notifiers
-            .filter { it.hasValidConfiguration() }
+            .filter { it.hasValidConfig() }
             .forEach { notifier ->
                 try {
                     Timber.tag(WORKER_LOG_TAG).i("Sending notification with ${notifier.notifierType}")

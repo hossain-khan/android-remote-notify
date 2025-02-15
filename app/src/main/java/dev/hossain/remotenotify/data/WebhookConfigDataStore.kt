@@ -49,12 +49,41 @@ class WebhookConfigDataStore
 
         override suspend fun hasValidConfig(): Boolean {
             val url = webhookUrl.first()
-            return if (url.isNullOrBlank()) {
+            if (url.isNullOrBlank()) {
                 Timber.e("Webhook URL is not configured")
-                false
-            } else {
-                Timber.i("Webhook config is set correctly")
-                true
+                return false
             }
+
+            return isValidConfig(AlertMediumConfig.WebhookConfig(url))
+        }
+
+        override suspend fun isValidConfig(config: AlertMediumConfig): Boolean {
+            val url =
+                when (config) {
+                    is AlertMediumConfig.WebhookConfig -> config.url
+                    else -> return false
+                }
+
+            // Basic URL validation for HTTP/HTTPS
+            val isValidUrl =
+                try {
+                    url.matches(Regex("""^https?://[^\s/$.?#].[^\s]*$"""))
+                } catch (e: Exception) {
+                    Timber.e(e, "Invalid URL format")
+                    false
+                }
+
+            if (!isValidUrl) {
+                Timber.e("Invalid webhook URL format: $url")
+                return false
+            }
+
+            Timber.i("Webhook config is valid")
+            return true
+        }
+
+        suspend fun getConfig(): AlertMediumConfig.WebhookConfig {
+            val url = webhookUrl.first() ?: ""
+            return AlertMediumConfig.WebhookConfig(url)
         }
     }

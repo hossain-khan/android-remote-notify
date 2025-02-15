@@ -108,7 +108,7 @@ class AlertsListPresenter
             }
 
             val isAnyNotifierConfigured by produceState(false) {
-                value = notifiers.any { it.hasValidConfiguration() }
+                value = notifiers.any { it.hasValidConfig() }
             }
 
             return AlertsListScreen.State(
