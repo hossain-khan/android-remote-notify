@@ -31,7 +31,7 @@ class ObserveDeviceHealthWorker(
         Timber.tag(WORKER_LOG_TAG).i("Schedule worker has started the job.")
         try {
             // Load all alerts from the repository
-            val alerts = repository.getAllRemoteNotifications()
+            val alerts = repository.getAllRemoteAlert()
             Timber.tag(WORKER_LOG_TAG).d("Loaded alerts: $alerts")
 
             // Check battery and storage levels

@@ -10,7 +10,7 @@ import androidx.room.RoomDatabase
  * - https://developer.android.com/training/data-storage/room
  */
 @Database(
-    entities = [NotificationEntity::class],
+    entities = [AlertConfigEntity::class],
     version = 1,
     exportSchema = true,
     // https://developer.android.com/training/data-storage/room/migrating-db-versions
@@ -19,5 +19,5 @@ import androidx.room.RoomDatabase
     autoMigrations = [],
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun notificationDao(): NotificationDao
+    abstract fun notificationDao(): AlertConfigDao
 }

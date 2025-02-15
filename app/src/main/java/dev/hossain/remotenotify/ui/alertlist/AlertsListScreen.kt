@@ -101,7 +101,7 @@ class AlertsListPresenter
 
             val notifications by produceState<List<RemoteAlert>>(emptyList()) {
                 remoteAlertRepository
-                    .getAllRemoteNotificationsFlow()
+                    .getAllRemoteAlertFlow()
                     .collect {
                         value = it
                     }
@@ -122,7 +122,7 @@ class AlertsListPresenter
                     is AlertsListScreen.Event.DeleteNotification -> {
                         Timber.d("Deleting notification: $event")
                         scope.launch {
-                            remoteAlertRepository.deleteRemoteNotification(event.notification)
+                            remoteAlertRepository.deleteRemoteAlert(event.notification)
                         }
                     }
 

@@ -1,49 +1,49 @@
 package dev.hossain.remotenotify.data
 
 import com.squareup.anvil.annotations.ContributesBinding
-import dev.hossain.remotenotify.db.NotificationDao
-import dev.hossain.remotenotify.db.NotificationEntity
+import dev.hossain.remotenotify.db.AlertConfigDao
+import dev.hossain.remotenotify.db.AlertConfigEntity
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteAlert
-import dev.hossain.remotenotify.model.toNotificationEntity
-import dev.hossain.remotenotify.model.toRemoteNotification
+import dev.hossain.remotenotify.model.toAlertConfigEntity
+import dev.hossain.remotenotify.model.toRemoteAlert
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 interface RemoteAlertRepository {
-    suspend fun saveRemoteNotification(notification: RemoteAlert)
+    suspend fun saveRemoteAlert(remoteAlert: RemoteAlert)
 
-    suspend fun getAllRemoteNotifications(): List<RemoteAlert>
+    suspend fun getAllRemoteAlert(): List<RemoteAlert>
 
-    fun getAllRemoteNotificationsFlow(): Flow<List<RemoteAlert>>
+    fun getAllRemoteAlertFlow(): Flow<List<RemoteAlert>>
 
-    suspend fun deleteRemoteNotification(notification: RemoteAlert)
+    suspend fun deleteRemoteAlert(remoteAlert: RemoteAlert)
 }
 
 @ContributesBinding(AppScope::class)
 class RemoteAlertRepositoryImpl
     @Inject
     constructor(
-        private val notificationDao: NotificationDao,
+        private val alertConfigDao: AlertConfigDao,
     ) : RemoteAlertRepository {
-        override suspend fun saveRemoteNotification(notification: RemoteAlert) {
-            val entity = notification.toNotificationEntity()
-            notificationDao.insert(entity)
+        override suspend fun saveRemoteAlert(remoteAlert: RemoteAlert) {
+            val entity = remoteAlert.toAlertConfigEntity()
+            alertConfigDao.insert(entity)
         }
 
-        override suspend fun getAllRemoteNotifications(): List<RemoteAlert> =
-            notificationDao.getAll().map { it.toRemoteNotification() }
+        override suspend fun getAllRemoteAlert(): List<RemoteAlert> =
+            alertConfigDao.getAll().map { it.toRemoteAlert() }
 
-        override fun getAllRemoteNotificationsFlow(): Flow<List<RemoteAlert>> =
-            notificationDao.getAllFlow().map { notificationEntities: List<NotificationEntity> ->
+        override fun getAllRemoteAlertFlow(): Flow<List<RemoteAlert>> =
+            alertConfigDao.getAllFlow().map { notificationEntities: List<AlertConfigEntity> ->
                 notificationEntities.map {
-                    it.toRemoteNotification()
+                    it.toRemoteAlert()
                 }
             }
 
-        override suspend fun deleteRemoteNotification(notification: RemoteAlert) {
-            val entity = notification.toNotificationEntity()
-            notificationDao.delete(entity)
+        override suspend fun deleteRemoteAlert(remoteAlert: RemoteAlert) {
+            val entity = remoteAlert.toAlertConfigEntity()
+            alertConfigDao.delete(entity)
         }
     }

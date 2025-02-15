@@ -7,7 +7,7 @@ import com.squareup.anvil.annotations.optional.SingleIn
 import dagger.Module
 import dagger.Provides
 import dev.hossain.remotenotify.db.AppDatabase
-import dev.hossain.remotenotify.db.NotificationDao
+import dev.hossain.remotenotify.db.AlertConfigDao
 
 @Module
 @ContributesTo(AppScope::class)
@@ -23,5 +23,5 @@ object DatabaseModule {
             .build()
 
     @Provides
-    fun provideNotificationDao(database: AppDatabase): NotificationDao = database.notificationDao()
+    fun provideNotificationDao(database: AppDatabase): AlertConfigDao = database.notificationDao()
 }

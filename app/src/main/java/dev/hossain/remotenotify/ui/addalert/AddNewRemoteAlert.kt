@@ -59,7 +59,7 @@ class AddNewRemoteAlertPresenter
                 when (event) {
                     is AddNewRemoteAlertScreen.Event.SaveNotification -> {
                         scope.launch {
-                            remoteAlertRepository.saveRemoteNotification(event.notification)
+                            remoteAlertRepository.saveRemoteAlert(event.notification)
                         }
                         navigator.pop()
                     }

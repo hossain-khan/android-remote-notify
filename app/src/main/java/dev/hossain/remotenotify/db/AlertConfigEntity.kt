@@ -7,8 +7,8 @@ import dev.hossain.remotenotify.model.BATTERY_PERCENTAGE_NONE
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.STORAGE_MIN_SPACE_GB_NONE
 
-@Entity(tableName = "notifications")
-data class NotificationEntity(
+@Entity(tableName = "alert_config")
+data class AlertConfigEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val type: AlertType,
     @ColumnInfo(name = "battery_percentage", defaultValue = BATTERY_PERCENTAGE_NONE.toString())

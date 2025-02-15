@@ -1,6 +1,6 @@
 package dev.hossain.remotenotify.model
 
-import dev.hossain.remotenotify.db.NotificationEntity
+import dev.hossain.remotenotify.db.AlertConfigEntity
 
 const val BATTERY_PERCENTAGE_NONE = -1
 const val STORAGE_MIN_SPACE_GB_NONE = -1
@@ -19,17 +19,17 @@ sealed interface RemoteAlert {
     ) : RemoteAlert
 }
 
-fun RemoteAlert.toNotificationEntity(): NotificationEntity =
+fun RemoteAlert.toAlertConfigEntity(): AlertConfigEntity =
     when (this) {
         is RemoteAlert.BatteryAlert ->
-            NotificationEntity(
+            AlertConfigEntity(
                 id = alertId,
                 batteryPercentage = batteryPercentage,
                 type = AlertType.BATTERY,
                 storageMinSpaceGb = 0,
             )
         is RemoteAlert.StorageAlert ->
-            NotificationEntity(
+            AlertConfigEntity(
                 id = alertId,
                 storageMinSpaceGb = storageMinSpaceGb,
                 type = AlertType.STORAGE,
@@ -37,7 +37,7 @@ fun RemoteAlert.toNotificationEntity(): NotificationEntity =
             )
     }
 
-fun NotificationEntity.toRemoteNotification(): RemoteAlert =
+fun AlertConfigEntity.toRemoteAlert(): RemoteAlert =
     when (type) {
         AlertType.BATTERY -> RemoteAlert.BatteryAlert(id, batteryPercentage)
         AlertType.STORAGE -> RemoteAlert.StorageAlert(id, storageMinSpaceGb)
