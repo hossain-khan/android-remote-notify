@@ -1,4 +1,4 @@
-package dev.hossain.remotenotify.ui.addalertmedium
+package dev.hossain.remotenotify.ui.alertmediumconfig
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
