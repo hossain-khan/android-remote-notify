@@ -189,6 +189,12 @@ fun AlertsListUi(
                 contentPadding = PaddingValues(8.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {
+                item(key = "device_info_header") {
+                    Text(
+                        text = "Device Status",
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
                 // Display battery percentage at the top
                 item(key = "device_state_info") { DeviceCurrentStateUi(state) }
 
@@ -209,7 +215,7 @@ fun AlertsListUi(
                     item(key = "alerts_header") {
                         Text(
                             text = "Your Alerts",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.labelMedium,
                         )
                     }
                     itemsIndexed(
@@ -235,15 +241,14 @@ private fun DeviceCurrentStateUi(state: AlertsListScreen.State) {
     Card(
         modifier =
             Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
+                .fillMaxWidth(),
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface,
             ),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp),
         ) {
             // Battery Status
             Column {
@@ -379,7 +384,7 @@ fun NotificationItem(
                             painterResource(id = R.drawable.hard_disk_24dp)
                     },
                 contentDescription = null,
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(36.dp),
             )
         },
         headlineContent = {
@@ -389,7 +394,7 @@ fun NotificationItem(
                         is RemoteAlert.BatteryAlert -> "Battery Alert"
                         is RemoteAlert.StorageAlert -> "Storage Alert"
                     },
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
             )
         },
         supportingContent = {
