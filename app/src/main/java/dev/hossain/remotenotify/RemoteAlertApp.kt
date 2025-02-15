@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.work.Configuration
 import androidx.work.WorkerFactory
 import dev.hossain.remotenotify.di.AppComponent
+import dev.hossain.remotenotify.utils.CrashlyticsTree
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -44,6 +45,9 @@ class RemoteAlertApp :
         if (BuildConfig.DEBUG) {
             // Plant a debug tree for development builds
             Timber.plant(Timber.DebugTree())
+        } else {
+            // Plant the custom Crashlytics tree for production builds
+            Timber.plant(CrashlyticsTree())
         }
     }
 }
