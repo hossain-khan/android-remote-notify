@@ -25,19 +25,16 @@ data class DeviceAlert(
     }
 
     internal fun toJson(): String {
-        val batteryLevelJson = batteryLevel?.let { ",\"batteryLevel\":$it" } ?: ""
-        val storageGbJson = availableStorageGb?.let { ",\"availableStorageGb\":$it" } ?: ""
-        val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-        val formattedTimestamp = timestamp.format(formatter)
-
-        return """
-            {
-                "alertType": "${alertType.name}",
-                "deviceModel": "$deviceModel",
-                "androidVersion": "$androidVersion",
-                "timestamp": "$formattedTimestamp"$batteryLevelJson$storageGbJson
-            }
-            """.trimIndent()
+        val payload =
+            DeviceAlertJsonPayload(
+                alertType = alertType,
+                deviceModel = deviceModel,
+                androidVersion = androidVersion,
+                batteryLevel = batteryLevel,
+                availableStorageGb = availableStorageGb,
+                isoDateTime = timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            )
+        return payload.toJson()
     }
 
     internal fun toText(): String {

@@ -162,6 +162,7 @@ retrofit-converter-moshi = { group = "com.squareup.retrofit2", name = "converter
 
 # Kotlin multiplatform / multi-format serialization
 # https://github.com/Kotlin/kotlinx.serialization
+# https://kotlinlang.org/docs/serialization.html#example-json-serialization
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx",name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-serialization-properties = { group = "org.jetbrains.kotlinx",name = "kotlinx-serialization-properties", version.ref = "kotlinxSerializationProperties" }
 
@@ -211,6 +212,8 @@ kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref =
 
 # Add Kotlin serialization support
 # https://github.com/Kotlin/kotlinx.serialization
+# https://kotlinlang.org/docs/serialization.html
+# https://github.com/Kotlin/kotlinx.serialization/blob/master/formats/README.md#json
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
