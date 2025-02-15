@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlinter)
     alias(libs.plugins.kotlinx.kover)
     alias(libs.plugins.ksp)
@@ -73,6 +74,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.properties)
 
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
