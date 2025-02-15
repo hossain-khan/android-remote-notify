@@ -2,7 +2,6 @@ package dev.hossain.remotenotify.ui.addalert
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -12,12 +11,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -28,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -142,35 +144,11 @@ fun AddNewRemoteAlertUi(
                         "Alert Type",
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        FilterChip(
-                            selected = type == AlertType.BATTERY,
-                            onClick = { type = AlertType.BATTERY },
-                            label = { Text("Battery") },
-                            leadingIcon = {
-                                Icon(
-                                    painterResource(R.drawable.battery_5_bar_24dp),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                )
-                            },
-                        )
-                        FilterChip(
-                            selected = type == AlertType.STORAGE,
-                            onClick = { type = AlertType.STORAGE },
-                            label = { Text("Storage") },
-                            leadingIcon = {
-                                Icon(
-                                    painterResource(R.drawable.hard_disk_24dp),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                )
-                            },
-                        )
-                    }
+                    AlertTypeSelector(
+                        selectedType = type,
+                        onTypeSelected = { type = it },
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
                 }
             }
 
@@ -272,6 +250,50 @@ fun AddNewRemoteAlertUi(
                 enabled = threshold > 0,
             ) {
                 Text("Save Alert")
+            }
+        }
+    }
+}
+
+@Composable
+private fun AlertTypeSelector(
+    selectedType: AlertType,
+    onTypeSelected: (AlertType) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
+        AlertType.entries.forEachIndexed { index, alertType ->
+            SegmentedButton(
+                shape =
+                    SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = AlertType.entries.size,
+                    ),
+                icon = {
+                    SegmentedButtonDefaults.Icon(active = alertType == selectedType) {
+                        Icon(
+                            painter =
+                                painterResource(
+                                    when (alertType) {
+                                        AlertType.BATTERY -> R.drawable.battery_5_bar_24dp
+                                        AlertType.STORAGE -> R.drawable.hard_disk_24dp
+                                    },
+                                ),
+                            contentDescription = null,
+                            modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
+                        )
+                    }
+                },
+                onClick = { onTypeSelected(alertType) },
+                selected = alertType == selectedType,
+                modifier = Modifier.align(Alignment.CenterVertically),
+            ) {
+                Text(
+                    when (alertType) {
+                        AlertType.BATTERY -> "Battery"
+                        AlertType.STORAGE -> "Storage"
+                    },
+                )
             }
         }
     }
