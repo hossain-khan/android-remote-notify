@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,7 +65,7 @@ import timber.log.Timber
 @Parcelize
 data object AlertsListScreen : Screen {
     data class State(
-        val notifications: List<RemoteAlert>,
+        val remoteAlertConfigs: List<RemoteAlert>,
         val batteryPercentage: Int,
         val availableStorage: Long,
         val totalStorage: Long,
@@ -95,9 +96,9 @@ class AlertsListPresenter
         @Composable
         override fun present(): AlertsListScreen.State {
             val scope = rememberCoroutineScope()
-            val batteryPercentage = batteryMonitor.getBatteryLevel()
-            val availableStorage = storageMonitor.getAvailableStorageInGB()
-            val totalStorage = storageMonitor.getTotalStorageInGB()
+            val deviceBatteryLevelPercentage = remember { batteryMonitor.getBatteryLevel() }
+            val deviceAvailableStorage = remember { storageMonitor.getAvailableStorageInGB() }
+            val deviceTotalStorage = remember { storageMonitor.getTotalStorageInGB() }
 
             val notifications by produceState<List<RemoteAlert>>(emptyList()) {
                 remoteAlertRepository
@@ -112,10 +113,10 @@ class AlertsListPresenter
             }
 
             return AlertsListScreen.State(
-                notifications = notifications,
-                batteryPercentage = batteryPercentage,
-                availableStorage = availableStorage,
-                totalStorage = totalStorage,
+                remoteAlertConfigs = notifications,
+                batteryPercentage = deviceBatteryLevelPercentage,
+                availableStorage = deviceAvailableStorage,
+                totalStorage = deviceTotalStorage,
                 isAnyNotifierConfigured = isAnyNotifierConfigured,
             ) { event ->
                 when (event) {
@@ -201,7 +202,7 @@ fun AlertsListUi(
                 }
 
                 // Show empty state or user configured alerts
-                if (state.notifications.isEmpty()) {
+                if (state.remoteAlertConfigs.isEmpty()) {
                     item { EmptyNotificationsState() }
                 } else {
                     item {
@@ -210,12 +211,13 @@ fun AlertsListUi(
                             style = MaterialTheme.typography.titleMedium,
                         )
                     }
-                    items(state.notifications) { notification ->
+                    itemsIndexed(state.remoteAlertConfigs) { _: Int, remoteAlert: RemoteAlert ->
                         NotificationItem(
-                            notification = notification,
+                            remoteAlert = remoteAlert,
                             onDelete = {
-                                state.eventSink(AlertsListScreen.Event.DeleteNotification(notification))
+                                state.eventSink(AlertsListScreen.Event.DeleteNotification(remoteAlert))
                             },
+                            modifier = Modifier.animateItem(),
                         )
                     }
                 }
@@ -357,7 +359,7 @@ private fun NoNotifierConfiguredCard(
 
 @Composable
 fun NotificationItem(
-    notification: RemoteAlert,
+    remoteAlert: RemoteAlert,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -366,20 +368,20 @@ fun NotificationItem(
         leadingContent = {
             Icon(
                 painter =
-                    when (notification) {
+                    when (remoteAlert) {
                         is RemoteAlert.BatteryAlert ->
                             painterResource(id = R.drawable.battery_3_bar_24dp)
                         is RemoteAlert.StorageAlert ->
                             painterResource(id = R.drawable.hard_disk_24dp)
                     },
                 contentDescription = null,
-                modifier = modifier.size(32.dp),
+                modifier = Modifier.size(32.dp),
             )
         },
         headlineContent = {
             Text(
                 text =
-                    when (notification) {
+                    when (remoteAlert) {
                         is RemoteAlert.BatteryAlert -> "Battery Alert"
                         is RemoteAlert.StorageAlert -> "Storage Alert"
                     },
@@ -391,10 +393,10 @@ fun NotificationItem(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(top = 4.dp),
             ) {
-                when (notification) {
+                when (remoteAlert) {
                     is RemoteAlert.BatteryAlert -> {
                         LinearProgressIndicator(
-                            progress = { notification.batteryPercentage / 100f },
+                            progress = { remoteAlert.batteryPercentage / 100f },
                             modifier =
                                 Modifier
                                     .weight(1f)
@@ -402,13 +404,13 @@ fun NotificationItem(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "${notification.batteryPercentage}%",
+                            text = "${remoteAlert.batteryPercentage}%",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
                     is RemoteAlert.StorageAlert -> {
                         Text(
-                            text = "Min Storage: ${notification.storageMinSpaceGb} GB",
+                            text = "Min Storage: ${remoteAlert.storageMinSpaceGb} GB",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
@@ -426,7 +428,7 @@ fun NotificationItem(
                 )
             }
         },
-        modifier = Modifier.padding(horizontal = 4.dp),
+        modifier = modifier.padding(horizontal = 4.dp),
     )
 }
 
@@ -461,7 +463,7 @@ fun PreviewAlertsListUi() {
     AlertsListUi(
         state =
             AlertsListScreen.State(
-                notifications = sampleNotifications,
+                remoteAlertConfigs = sampleNotifications,
                 batteryPercentage = 50,
                 availableStorage = 10,
                 totalStorage = 100,
