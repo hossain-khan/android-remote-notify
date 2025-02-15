@@ -1,5 +1,4 @@
-package dev.hossain.remotenotify.theme
-
+package com.example.compose
 import androidx.compose.ui.graphics.Color
 
 val primaryLight = Color(0xFF2E6A44)
@@ -247,3 +246,4 @@ val successDarkHighContrast = Color(0xFFD3FCB7)
 val onSuccessDarkHighContrast = Color(0xFF000000)
 val successContainerDarkHighContrast = Color(0xFFA6CE8D)
 val onSuccessContainerDarkHighContrast = Color(0xFF020E00)
+
