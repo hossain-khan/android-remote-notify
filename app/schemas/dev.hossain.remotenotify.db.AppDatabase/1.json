@@ -2,10 +2,10 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "408038bcb3dc4bd4b00cf88fa5e392cb",
+    "identityHash": "12850dccdbd4f17e73a34f141118e502",
     "entities": [
       {
-        "tableName": "notifications",
+        "tableName": "alert_config",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `type` TEXT NOT NULL, `battery_percentage` INTEGER NOT NULL DEFAULT -1, `storage_min_space_gb` INTEGER NOT NULL DEFAULT -1)",
         "fields": [
           {
@@ -48,7 +48,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '408038bcb3dc4bd4b00cf88fa5e392cb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '12850dccdbd4f17e73a34f141118e502')"
     ]
   }
 }
