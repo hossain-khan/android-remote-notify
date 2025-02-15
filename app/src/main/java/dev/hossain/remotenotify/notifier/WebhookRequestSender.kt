@@ -1,6 +1,7 @@
 package dev.hossain.remotenotify.notifier
 
 import com.squareup.anvil.annotations.ContributesMultibinding
+import dev.hossain.remotenotify.data.AlertMediumConfig
 import dev.hossain.remotenotify.data.WebhookConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteNotification
@@ -78,4 +79,7 @@ class WebhookRequestSender
         override suspend fun clearConfig() {
             webhookConfigDataStore.clearConfig()
         }
+
+        override suspend fun isValidConfig(alertMediumConfig: AlertMediumConfig): Boolean =
+            webhookConfigDataStore.isValidConfig(alertMediumConfig)
     }

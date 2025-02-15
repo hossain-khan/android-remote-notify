@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.notifier
 
+import dev.hossain.remotenotify.data.AlertMediumConfig
 import dev.hossain.remotenotify.model.RemoteNotification
 
 /**
@@ -22,4 +23,14 @@ interface NotificationSender {
      * Clears all configuration for the notifier.
      */
     suspend fun clearConfig()
+
+    /**
+     * Validates the configuration for the notifier.
+     */
+    suspend fun isValidConfig(alertMediumConfig: AlertMediumConfig): Boolean
 }
+
+fun Set<@JvmSuppressWildcards NotificationSender>.of(senderNotifierType: NotifierType): NotificationSender =
+    requireNotNull(find { it.notifierType == senderNotifierType }) {
+        "Sender for notifier type not found: $senderNotifierType"
+    }

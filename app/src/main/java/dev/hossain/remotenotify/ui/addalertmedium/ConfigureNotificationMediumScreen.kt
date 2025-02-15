@@ -45,6 +45,7 @@ import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.RemoteNotification
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
+import dev.hossain.remotenotify.notifier.of
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -95,15 +96,11 @@ class ConfigureNotificationMediumPresenter
 
             val isValidInput by produceState(false, alertMediumConfig) {
                 val config = alertMediumConfig
-                value =
-                    when (config) {
-                        is AlertMediumConfig.TelegramConfig -> telegramConfigDataStore.isValidConfig(config)
-                        is AlertMediumConfig.WebhookConfig -> webhookConfigDataStore.isValidConfig(config)
-                        else -> {
-                            Timber.e("Unknown alert medium config type: $alertMediumConfig")
-                            false
-                        }
-                    }
+                if (config == null) {
+                    value = false
+                } else {
+                    value = notifiers.of(screen.notifierType).isValidConfig(config)
+                }
             }
 
             LaunchedEffect(Unit) {
@@ -160,7 +157,7 @@ class ConfigureNotificationMediumPresenter
                                 val success =
                                     withContext(Dispatchers.IO) {
                                         val testNotification = RemoteNotification.BatteryNotification(batteryPercentage = 5)
-                                        notifiers.find { it.notifierType == screen.notifierType }!!.sendNotification(testNotification)
+                                        notifiers.of(screen.notifierType).sendNotification(testNotification)
                                     }
                                 snackbarMessage =
                                     if (success) {
