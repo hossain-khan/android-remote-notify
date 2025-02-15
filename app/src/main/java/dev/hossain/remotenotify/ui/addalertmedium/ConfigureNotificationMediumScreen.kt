@@ -10,13 +10,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -75,6 +81,8 @@ data class ConfigureNotificationMediumScreen(
         data object TestConfig : Event()
 
         data object DismissSnackbar : Event()
+
+        data object NavigateBack : Event()
     }
 }
 
@@ -165,6 +173,10 @@ class ConfigureNotificationMediumPresenter
                         shouldShowValidationError = false // Reset validation on config change
                         alertMediumConfig = event.alertMediumConfig
                     }
+
+                    ConfigureNotificationMediumScreen.Event.NavigateBack -> {
+                        navigator.pop()
+                    }
                 }
             }
         }
@@ -179,6 +191,7 @@ class ConfigureNotificationMediumPresenter
         }
     }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @CircuitInject(screen = ConfigureNotificationMediumScreen::class, scope = AppScope::class)
 @Composable
 fun ConfigureNotificationMediumUi(
@@ -188,6 +201,21 @@ fun ConfigureNotificationMediumUi(
     SideEffect { Timber.d("ConfigureNotificationMediumUi: ${state.alertMediumConfig}") }
     Scaffold(
         modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { Text("Configure ${state.notifierType.displayName}") },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        state.eventSink(ConfigureNotificationMediumScreen.Event.NavigateBack)
+                    }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
+                },
+            )
+        },
         snackbarHost = {
             state.snackbarMessage?.let { message ->
                 Snackbar(
@@ -210,12 +238,6 @@ fun ConfigureNotificationMediumUi(
                     .padding(innerPadding)
                     .padding(16.dp),
         ) {
-            Text(
-                text = "Configure ${state.notifierType.displayName}",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 16.dp),
-            )
-
             val onConfigUpdate: (AlertMediumConfig?) -> Unit = {
                 state.eventSink(ConfigureNotificationMediumScreen.Event.UpdateConfigValue(it))
             }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -79,6 +80,8 @@ data object NotificationMediumListScreen : Screen {
         data class DeleteMedium(
             val id: NotifierType,
         ) : Event()
+
+        data object NavigateBack : Event()
     }
 }
 
@@ -127,6 +130,9 @@ class NotificationMediumListPresenter
                             updateNotifierList()
                         }
                     }
+                    NotificationMediumListScreen.Event.NavigateBack -> {
+                        navigator.pop()
+                    }
                 }
             }
         }
@@ -150,6 +156,16 @@ fun NotificationMediumListUi(
         topBar = {
             TopAppBar(
                 title = { Text("Notification Mediums") },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        state.eventSink(NotificationMediumListScreen.Event.NavigateBack)
+                    }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
+                },
             )
         },
     ) { padding ->
