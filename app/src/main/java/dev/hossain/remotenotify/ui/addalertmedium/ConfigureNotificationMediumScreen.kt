@@ -94,7 +94,7 @@ class ConfigureNotificationMediumPresenter
             var snackbarMessage by remember { mutableStateOf<String?>(null) }
             var isConfigured by remember { mutableStateOf(false) }
 
-            val notificationSender = notifiers.of(screen.notifierType)
+            val notificationSender = notifiers.of(senderNotifierType = screen.notifierType)
 
             val isValidInput by produceState(false, alertMediumConfig) {
                 val config = alertMediumConfig
