@@ -1,4 +1,4 @@
-package dev.hossain.remotenotify.data
+package dev.hossain.remotenotify.model
 
 /**
  * Represents different configuration types for alert mediums supported by the application.

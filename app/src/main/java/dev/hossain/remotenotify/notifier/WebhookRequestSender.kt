@@ -1,10 +1,10 @@
 package dev.hossain.remotenotify.notifier
 
 import com.squareup.anvil.annotations.ContributesMultibinding
-import dev.hossain.remotenotify.data.AlertMediumConfig
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.WebhookConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
+import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.RemoteNotification
 import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -90,6 +90,6 @@ class WebhookRequestSender
             webhookConfigDataStore.clearConfig()
         }
 
-        override suspend fun isValidConfig(alertMediumConfig: AlertMediumConfig): ConfigValidationResult =
-            webhookConfigDataStore.isValidConfig(alertMediumConfig)
+        override suspend fun validateConfig(alertMediumConfig: AlertMediumConfig): ConfigValidationResult =
+            webhookConfigDataStore.validateConfig(alertMediumConfig)
     }
