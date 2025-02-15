@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AlertConfigDao {
-    @Query("SELECT * FROM alert_config")
+    @Query("SELECT * FROM alert_config ORDER BY created_on DESC")
     suspend fun getAll(): List<AlertConfigEntity>
 
-    @Query("SELECT * FROM alert_config")
+    @Query("SELECT * FROM alert_config ORDER BY created_on DESC")
     fun getAllFlow(): Flow<List<AlertConfigEntity>>
 
     @Insert
