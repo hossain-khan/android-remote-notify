@@ -31,7 +31,7 @@ Never let your remote devices die on you again! Whether you're managing one devi
 
 ### **Built with the Best Tech**
 - 🎨 Material 3 UI for a stunning and smooth experience.
-- 🛠️ Jetpack Libraries for modern Android application.
+- 🛠️ Jetpack Libraries for modern Android applications.
 - 💾 OkHttp for stable API integrations (REST & Telegram).
 - ⏰ Jetpack WorkManager for reliable periodic checks.
 - ⚡️ Circuit UDF architecture for a solid app structure.
