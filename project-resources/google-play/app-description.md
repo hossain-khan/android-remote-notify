@@ -20,21 +20,21 @@ Never let your remote devices die on you again! Whether you're managing one devi
 ### **Key Features:**
 
 - 🔋 **Real-time Monitoring**: Keep tabs on your remote device's battery and storage levels on the home screen.
-- 📲 **Custom Alerts**: Set up personalized triggers for battery (5%-95%) and storage (down to 2GB).
-- ➕ **Easy Management**: Add, edit, or delete alerts with a swipe — and undo if you change your mind!
+- 📲 **Custom Alerts**: Set up personalized triggers for battery (5%-50%) and storage (down to 2GB).
+- ➕ **Easy Management**: Add, edit, or delete alerts with a swipe — and undo if you change your mind (coming soon)!
 - 🛡️ **Multiple Notification Methods**: Get notified via Twilio (SMS via API), Telegram, REST webhooks, and more.
 - ⚙️ **Flexible Settings**: Choose how often checks happen — every 30 mins, 2 hours, or your own schedule!
-- 📊 **Detailed Stats**: Track notification history and see how your remote device's battery and storage levels change over time.
+- 📊 **Detailed Stats**: Track notification history and see how your remote device's battery and storage levels change over time (coming soon).
 - 💡 **Dark & Light Mode**: Enjoy a beautiful, Material 3 design in both themes!
 
 ---
 
 ### **Built with the Best Tech**
-- 🛠️ Jetpack Room for seamless database management.
-- 💾 OkHttp for smooth API integrations (REST & Telegram).
-- ⏰ Jetpack WorkManager for reliable periodic checks.
-- 🔧 Circuit UDF architecture for a solid app structure.
 - 🎨 Material 3 UI for a stunning and smooth experience.
+- 🛠️ Jetpack Libraries for modern Android applications.
+- 💾 OkHttp for stable API integrations (REST & Telegram).
+- ⏰ Jetpack WorkManager for reliable periodic checks.
+- ⚡️ Circuit UDF architecture for a solid app structure.
 
 ---
 
