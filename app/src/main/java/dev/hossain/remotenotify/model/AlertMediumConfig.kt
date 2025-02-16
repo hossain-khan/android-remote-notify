@@ -25,4 +25,10 @@ sealed interface AlertMediumConfig {
     data class WebhookConfig(
         val url: String,
     ) : AlertMediumConfig
+
+    data class TwilioConfig(
+        val accountSid: String,
+        val authToken: String,
+        val fromPhone: String,
+    ) : AlertMediumConfig
 }

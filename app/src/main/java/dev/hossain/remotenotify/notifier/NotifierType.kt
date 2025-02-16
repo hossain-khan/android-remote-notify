@@ -8,4 +8,5 @@ enum class NotifierType(
 ) {
     TELEGRAM("Telegram"),
     WEBHOOK_REST_API("Webhook"),
+    TWILIO("Twilio"),
 }

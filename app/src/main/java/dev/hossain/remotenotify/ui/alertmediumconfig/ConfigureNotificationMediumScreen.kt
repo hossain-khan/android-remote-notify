@@ -262,6 +262,15 @@ fun ConfigureNotificationMediumUi(
                         onConfigUpdate = onConfigUpdate,
                     )
                 }
+
+                NotifierType.TWILIO -> {
+                    TwilioConfigInputUi(
+                        alertMediumConfig = state.alertMediumConfig,
+                        configValidationResult = state.configValidationResult,
+                        shouldShowValidationError = state.showValidationError,
+                        onConfigUpdate = onConfigUpdate,
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
