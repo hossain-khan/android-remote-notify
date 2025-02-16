@@ -36,7 +36,7 @@ class TwilioNotificationSender
                     .Builder()
                     .add("Body", message)
                     .add("From", config.fromPhone)
-                    .add("To", "<Recipient Phone Number>")
+                    .add("To", config.toPhone)
                     .build()
 
             val request =

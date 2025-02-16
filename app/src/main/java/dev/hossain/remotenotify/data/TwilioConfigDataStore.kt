@@ -28,23 +28,27 @@ class TwilioConfigDataStore
             private val ACCOUNT_SID_KEY = stringPreferencesKey("twilio_account_sid")
             private val AUTH_TOKEN_KEY = stringPreferencesKey("twilio_auth_token")
             private val FROM_PHONE_KEY = stringPreferencesKey("twilio_from_phone")
+            private val TO_PHONE_KEY = stringPreferencesKey("twilio_to_phone")
 
             object ValidationKeys {
                 const val ACCOUNT_SID = "accountSid"
                 const val AUTH_TOKEN = "authToken"
                 const val FROM_PHONE = "fromPhone"
+                const val TO_PHONE = "toPhone"
             }
         }
 
         val accountSid: Flow<String?> = context.twilioConfigDataStore.data.map { it[ACCOUNT_SID_KEY] }
         val authToken: Flow<String?> = context.twilioConfigDataStore.data.map { it[AUTH_TOKEN_KEY] }
         val fromPhone: Flow<String?> = context.twilioConfigDataStore.data.map { it[FROM_PHONE_KEY] }
+        val toPhone: Flow<String?> = context.twilioConfigDataStore.data.map { it[TO_PHONE_KEY] }
 
         suspend fun getConfig(): AlertMediumConfig.TwilioConfig {
             val sid = accountSid.first().orEmpty()
             val token = authToken.first().orEmpty()
-            val phone = fromPhone.first().orEmpty()
-            return AlertMediumConfig.TwilioConfig(sid, token, phone)
+            val fromPhone = fromPhone.first().orEmpty()
+            val toPhone = toPhone.first().orEmpty()
+            return AlertMediumConfig.TwilioConfig(sid, token, fromPhone, toPhone)
         }
 
         suspend fun saveConfig(config: AlertMediumConfig.TwilioConfig) {
@@ -53,6 +57,7 @@ class TwilioConfigDataStore
                 it[ACCOUNT_SID_KEY] = config.accountSid
                 it[AUTH_TOKEN_KEY] = config.authToken
                 it[FROM_PHONE_KEY] = config.fromPhone
+                it[TO_PHONE_KEY] = config.toPhone
             }
         }
 
@@ -62,6 +67,7 @@ class TwilioConfigDataStore
                 it.remove(ACCOUNT_SID_KEY)
                 it.remove(AUTH_TOKEN_KEY)
                 it.remove(FROM_PHONE_KEY)
+                it.remove(TO_PHONE_KEY)
             }
         }
 
@@ -81,6 +87,9 @@ class TwilioConfigDataStore
                 }
                 if (!config.fromPhone.matches(Regex("""^\+\d{10,}$"""))) {
                     errors[ValidationKeys.FROM_PHONE] = "Phone number must be in E.164 format (e.g., +1234567890)"
+                }
+                if (!config.toPhone.matches(Regex("""^\+\d{10,}$"""))) {
+                    errors[ValidationKeys.TO_PHONE] = "To phone must be in E.164 format (e.g., +1234567890)"
                 }
             }
             return ConfigValidationResult(isValid = errors.isEmpty(), errors = errors)

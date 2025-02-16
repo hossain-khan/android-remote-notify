@@ -30,5 +30,6 @@ sealed interface AlertMediumConfig {
         val accountSid: String,
         val authToken: String,
         val fromPhone: String,
+        val toPhone: String,
     ) : AlertMediumConfig
 }

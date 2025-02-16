@@ -69,7 +69,24 @@ internal fun TwilioConfigInputUi(
                 if (shouldShowValidationError && errors[ValidationKeys.FROM_PHONE] != null) {
                     Text(errors[ValidationKeys.FROM_PHONE]!!, color = MaterialTheme.colorScheme.error)
                 } else {
-                    Text("Enter the phone number in E.164 format (e.g., +1234567890)")
+                    Text("Your Twilio phone number in E.164 format")
+                }
+            },
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextField(
+            value = config?.toPhone.orEmpty(),
+            onValueChange = { onConfigUpdate(config?.copy(toPhone = it)) },
+            label = { Text("To Phone Number") },
+            modifier = Modifier.fillMaxWidth(),
+            isError = shouldShowValidationError && errors[ValidationKeys.TO_PHONE] != null,
+            supportingText = {
+                if (shouldShowValidationError && errors[ValidationKeys.TO_PHONE] != null) {
+                    Text(errors[ValidationKeys.TO_PHONE]!!, color = MaterialTheme.colorScheme.error)
+                } else {
+                    Text("Destination phone number in E.164 format")
                 }
             },
         )
