@@ -15,11 +15,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,11 +31,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,6 +60,7 @@ import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen
+import dev.hossain.remotenotify.worker.DEFAULT_PERIODIC_INTERVAL_MINUTES
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -203,6 +208,15 @@ fun NotificationMediumListUi(
                         },
                     )
                 }
+                // Add this item right after your existing notifiers items
+                item(key = "worker-config") {
+                    WorkerConfigCard(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                    )
+                }
                 item(key = "bottom") {
                     FeedbackAndRequestMediumUi()
                 }
@@ -272,6 +286,80 @@ private fun NotifierCard(
 }
 
 @Composable
+private fun WorkerConfigCard(modifier: Modifier = Modifier) {
+    // var sliderPosition by remember { mutableFloatOf(DEFAULT_PERIODIC_INTERVAL_MINUTES.toFloat()) }
+    var sliderPosition by remember { mutableLongStateOf(DEFAULT_PERIODIC_INTERVAL_MINUTES) }
+
+    Card(
+        modifier = modifier,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    // painter = painterResource(id = R.drawable.schedule_24dp),
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(32.dp),
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "Check Frequency",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Alert checked every ${formatDuration(sliderPosition.toInt())}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Slider(
+                value = sliderPosition.toFloat(),
+                onValueChange = {
+                    sliderPosition = it.toLong()
+                    // TODO: Call worker with new interval
+                    // sendPeriodicWorkRequest(context, it.toLong())
+                },
+                valueRange = 30f..300f,
+                // steps = 270, // (300-30)/1 to have steps of 1 minute
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "30m",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = "5h",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun EmptyMediumState(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.padding(32.dp),
@@ -291,6 +379,22 @@ private fun EmptyMediumState(modifier: Modifier = Modifier) {
         )
     }
 }
+
+@Composable
+private fun formatDuration(minutes: Int): String =
+    when {
+        minutes < 60 -> "$minutes ${if (minutes == 1) "minute" else "minutes"}"
+        minutes % 60 == 0 -> {
+            val hours = minutes / 60
+            "$hours ${if (hours == 1) "hour" else "hours"}"
+        }
+        else -> {
+            val hours = minutes / 60
+            val remainingMinutes = minutes % 60
+            "$hours ${if (hours == 1) "hour" else "hours"} and " +
+                "$remainingMinutes ${if (remainingMinutes == 1) "minute" else "minutes"}"
+        }
+    }
 
 @DrawableRes
 private fun NotifierType.iconResId(): Int =
