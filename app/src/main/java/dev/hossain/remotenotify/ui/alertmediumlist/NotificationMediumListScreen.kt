@@ -47,8 +47,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.google.common.primitives.UnsignedBytes.toInt
 import com.slack.circuit.codegen.annotations.CircuitInject
+import com.slack.circuit.foundation.rememberAnsweringNavigator
 import com.slack.circuit.runtime.CircuitUiEvent
 import com.slack.circuit.runtime.CircuitUiState
 import com.slack.circuit.runtime.Navigator
@@ -125,6 +125,29 @@ class NotificationMediumListPresenter
             var notifierMediumInfoList by remember { mutableStateOf(emptyList<NotificationMediumListScreen.NotifierMediumInfo>()) }
             var workerIntervalMinutes by remember { mutableLongStateOf(DEFAULT_PERIODIC_INTERVAL_MINUTES) }
 
+            val configureMediumNavigator =
+                rememberAnsweringNavigator<ConfigureNotificationMediumScreen.ConfigurationResult>(navigator) { result ->
+                    Timber.d("ConfigureNotificationMediumScreen result received: $result")
+                    when (result) {
+                        is ConfigureNotificationMediumScreen.ConfigurationResult.Configured -> {
+                            scope.launch {
+                                // Get the last saved interval
+                                val intervalMinutes = appPreferencesDataStore.workerIntervalFlow.first()
+
+                                Timber.d(
+                                    "Notifier configured: ${result.notifierType}, initializing worker with interval: $intervalMinutes minutes",
+                                )
+
+                                // Initialize/update the worker
+                                sendPeriodicWorkRequest(context, intervalMinutes)
+                            }
+                        }
+                        ConfigureNotificationMediumScreen.ConfigurationResult.NotConfigured -> {
+                            // Do nothing
+                        }
+                    }
+                }
+
             // Helper function to update the list
             suspend fun updateNotifierList() {
                 notifierMediumInfoList =
@@ -167,7 +190,7 @@ class NotificationMediumListPresenter
             ) { event ->
                 when (event) {
                     is NotificationMediumListScreen.Event.EditMediumConfig -> {
-                        navigator.goTo(ConfigureNotificationMediumScreen(event.notifierType))
+                        configureMediumNavigator.goTo(ConfigureNotificationMediumScreen(event.notifierType))
                     }
                     is NotificationMediumListScreen.Event.ResetMediumConfig -> {
                         scope.launch {

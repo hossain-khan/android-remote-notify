@@ -40,6 +40,7 @@ import com.slack.circuit.runtime.CircuitUiEvent
 import com.slack.circuit.runtime.CircuitUiState
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
+import com.slack.circuit.runtime.screen.PopResult
 import com.slack.circuit.runtime.screen.Screen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -51,6 +52,7 @@ import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.notifier.of
+import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen.ConfigurationResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -58,7 +60,7 @@ import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 
 @Parcelize
-data class ConfigureNotificationMediumScreen(
+data class ConfigureNotificationMediumScreen constructor(
     val notifierType: NotifierType,
 ) : Screen {
     data class State(
@@ -83,6 +85,17 @@ data class ConfigureNotificationMediumScreen(
         data object DismissSnackbar : Event()
 
         data object NavigateBack : Event()
+    }
+
+    @Parcelize
+    sealed class ConfigurationResult : PopResult {
+        @Parcelize
+        data class Configured(
+            val notifierType: NotifierType,
+        ) : ConfigurationResult()
+
+        @Parcelize
+        data object NotConfigured : ConfigurationResult()
     }
 }
 
@@ -136,7 +149,7 @@ class ConfigureNotificationMediumPresenter
                             alertMediumConfig?.let { config ->
                                 runCatching {
                                     notificationSender.saveConfig(config)
-                                    navigator.pop()
+                                    navigator.pop(ConfigurationResult.Configured(screen.notifierType))
                                 }.onFailure {
                                     Timber.e(it, "Error saving config: $it")
                                     snackbarMessage = "Unable to save configuration: ${it.message}"
@@ -178,7 +191,11 @@ class ConfigureNotificationMediumPresenter
                     }
 
                     ConfigureNotificationMediumScreen.Event.NavigateBack -> {
-                        navigator.pop()
+                        if (isConfigured) {
+                            navigator.pop(ConfigurationResult.Configured(screen.notifierType))
+                        } else {
+                            navigator.pop(ConfigurationResult.NotConfigured)
+                        }
                     }
                 }
             }
