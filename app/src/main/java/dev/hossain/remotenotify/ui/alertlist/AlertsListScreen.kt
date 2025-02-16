@@ -16,8 +16,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -57,6 +59,7 @@ import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
+import dev.hossain.remotenotify.ui.about.AboutAppScreen
 import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
 import dev.hossain.remotenotify.ui.alertmediumlist.NotificationMediumListScreen
 import kotlinx.coroutines.launch
@@ -82,6 +85,8 @@ data object AlertsListScreen : Screen {
         data object AddNotification : Event()
 
         data object AddNotificationDestination : Event()
+
+        data object NavigateToAbout : Event()
     }
 }
 
@@ -135,6 +140,10 @@ class AlertsListPresenter
                     AlertsListScreen.Event.AddNotificationDestination -> {
                         navigator.goTo(NotificationMediumListScreen)
                     }
+
+                    AlertsListScreen.Event.NavigateToAbout -> {
+                        navigator.goTo(AboutAppScreen)
+                    }
                 }
             }
         }
@@ -159,6 +168,14 @@ fun AlertsListUi(
             TopAppBar(
                 title = { Text("Remote Alerts") },
                 actions = {
+                    IconButton(onClick = {
+                        state.eventSink(AlertsListScreen.Event.NavigateToAbout)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = "About App",
+                        )
+                    }
                     IconButton(onClick = {
                         state.eventSink(AlertsListScreen.Event.AddNotificationDestination)
                     }) {
