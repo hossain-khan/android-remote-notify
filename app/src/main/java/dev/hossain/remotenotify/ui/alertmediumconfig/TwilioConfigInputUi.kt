@@ -15,7 +15,7 @@ import dev.hossain.remotenotify.data.TwilioConfigDataStore.Companion.ValidationK
 import dev.hossain.remotenotify.model.AlertMediumConfig
 
 @Composable
-fun TwilioConfigInputUi(
+internal fun TwilioConfigInputUi(
     alertMediumConfig: AlertMediumConfig?,
     configValidationResult: ConfigValidationResult,
     shouldShowValidationError: Boolean,
@@ -62,14 +62,14 @@ fun TwilioConfigInputUi(
         TextField(
             value = config?.fromPhone.orEmpty(),
             onValueChange = { onConfigUpdate(config?.copy(fromPhone = it)) },
-            label = { Text("From Phone") },
+            label = { Text("From Phone Number") },
             modifier = Modifier.fillMaxWidth(),
             isError = shouldShowValidationError && errors[ValidationKeys.FROM_PHONE] != null,
             supportingText = {
                 if (shouldShowValidationError && errors[ValidationKeys.FROM_PHONE] != null) {
                     Text(errors[ValidationKeys.FROM_PHONE]!!, color = MaterialTheme.colorScheme.error)
                 } else {
-                    Text("Enter the phone number to send from")
+                    Text("Enter the phone number in E.164 format (e.g., +1234567890)")
                 }
             },
         )
