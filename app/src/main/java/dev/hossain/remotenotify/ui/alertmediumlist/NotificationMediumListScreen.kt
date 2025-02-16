@@ -44,6 +44,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.google.common.primitives.UnsignedBytes.toInt
@@ -63,9 +64,14 @@ import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen
 import dev.hossain.remotenotify.worker.DEFAULT_PERIODIC_INTERVAL_MINUTES
+import dev.hossain.remotenotify.worker.sendPeriodicWorkRequest
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
 
 /**
  * Screen to list all notification mediums that allows user to configure, edit, and reset.
@@ -108,9 +114,13 @@ class NotificationMediumListPresenter
         private val appPreferencesDataStore: AppPreferencesDataStore,
         private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
     ) : Presenter<NotificationMediumListScreen.State> {
+        private val workerIntervalFlow = MutableStateFlow(DEFAULT_PERIODIC_INTERVAL_MINUTES)
+
+        @OptIn(FlowPreview::class)
         @Composable
         override fun present(): NotificationMediumListScreen.State {
             val scope = rememberCoroutineScope()
+            val context = LocalContext.current
             // Use remember and mutableStateOf to make the list observable
             var notifierMediumInfoList by remember { mutableStateOf(emptyList<NotificationMediumListScreen.NotifierMediumInfo>()) }
             var workerIntervalMinutes by remember { mutableLongStateOf(DEFAULT_PERIODIC_INTERVAL_MINUTES) }
@@ -134,9 +144,21 @@ class NotificationMediumListPresenter
                 updateNotifierList()
             }
 
-            // Load worker interval
+            // Load initial state and set up debounced updates
             LaunchedEffect(Unit) {
+                // Load initial value
                 workerIntervalMinutes = appPreferencesDataStore.workerIntervalFlow.first()
+
+                // Set up debounced updates
+                workerIntervalFlow
+                    .debounce(500L) // Wait for 500ms of inactivity
+                    .collect { minutes ->
+                        Timber.d("Worker interval updated: $minutes minutes")
+                        appPreferencesDataStore.saveWorkerInterval(minutes)
+
+                        // Also setup the worker interval
+                        sendPeriodicWorkRequest(context = context, repeatIntervalMinutes = minutes)
+                    }
             }
 
             return NotificationMediumListScreen.State(
@@ -159,10 +181,8 @@ class NotificationMediumListPresenter
                     }
 
                     is NotificationMediumListScreen.Event.OnWorkerIntervalUpdated -> {
-                        scope.launch {
-                            workerIntervalMinutes = event.minutes
-                            appPreferencesDataStore.saveWorkerInterval(event.minutes)
-                        }
+                        workerIntervalMinutes = event.minutes // Update UI immediately
+                        workerIntervalFlow.value = event.minutes // Trigger debounced update
                     }
                 }
             }

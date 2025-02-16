@@ -6,7 +6,6 @@ import androidx.work.Configuration
 import androidx.work.WorkerFactory
 import dev.hossain.remotenotify.di.AppComponent
 import dev.hossain.remotenotify.utils.CrashlyticsTree
-import dev.hossain.remotenotify.worker.sendPeriodicWorkRequest
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -40,9 +39,6 @@ class RemoteAlertApp :
 
         // TEST WORKER CODE
         // sendOneTimeWorkRequest(this)
-
-        // Actual worker code - ideally should be done elsewhere
-        sendPeriodicWorkRequest(context = this)
     }
 
     private fun installLoggingTree() {
