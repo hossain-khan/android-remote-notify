@@ -15,11 +15,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,20 +31,24 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.codegen.annotations.CircuitInject
+import com.slack.circuit.foundation.rememberAnsweringNavigator
 import com.slack.circuit.runtime.CircuitUiEvent
 import com.slack.circuit.runtime.CircuitUiState
 import com.slack.circuit.runtime.Navigator
@@ -52,12 +58,20 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
+import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen
+import dev.hossain.remotenotify.worker.DEFAULT_PERIODIC_INTERVAL_MINUTES
+import dev.hossain.remotenotify.worker.sendPeriodicWorkRequest
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
 
 /**
  * Screen to list all notification mediums that allows user to configure, edit, and reset.
@@ -65,6 +79,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data object NotificationMediumListScreen : Screen {
     data class State(
+        val workerIntervalMinutes: Long,
         val notifiers: List<NotifierMediumInfo>,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
@@ -84,6 +99,10 @@ data object NotificationMediumListScreen : Screen {
             val notifierType: NotifierType,
         ) : Event()
 
+        data class OnWorkerIntervalUpdated(
+            val minutes: Long,
+        ) : Event()
+
         data object NavigateBack : Event()
     }
 }
@@ -92,13 +111,42 @@ class NotificationMediumListPresenter
     @AssistedInject
     constructor(
         @Assisted private val navigator: Navigator,
+        private val appPreferencesDataStore: AppPreferencesDataStore,
         private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
     ) : Presenter<NotificationMediumListScreen.State> {
+        private val workerIntervalFlow = MutableStateFlow(DEFAULT_PERIODIC_INTERVAL_MINUTES)
+
+        @OptIn(FlowPreview::class)
         @Composable
         override fun present(): NotificationMediumListScreen.State {
             val scope = rememberCoroutineScope()
+            val context = LocalContext.current
             // Use remember and mutableStateOf to make the list observable
             var notifierMediumInfoList by remember { mutableStateOf(emptyList<NotificationMediumListScreen.NotifierMediumInfo>()) }
+            var workerIntervalMinutes by remember { mutableLongStateOf(DEFAULT_PERIODIC_INTERVAL_MINUTES) }
+
+            val configureMediumNavigator =
+                rememberAnsweringNavigator<ConfigureNotificationMediumScreen.ConfigurationResult>(navigator) { result ->
+                    Timber.d("ConfigureNotificationMediumScreen result received: $result")
+                    when (result) {
+                        is ConfigureNotificationMediumScreen.ConfigurationResult.Configured -> {
+                            scope.launch {
+                                // Get the last saved interval
+                                val intervalMinutes = appPreferencesDataStore.workerIntervalFlow.first()
+
+                                Timber.d(
+                                    "Notifier configured: ${result.notifierType}, initializing worker with interval: $intervalMinutes minutes",
+                                )
+
+                                // Initialize/update the worker
+                                sendPeriodicWorkRequest(context, intervalMinutes)
+                            }
+                        }
+                        ConfigureNotificationMediumScreen.ConfigurationResult.NotConfigured -> {
+                            // Do nothing
+                        }
+                    }
+                }
 
             // Helper function to update the list
             suspend fun updateNotifierList() {
@@ -119,12 +167,30 @@ class NotificationMediumListPresenter
                 updateNotifierList()
             }
 
+            // Load initial state and set up debounced updates
+            LaunchedEffect(Unit) {
+                // Load initial value
+                workerIntervalMinutes = appPreferencesDataStore.workerIntervalFlow.first()
+
+                // Set up debounced updates
+                workerIntervalFlow
+                    .debounce(500L) // Wait for 500ms of inactivity
+                    .collect { minutes ->
+                        Timber.d("Worker interval updated: $minutes minutes")
+                        appPreferencesDataStore.saveWorkerInterval(minutes)
+
+                        // Also setup the worker interval
+                        sendPeriodicWorkRequest(context = context, repeatIntervalMinutes = minutes)
+                    }
+            }
+
             return NotificationMediumListScreen.State(
+                workerIntervalMinutes = workerIntervalMinutes,
                 notifiers = notifierMediumInfoList,
             ) { event ->
                 when (event) {
                     is NotificationMediumListScreen.Event.EditMediumConfig -> {
-                        navigator.goTo(ConfigureNotificationMediumScreen(event.notifierType))
+                        configureMediumNavigator.goTo(ConfigureNotificationMediumScreen(event.notifierType))
                     }
                     is NotificationMediumListScreen.Event.ResetMediumConfig -> {
                         scope.launch {
@@ -135,6 +201,11 @@ class NotificationMediumListPresenter
                     }
                     NotificationMediumListScreen.Event.NavigateBack -> {
                         navigator.pop()
+                    }
+
+                    is NotificationMediumListScreen.Event.OnWorkerIntervalUpdated -> {
+                        workerIntervalMinutes = event.minutes // Update UI immediately
+                        workerIntervalFlow.value = event.minutes // Trigger debounced update
                     }
                 }
             }
@@ -201,6 +272,16 @@ fun NotificationMediumListUi(
                                 NotificationMediumListScreen.Event.ResetMediumConfig(notifier.notifierType),
                             )
                         },
+                    )
+                }
+                // Add this item right after your existing notifiers items
+                item(key = "worker-config") {
+                    WorkerConfigCard(
+                        state = state,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
                     )
                 }
                 item(key = "bottom") {
@@ -272,6 +353,78 @@ private fun NotifierCard(
 }
 
 @Composable
+private fun WorkerConfigCard(
+    state: NotificationMediumListScreen.State,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    // painter = painterResource(id = R.drawable.schedule_24dp),
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(32.dp),
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "Check Frequency",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Alert checked every ${formatDuration(state.workerIntervalMinutes.toInt())}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Slider(
+                value = state.workerIntervalMinutes.toFloat(),
+                onValueChange = {
+                    state.eventSink(NotificationMediumListScreen.Event.OnWorkerIntervalUpdated(it.toLong()))
+                },
+                valueRange = 30f..300f,
+                // steps = 270, // (300-30)/1 to have steps of 1 minute
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "30m",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = "5h",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun EmptyMediumState(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.padding(32.dp),
@@ -291,6 +444,22 @@ private fun EmptyMediumState(modifier: Modifier = Modifier) {
         )
     }
 }
+
+@Composable
+private fun formatDuration(minutes: Int): String =
+    when {
+        minutes < 60 -> "$minutes ${if (minutes == 1) "minute" else "minutes"}"
+        minutes % 60 == 0 -> {
+            val hours = minutes / 60
+            "$hours ${if (hours == 1) "hour" else "hours"}"
+        }
+        else -> {
+            val hours = minutes / 60
+            val remainingMinutes = minutes % 60
+            "$hours ${if (hours == 1) "hour" else "hours"} and " +
+                "$remainingMinutes ${if (remainingMinutes == 1) "minute" else "minutes"}"
+        }
+    }
 
 @DrawableRes
 private fun NotifierType.iconResId(): Int =
