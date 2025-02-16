@@ -44,8 +44,8 @@ fun sendPeriodicWorkRequest(
                 .Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresDeviceIdle(true)
-                .setRequiresBatteryNotLow(true)
-                .setRequiresStorageNotLow(true)
+                .setRequiresBatteryNotLow(false)
+                .setRequiresStorageNotLow(false)
                 .build(),
         ).addTag("periodic-health-check")
             .build()
