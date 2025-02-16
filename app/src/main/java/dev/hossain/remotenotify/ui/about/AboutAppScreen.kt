@@ -93,7 +93,7 @@ class AboutAppPresenter
                     }
 
                     AboutAppScreen.Event.OpenGitHubProject -> {
-                        uriHandler.openUri("https://github.com/hossain-khan/android-weather-alert")
+                        uriHandler.openUri("https://github.com/hossain-khan/android-remote-notify")
                     }
                 }
             }
