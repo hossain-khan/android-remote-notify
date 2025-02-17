@@ -569,9 +569,36 @@ private fun formatTimeAgo(timestamp: Long): String {
     val diff = now - timestamp
     return when {
         diff < 60_000 -> "just now"
-        diff < 3600_000 -> "${diff / 60_000}m ago"
-        diff < 86400_000 -> "${diff / 3600_000}h ago"
-        else -> "${diff / 86400_000}d ago"
+        diff < 3600_000 -> {
+            val minutes = diff / 60_000
+            "$minutes minute${if (minutes > 1) "s" else ""} ago"
+        }
+        diff < 86400_000 -> {
+            val hours = diff / 3600_000
+            val minutes = (diff % 3600_000) / 60_000
+            buildString {
+                append("$hours hour${if (hours > 1) "s" else ""}")
+                if (minutes > 0) {
+                    append(" $minutes minute${if (minutes > 1) "s" else ""}")
+                }
+                append(" ago")
+            }
+        }
+        diff < 2592000000 -> { // 30 days
+            val days = diff / 86400_000
+            val hours = (diff % 86400_000) / 3600_000
+            buildString {
+                append("$days day${if (days > 1) "s" else ""}")
+                if (hours > 0) {
+                    append(" $hours hour${if (hours > 1) "s" else ""}")
+                }
+                append(" ago")
+            }
+        }
+        else -> {
+            val days = diff / 86400_000
+            "$days days ago"
+        }
     }
 }
 
