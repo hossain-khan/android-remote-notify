@@ -40,4 +40,13 @@ interface AlertCheckLogDao {
     """,
     )
     fun getTriggeredAlerts(): Flow<List<AlertCheckLogEntity>>
+
+    @Query(
+        """
+        SELECT * FROM alert_check_log 
+        ORDER BY checked_at DESC 
+        LIMIT 1
+    """,
+    )
+    fun getLatestCheckLog(): Flow<AlertCheckLogEntity?>
 }

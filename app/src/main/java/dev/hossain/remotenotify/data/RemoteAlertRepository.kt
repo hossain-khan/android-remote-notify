@@ -6,8 +6,10 @@ import dev.hossain.remotenotify.db.AlertCheckLogEntity
 import dev.hossain.remotenotify.db.AlertConfigDao
 import dev.hossain.remotenotify.db.AlertConfigEntity
 import dev.hossain.remotenotify.di.AppScope
+import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
+import dev.hossain.remotenotify.model.toAlertCheckLog
 import dev.hossain.remotenotify.model.toAlertConfigEntity
 import dev.hossain.remotenotify.model.toRemoteAlert
 import dev.hossain.remotenotify.notifier.NotifierType
@@ -33,6 +35,8 @@ interface RemoteAlertRepository {
     )
 
     fun getLatestCheckForAlert(alertId: Long): Flow<AlertCheckLogEntity?>
+
+    fun getLatestCheckLog(): Flow<AlertCheckLog?>
 }
 
 @ContributesBinding(AppScope::class)
@@ -79,5 +83,8 @@ class RemoteAlertRepositoryImpl
             )
         }
 
+        // TODO - do not expose entity directly
         override fun getLatestCheckForAlert(alertId: Long): Flow<AlertCheckLogEntity?> = alertCheckLogDao.getLatestCheckForAlert(alertId)
+
+        override fun getLatestCheckLog(): Flow<AlertCheckLog?> = alertCheckLogDao.getLatestCheckLog().map { it?.toAlertCheckLog() }
     }

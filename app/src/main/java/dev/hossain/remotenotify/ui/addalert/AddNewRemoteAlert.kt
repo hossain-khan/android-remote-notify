@@ -48,6 +48,7 @@ import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
+import dev.hossain.remotenotify.model.toIconResId
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -228,10 +229,7 @@ fun AddNewRemoteAlertUi(
                     },
                     leadingContent = {
                         Icon(
-                            when (type) {
-                                AlertType.BATTERY -> painterResource(R.drawable.battery_3_bar_24dp)
-                                AlertType.STORAGE -> painterResource(R.drawable.hard_disk_24dp)
-                            },
+                            painter = painterResource(type.toIconResId()),
                             contentDescription = null,
                         )
                     },

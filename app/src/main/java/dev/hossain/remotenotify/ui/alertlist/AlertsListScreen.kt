@@ -55,7 +55,10 @@ import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
+import dev.hossain.remotenotify.model.AlertCheckLog
+import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
+import dev.hossain.remotenotify.model.toIconResId
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
@@ -74,6 +77,7 @@ data object AlertsListScreen : Screen {
         val availableStorage: Long,
         val totalStorage: Long,
         val isAnyNotifierConfigured: Boolean,
+        val latestAlertCheckLog: AlertCheckLog?,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -118,12 +122,19 @@ class AlertsListPresenter
                 value = notifiers.any { it.hasValidConfig() }
             }
 
+            val lastCheckLog by produceState<AlertCheckLog?>(null) {
+                remoteAlertRepository
+                    .getLatestCheckLog()
+                    .collect { value = it }
+            }
+
             return AlertsListScreen.State(
                 remoteAlertConfigs = notifications,
                 batteryPercentage = deviceBatteryLevelPercentage,
                 availableStorage = deviceAvailableStorage,
                 totalStorage = deviceTotalStorage,
                 isAnyNotifierConfigured = isAnyNotifierConfigured,
+                latestAlertCheckLog = lastCheckLog,
             ) { event ->
                 when (event) {
                     is AlertsListScreen.Event.DeleteNotification -> {
@@ -222,6 +233,10 @@ fun AlertsListUi(
                                 state.eventSink(AlertsListScreen.Event.AddNotificationDestination)
                             },
                         )
+                    }
+                } else {
+                    item(key = "last_check_status") {
+                        LastCheckStatusCardUi(state.latestAlertCheckLog)
                     }
                 }
 
@@ -384,6 +399,77 @@ private fun NoNotifierConfiguredCard(
 }
 
 @Composable
+private fun LastCheckStatusCardUi(
+    lastCheckLog: AlertCheckLog?,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+        ) {
+            Text(
+                text = "Last Check Status",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (lastCheckLog == null) {
+                Text(
+                    text = "No checks have been performed yet",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        painter = painterResource(lastCheckLog.alertType.toIconResId()),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint =
+                            if (lastCheckLog.isAlertSent) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.primary
+                            },
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        /*Text(
+                            text = when (lastCheckLog.alertType) {
+                                AlertType.BATTERY -> "Battery: ${lastCheckLog.alertStateValue}%"
+                                AlertType.STORAGE -> "Storage: ${lastCheckLog.alertStateValue}GB"
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                        )*/
+                        Text(
+                            text = "Alert checked ${formatTimeAgo(lastCheckLog.checkedOn)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        if (lastCheckLog.isAlertSent) {
+                            Text(
+                                text = "Alert sent",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun NotificationItem(
     remoteAlert: RemoteAlert,
     onDelete: () -> Unit,
@@ -478,6 +564,17 @@ private fun EmptyNotificationsState() {
     }
 }
 
+private fun formatTimeAgo(timestamp: Long): String {
+    val now = System.currentTimeMillis()
+    val diff = now - timestamp
+    return when {
+        diff < 60_000 -> "just now"
+        diff < 3600_000 -> "${diff / 60_000}m ago"
+        diff < 86400_000 -> "${diff / 3600_000}h ago"
+        else -> "${diff / 86400_000}d ago"
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewAlertsListUi() {
@@ -494,6 +591,34 @@ fun PreviewAlertsListUi() {
                 availableStorage = 10,
                 totalStorage = 100,
                 isAnyNotifierConfigured = false,
+                latestAlertCheckLog = null,
+                eventSink = {},
+            ),
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewAlertsListUiWithLastCheck() {
+    val sampleNotifications =
+        listOf(
+            RemoteAlert.BatteryAlert(batteryPercentage = 50),
+            RemoteAlert.StorageAlert(storageMinSpaceGb = 10),
+        )
+    AlertsListUi(
+        state =
+            AlertsListScreen.State(
+                remoteAlertConfigs = sampleNotifications,
+                batteryPercentage = 50,
+                availableStorage = 10,
+                totalStorage = 100,
+                isAnyNotifierConfigured = true,
+                latestAlertCheckLog =
+                    AlertCheckLog(
+                        checkedOn = System.currentTimeMillis() - 300_000, // 5 minutes ago
+                        alertType = AlertType.BATTERY,
+                        isAlertSent = true,
+                    ),
                 eventSink = {},
             ),
     )
