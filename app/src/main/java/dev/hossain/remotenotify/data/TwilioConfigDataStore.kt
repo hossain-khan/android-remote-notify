@@ -79,6 +79,7 @@ class TwilioConfigDataStore
         override suspend fun validateConfig(config: AlertMediumConfig): ConfigValidationResult {
             val errors = mutableMapOf<String, String>()
             if (config is AlertMediumConfig.TwilioConfig) {
+                // See https://www.twilio.com/docs/iam/api/authtoken
                 if (!config.accountSid.matches(Regex("""^AC[a-zA-Z0-9]{32}$"""))) {
                     errors[ValidationKeys.ACCOUNT_SID] = "Invalid Account SID format"
                 }
