@@ -38,8 +38,8 @@ class RemoteAlertApp :
         appComponent.inject(this)
 
         // TEST WORKER CODE
-        dev.hossain.remotenotify.worker
-            .sendOneTimeWorkRequest(this)
+//        dev.hossain.remotenotify.worker
+//            .sendOneTimeWorkRequest(this)
     }
 
     private fun installLoggingTree() {
