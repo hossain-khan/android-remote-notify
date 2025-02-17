@@ -24,6 +24,7 @@ class AppPreferencesDataStore
     ) {
         companion object {
             private val WORKER_INTERVAL_KEY = longPreferencesKey("worker_interval_minutes")
+            private val LAST_REVIEW_REQUEST_KEY = longPreferencesKey("last_review_request_time")
         }
 
         suspend fun saveWorkerInterval(intervalMinutes: Long) {
@@ -32,9 +33,21 @@ class AppPreferencesDataStore
             }
         }
 
+        suspend fun saveLastReviewRequestTime(timestamp: Long) {
+            context.appPreferencesDataStore.edit { preferences ->
+                preferences[LAST_REVIEW_REQUEST_KEY] = timestamp
+            }
+        }
+
         val workerIntervalFlow: Flow<Long> =
             context.appPreferencesDataStore.data
                 .map { preferences ->
                     preferences[WORKER_INTERVAL_KEY] ?: DEFAULT_PERIODIC_INTERVAL_MINUTES
+                }
+
+        val lastReviewRequestFlow: Flow<Long> =
+            context.appPreferencesDataStore.data
+                .map { preferences ->
+                    preferences[LAST_REVIEW_REQUEST_KEY] ?: 0L
                 }
     }
