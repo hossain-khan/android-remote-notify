@@ -15,6 +15,8 @@ Stay in control with notifications via Twilio (SMS via API) 📲, Telegram 📢,
 
 Never let your remote devices die on you again! Whether you're managing one device or many, this app ensures you're always in the loop when battery 🔋 or storage 💾 levels drop too low. Get notified before it's too late — even when your devices are miles away!
 
+📲 Install the app on each devices you want to monitor and configure the notification medium, and you are set to receive alerts when the threshold is met. ✅
+
 ---
 
 ### **Key Features:**
