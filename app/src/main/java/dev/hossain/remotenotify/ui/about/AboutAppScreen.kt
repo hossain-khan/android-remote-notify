@@ -152,7 +152,7 @@ fun AboutAppScreen(
                             .padding(top = 16.dp)
                             .align(Alignment.CenterHorizontally),
                 )
-                Text("Stay connected, stay informed with remote Android diagnostics and notification.")
+                Text("This app monitors Android device battery and storage, alerting you to low levels so you can take action.")
                 Spacer(modifier = Modifier.height(32.dp))
             }
             Column(modifier = Modifier.fillMaxWidth()) {
