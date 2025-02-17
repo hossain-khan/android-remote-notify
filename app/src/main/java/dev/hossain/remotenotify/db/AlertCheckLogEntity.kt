@@ -28,7 +28,11 @@ data class AlertCheckLogEntity(
      * Battery % or Storage GB
      */
     @ColumnInfo(name = "alert_state_value") val alertStateValue: Int,
-    @ColumnInfo(name = "alert_triggered") val alertTriggered: Boolean,
-    @ColumnInfo(name = "notifier_type") val notifierType: NotifierType,
+    @ColumnInfo(name = "is_alert_triggered") val alertTriggered: Boolean,
     @ColumnInfo(name = "alert_type") val alertType: AlertType,
+    /**
+     * The notifier that was used to send the alert.
+     * This is nullable because the alert might be triggered by threshold set (e.g. battery level)
+     */
+    @ColumnInfo(name = "notifier_type") val notifierType: NotifierType?,
 )

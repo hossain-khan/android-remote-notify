@@ -9,6 +9,7 @@ import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
+import dev.hossain.remotenotify.notifier.NotifierType
 import kotlinx.coroutines.delay
 import timber.log.Timber
 
@@ -45,19 +46,22 @@ class ObserveDeviceHealthWorker(
             alerts.forEach { alert ->
                 when (alert) {
                     is RemoteAlert.BatteryAlert -> {
-                        if (alert.batteryPercentage <= deviceCurrentBatteryLevel) {
-                            sendNotification(alert)
-                        } else {
-                            Timber.tag(WORKER_LOG_TAG).d("Notification threshold not met. Not sending: $alert")
-                        }
+                        val triggered = deviceCurrentBatteryLevel <= alert.batteryPercentage
+                        checkAndProcessAlert(
+                            alert = alert,
+                            triggered = triggered,
+                            alertType = AlertType.BATTERY,
+                            stateValue = deviceCurrentBatteryLevel,
+                        )
                     }
-
                     is RemoteAlert.StorageAlert -> {
-                        if (alert.storageMinSpaceGb <= deviceCurrentAvailableStorage) {
-                            sendNotification(alert)
-                        } else {
-                            Timber.tag(WORKER_LOG_TAG).d("Notification threshold not met. Not sending: $alert")
-                        }
+                        val triggered = deviceCurrentAvailableStorage <= alert.storageMinSpaceGb
+                        checkAndProcessAlert(
+                            alert = alert,
+                            triggered = triggered,
+                            alertType = AlertType.STORAGE,
+                            stateValue = deviceCurrentAvailableStorage.toInt(),
+                        )
                     }
                 }
             }
@@ -68,8 +72,26 @@ class ObserveDeviceHealthWorker(
         }
     }
 
-    private suspend fun sendNotification(notification: RemoteAlert) {
-        Timber.i("Notification triggered - sending: $notification")
+    private suspend fun checkAndProcessAlert(
+        alert: RemoteAlert,
+        triggered: Boolean,
+        alertType: AlertType,
+        stateValue: Int,
+    ) {
+        if (triggered) {
+            sendNotification(alert, alertType, stateValue)
+        } else {
+            Timber.tag(WORKER_LOG_TAG).d("Notification threshold not met. Not sending: $alert for $alertType")
+            saveAlertCheckLog(alert.alertId, alertType, stateValue, false, null)
+        }
+    }
+
+    private suspend fun sendNotification(
+        remoteAlert: RemoteAlert,
+        alertType: AlertType,
+        stateValue: Int,
+    ) {
+        Timber.i("Notification triggered - sending: $remoteAlert")
         if (notifiers.isEmpty()) {
             // This should ideally not happen unless dagger setup has failed
             Timber.tag(WORKER_LOG_TAG).e("No remote notifier has been registered")
@@ -81,10 +103,11 @@ class ObserveDeviceHealthWorker(
                 try {
                     Timber.tag(WORKER_LOG_TAG).i("Sending notification with ${notifier.notifierType}")
                     kotlin
-                        .runCatching { notifier.sendNotification(notification) }
+                        .runCatching { notifier.sendNotification(remoteAlert) }
                         .onFailure {
                             Timber.tag(WORKER_LOG_TAG).e(it)
                         }.onSuccess {
+                            saveAlertCheckLog(remoteAlert.alertId, alertType, stateValue, true, notifier.notifierType)
                             Timber.tag(WORKER_LOG_TAG).d("Notifier status: $it")
                         }
 
@@ -94,5 +117,22 @@ class ObserveDeviceHealthWorker(
                     Timber.tag(WORKER_LOG_TAG).e(e, "Failed to send notification with ${notifier.notifierType}")
                 }
             }
+    }
+
+    private suspend fun saveAlertCheckLog(
+        alertId: Long,
+        alertType: AlertType,
+        stateValue: Int,
+        alertSent: Boolean,
+        notifierType: NotifierType?,
+    ) {
+        Timber.tag(WORKER_LOG_TAG).i("Saving alert check log for $alertId")
+        repository.insertAlertCheckLog(
+            alertId = alertId,
+            alertType = alertType,
+            alertStateValue = stateValue,
+            alertTriggered = alertSent,
+            notifierType = notifierType,
+        )
     }
 }

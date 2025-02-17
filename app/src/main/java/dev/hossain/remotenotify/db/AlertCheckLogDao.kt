@@ -35,7 +35,7 @@ interface AlertCheckLogDao {
     @Query(
         """
         SELECT * FROM alert_check_log 
-        WHERE alert_triggered = 1 
+        WHERE is_alert_triggered = 1 
         ORDER BY checked_at DESC
     """,
     )
