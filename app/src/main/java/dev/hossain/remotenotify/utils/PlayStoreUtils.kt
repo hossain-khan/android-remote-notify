@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import timber.log.Timber
 
 object PlayStoreUtils {
     /**
@@ -23,6 +24,7 @@ object PlayStoreUtils {
                 },
             )
         } catch (e: ActivityNotFoundException) {
+            Timber.e(e, "Play Store app not found, opening in browser")
             // If Play Store app is not available, open in browser
             context.startActivity(
                 Intent(

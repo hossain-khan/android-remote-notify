@@ -32,6 +32,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -403,6 +404,14 @@ private fun WorkerConfigCard(
                 valueRange = 30f..300f,
                 // steps = 270, // (300-30)/1 to have steps of 1 minute
                 modifier = Modifier.fillMaxWidth(),
+                colors =
+                    SliderDefaults.colors(
+                        // Increase contrast for the inactive track
+                        inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                        // Make active part more prominent
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                    ),
             )
 
             Row(
