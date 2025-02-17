@@ -9,10 +9,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.TelegramConfigDataStore.Companion.ValidationKeys
 import dev.hossain.remotenotify.model.AlertMediumConfig
+import dev.hossain.remotenotify.theme.ComposeAppTheme
 
 @Composable
 internal fun TelegramConfigInputUi(
@@ -59,6 +61,40 @@ internal fun TelegramConfigInputUi(
                     Text("Enter chat ID or @channel username")
                 }
             },
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTelegramConfigInputUi() {
+    ComposeAppTheme {
+        TelegramConfigInputUi(
+            alertMediumConfig =
+                AlertMediumConfig.TelegramConfig(
+                    botToken = "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11",
+                    chatId = "@mychannel",
+                ),
+            configValidationResult =
+                ConfigValidationResult(
+                    isValid = false,
+                    errors = mapOf(ValidationKeys.BOT_TOKEN to "Invalid bot token format"),
+                ),
+            shouldShowValidationError = true,
+            onConfigUpdate = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTelegramConfigInputUiEmpty() {
+    ComposeAppTheme {
+        TelegramConfigInputUi(
+            alertMediumConfig = null,
+            configValidationResult = ConfigValidationResult(true, emptyMap()),
+            shouldShowValidationError = false,
+            onConfigUpdate = {},
         )
     }
 }

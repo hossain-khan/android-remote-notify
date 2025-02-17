@@ -4,15 +4,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.TwilioConfigDataStore.Companion.ValidationKeys
 import dev.hossain.remotenotify.model.AlertMediumConfig
+import dev.hossain.remotenotify.theme.ComposeAppTheme
 
 @Composable
 internal fun TwilioConfigInputUi(
@@ -64,6 +69,11 @@ internal fun TwilioConfigInputUi(
             onValueChange = { onConfigUpdate(config?.copy(fromPhone = it)) },
             label = { Text("From Phone Number") },
             modifier = Modifier.fillMaxWidth(),
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Phone,
+                    imeAction = ImeAction.Next,
+                ),
             isError = shouldShowValidationError && errors[ValidationKeys.FROM_PHONE] != null,
             supportingText = {
                 if (shouldShowValidationError && errors[ValidationKeys.FROM_PHONE] != null) {
@@ -81,6 +91,11 @@ internal fun TwilioConfigInputUi(
             onValueChange = { onConfigUpdate(config?.copy(toPhone = it)) },
             label = { Text("To Phone Number") },
             modifier = Modifier.fillMaxWidth(),
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Phone,
+                    imeAction = ImeAction.Done,
+                ),
             isError = shouldShowValidationError && errors[ValidationKeys.TO_PHONE] != null,
             supportingText = {
                 if (shouldShowValidationError && errors[ValidationKeys.TO_PHONE] != null) {
@@ -89,6 +104,42 @@ internal fun TwilioConfigInputUi(
                     Text("Destination phone number in E.164 format")
                 }
             },
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTwilioConfigInputUi() {
+    ComposeAppTheme {
+        TwilioConfigInputUi(
+            alertMediumConfig =
+                AlertMediumConfig.TwilioConfig(
+                    accountSid = "AC1234567890",
+                    authToken = "auth123456",
+                    fromPhone = "+12025550123",
+                    toPhone = "+12025550124",
+                ),
+            configValidationResult =
+                ConfigValidationResult(
+                    isValid = false,
+                    errors = mapOf(ValidationKeys.FROM_PHONE to "Invalid phone number format"),
+                ),
+            shouldShowValidationError = true,
+            onConfigUpdate = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTwilioConfigInputUiEmpty() {
+    ComposeAppTheme {
+        TwilioConfigInputUi(
+            alertMediumConfig = null,
+            configValidationResult = ConfigValidationResult(true, emptyMap()),
+            shouldShowValidationError = false,
+            onConfigUpdate = {},
         )
     }
 }
