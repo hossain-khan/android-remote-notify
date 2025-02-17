@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -19,4 +20,8 @@ interface AlertConfigDao {
 
     @Delete
     suspend fun delete(notification: AlertConfigEntity)
+
+    @Transaction
+    @Query("SELECT * FROM alert_config WHERE id = :alertConfigId")
+    fun getAlertWithLogs(alertConfigId: Long): Flow<AlertWithLogs>
 }
