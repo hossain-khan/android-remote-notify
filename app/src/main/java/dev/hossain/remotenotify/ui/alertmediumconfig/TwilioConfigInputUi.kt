@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.ui.alertmediumconfig
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,8 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.hossain.remotenotify.data.ConfigValidationResult
@@ -25,11 +31,42 @@ internal fun TwilioConfigInputUi(
     configValidationResult: ConfigValidationResult,
     shouldShowValidationError: Boolean,
     onConfigUpdate: (AlertMediumConfig?) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val config = alertMediumConfig as? AlertMediumConfig.TwilioConfig
     val errors = configValidationResult.errors
+    val uriHandler = LocalUriHandler.current
 
-    Column {
+    Column(modifier = modifier) {
+        Text(
+            text =
+                buildAnnotatedString {
+                    append("Get your Twilio credentials from ")
+                    pushStringAnnotation(
+                        tag = "URL",
+                        annotation = "https://console.twilio.com",
+                    )
+                    withStyle(
+                        style =
+                            SpanStyle(
+                                color = MaterialTheme.colorScheme.primary,
+                                textDecoration = TextDecoration.Underline,
+                            ),
+                    ) {
+                        append("Twilio Console")
+                    }
+                    append(". You'll need an Account SID, Auth Token, and a Twilio phone number.")
+                },
+            style = MaterialTheme.typography.bodyMedium,
+            modifier =
+                Modifier.clickable {
+                    uriHandler.openUri("https://console.twilio.com")
+                },
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         TextField(
             value = config?.accountSid.orEmpty(),
             onValueChange = { onConfigUpdate(config?.copy(accountSid = it)) },
