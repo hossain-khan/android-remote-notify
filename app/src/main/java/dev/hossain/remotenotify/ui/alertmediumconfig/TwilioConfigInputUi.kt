@@ -35,6 +35,11 @@ internal fun TwilioConfigInputUi(
             onValueChange = { onConfigUpdate(config?.copy(accountSid = it)) },
             label = { Text("Account SID") },
             modifier = Modifier.fillMaxWidth(),
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Ascii,
+                    imeAction = ImeAction.Next,
+                ),
             isError = shouldShowValidationError && errors[ValidationKeys.ACCOUNT_SID] != null,
             supportingText = {
                 if (shouldShowValidationError && errors[ValidationKeys.ACCOUNT_SID] != null) {
@@ -52,6 +57,11 @@ internal fun TwilioConfigInputUi(
             onValueChange = { onConfigUpdate(config?.copy(authToken = it)) },
             label = { Text("Auth Token") },
             modifier = Modifier.fillMaxWidth(),
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Ascii,
+                    imeAction = ImeAction.Next,
+                ),
             isError = shouldShowValidationError && errors[ValidationKeys.AUTH_TOKEN] != null,
             supportingText = {
                 if (shouldShowValidationError && errors[ValidationKeys.AUTH_TOKEN] != null) {

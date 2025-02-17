@@ -23,11 +23,12 @@ internal fun WebhookConfigInputUi(
     configValidationResult: ConfigValidationResult,
     shouldShowValidationError: Boolean,
     onConfigUpdate: (AlertMediumConfig?) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val config = alertMediumConfig as AlertMediumConfig.WebhookConfig?
     val errors = configValidationResult.errors
 
-    Column {
+    Column(modifier = modifier) {
         TextField(
             value = config?.url ?: "",
             onValueChange = {
@@ -52,7 +53,10 @@ internal fun WebhookConfigInputUi(
                 if (shouldShowValidationError && errors[ValidationKeys.URL] != null) {
                     Text(errors[ValidationKeys.URL]!!, color = MaterialTheme.colorScheme.error)
                 } else {
-                    Text("Enter the URL to receive notifications")
+                    Column {
+                        Text("Enter the URL to receive notifications via webhook")
+                        Text("HTTP POST with json payload will be sent to the URL.")
+                    }
                 }
             },
         )
