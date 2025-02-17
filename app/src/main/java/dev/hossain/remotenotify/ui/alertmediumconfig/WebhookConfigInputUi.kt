@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,6 +28,7 @@ internal fun WebhookConfigInputUi(
 ) {
     val config = alertMediumConfig as AlertMediumConfig.WebhookConfig?
     val errors = configValidationResult.errors
+    val focusManager = LocalFocusManager.current
 
     Column(modifier = modifier) {
         TextField(
@@ -44,8 +46,7 @@ internal fun WebhookConfigInputUi(
             keyboardActions =
                 KeyboardActions(
                     onDone = {
-                        // Optional: Handle done action if needed
-                        // For now, we are not doing anything
+                        focusManager.clearFocus()
                     },
                 ),
             isError = shouldShowValidationError && errors[ValidationKeys.URL] != null,
