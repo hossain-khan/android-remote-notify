@@ -7,6 +7,8 @@ Very specialized app that will notify about remote android device diagnostic dat
 > * 🪫 Battery: If it's going beyond certain level, you want to ensure the device is charging or charged up
 > * 💾 Storage: If the device is running low on storage, you may want to clear up storage so that device continues to function properly.
 
+<a href="https://play.google.com/store/apps/details?id=dev.hossain.remotenotify&pcampaignid=web_share" target="_blank"><img src="project-resources/google-play/GetItOnGooglePlay_Badge_Web_color_English.png" height="45"></a>
+
 ## Quick Summary
 
 **✨ Remote Notify: Your Remote Android Device Watchdog! 🛡️**
