@@ -27,6 +27,10 @@ sealed interface AlertMediumConfig {
     ) : AlertMediumConfig
 
     data class TwilioConfig(
+        /**
+         * Twilio Account SID.
+         * @see [Twilio Account SID](https://www.twilio.com/docs/iam/api/authtoken)
+         */
         val accountSid: String,
         val authToken: String,
         val fromPhone: String,

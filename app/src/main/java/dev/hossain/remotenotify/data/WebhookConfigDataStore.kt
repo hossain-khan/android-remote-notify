@@ -76,12 +76,12 @@ class WebhookConfigDataStore
                 try {
                     url.matches(Regex("""^https?://[^\s/$.?#].[^\s]*$"""))
                 } catch (e: Exception) {
-                    Timber.e(e, "Invalid URL format")
+                    Timber.e(e, "Invalid URL format. Eg. https://httpbin.org/post")
                     false
                 }
 
             if (!isValidUrl) {
-                errors[ValidationKeys.URL] = "Invalid URL format"
+                errors[ValidationKeys.URL] = "Invalid URL format. Use https:// based URL, Eg. https://httpbin.org/post"
                 Timber.e("Invalid webhook URL format: $url")
             }
 
