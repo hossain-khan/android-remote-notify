@@ -5,6 +5,8 @@ import com.squareup.anvil.annotations.ContributesMultibinding
 import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.EmailConfigDataStore
+import dev.hossain.remotenotify.data.EmailQuotaManager
+import dev.hossain.remotenotify.data.EmailQuotaManager.Companion.ValidationKeys.EMAIL_DAILY_QUOTA
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.RemoteAlert
@@ -27,12 +29,18 @@ class MailgunEmailNotificationSender
     @Inject
     constructor(
         private val emailConfigDataStore: EmailConfigDataStore,
+        private val emailQuotaManager: EmailQuotaManager,
         private val okHttpClient: OkHttpClient,
         private val alertFormatter: AlertFormatter,
     ) : NotificationSender {
         override val notifierType: NotifierType = NotifierType.EMAIL
 
         override suspend fun sendNotification(remoteAlert: RemoteAlert): Boolean {
+            if (!emailQuotaManager.canSendEmail()) {
+                Timber.w("Daily email quota exceeded")
+                return false
+            }
+
             val config = emailConfigDataStore.getConfig()
             val message = alertFormatter.format(remoteAlert)
 
@@ -67,6 +75,8 @@ class MailgunEmailNotificationSender
                     Timber.e("Failed to send email: ${response.code} - ${response.message}")
                     return false
                 }
+
+                emailQuotaManager.recordEmailSent()
                 Timber.d("Email sent successfully")
                 return true
             }
@@ -85,6 +95,18 @@ class MailgunEmailNotificationSender
 
         override suspend fun clearConfig() = emailConfigDataStore.clearConfig()
 
-        override suspend fun validateConfig(alertMediumConfig: AlertMediumConfig): ConfigValidationResult =
-            emailConfigDataStore.validateConfig(alertMediumConfig)
+        override suspend fun validateConfig(alertMediumConfig: AlertMediumConfig): ConfigValidationResult {
+            if (!emailQuotaManager.canSendEmail()) {
+                return ConfigValidationResult(
+                    isValid = false,
+                    errors =
+                        mapOf(
+                            EMAIL_DAILY_QUOTA to
+                                "Unfortunately, the email notification has limited quota that has been exceeded. Please try again tomorrow.",
+                        ),
+                )
+            }
+
+            return emailConfigDataStore.validateConfig(alertMediumConfig)
+        }
     }
