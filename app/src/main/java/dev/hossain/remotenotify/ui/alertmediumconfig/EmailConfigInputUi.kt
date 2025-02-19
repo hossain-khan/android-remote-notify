@@ -19,7 +19,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import dev.hossain.remotenotify.data.ConfigValidationResult
-import dev.hossain.remotenotify.data.MailgunConfigDataStore.Companion.ValidationKeys
+import dev.hossain.remotenotify.data.EmailConfigDataStore.Companion.ValidationKeys
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.notifier.mailgun.MailgunConfig
 
