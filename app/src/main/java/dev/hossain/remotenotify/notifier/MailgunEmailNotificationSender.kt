@@ -14,6 +14,11 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
+/**
+ * Sends email notification using Mailgun API.
+ * - https://documentation.mailgun.com/docs/mailgun/user-manual/get-started/
+ * - https://documentation.mailgun.com/en/latest/api-sending.html#sending
+ */
 @ContributesMultibinding(AppScope::class)
 @Named("email")
 class MailgunEmailNotificationSender
@@ -29,15 +34,15 @@ class MailgunEmailNotificationSender
             val config = mailgunConfigDataStore.getConfig()
             val message = alertFormatter.format(remoteAlert)
 
-        /*
-         * Example cURL command:
-         * curl -s --user 'api:API_KEY' \
-         * https://api.mailgun.net/v3/notify.liquidlabs.ca/messages \
-         * -F from='Mailgun Sandbox <postmaster@notify.liquidlabs.ca>' \
-         * -F to='Recipient Name <bob@emai.com>' \
-         * -F subject='Battery Alert' \
-         * -F text='Your battery is running low.'
-         */
+            /*
+             * Example cURL command:
+             * curl -s --user 'api:API_KEY' \
+             * https://api.mailgun.net/v3/notify.liquidlabs.ca/messages \
+             * -F from='Mailgun Sandbox <postmaster@notify.liquidlabs.ca>' \
+             * -F to='Recipient Name <bob@emai.com>' \
+             * -F subject='Battery Alert' \
+             * -F text='Your battery is running low.'
+             */
             val formBody =
                 FormBody
                     .Builder()
@@ -50,7 +55,7 @@ class MailgunEmailNotificationSender
             val request =
                 Request
                     .Builder()
-                    .url("https://api.mailgun.net/v3/notify.liquidlabs.ca/messages")
+                    .url("https://api.mailgun.net/v3/${config.domain}/messages")
                     // TODO fix me
                     // .addHeader("Authorization", "Basic " + config.apiKey.toByteArray().encodeBase64())
                     .post(formBody)
