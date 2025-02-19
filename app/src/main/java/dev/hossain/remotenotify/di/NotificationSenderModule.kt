@@ -3,6 +3,7 @@ package dev.hossain.remotenotify.di
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
+import dev.hossain.remotenotify.notifier.MailgunEmailNotificationSender
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.TelegramNotificationSender
 import dev.hossain.remotenotify.notifier.TwilioNotificationSender
@@ -21,4 +22,8 @@ abstract class NotificationSenderModule {
     @Binds
     @IntoSet
     abstract fun bindTwilioNotificationSender(sender: TwilioNotificationSender): NotificationSender
+
+    @Binds
+    @IntoSet
+    abstract fun bindMailgunEmailNotificationSender(sender: MailgunEmailNotificationSender): NotificationSender
 }

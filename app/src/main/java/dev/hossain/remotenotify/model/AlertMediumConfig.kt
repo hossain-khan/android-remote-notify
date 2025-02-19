@@ -36,4 +36,11 @@ sealed interface AlertMediumConfig {
         val fromPhone: String,
         val toPhone: String,
     ) : AlertMediumConfig
+
+    data class EmailConfig(
+        val apiKey: String,
+        val domain: String,
+        val fromEmail: String,
+        val toEmail: String,
+    ) : AlertMediumConfig
 }

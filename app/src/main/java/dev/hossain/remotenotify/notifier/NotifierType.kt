@@ -6,7 +6,8 @@ package dev.hossain.remotenotify.notifier
 enum class NotifierType(
     val displayName: String,
 ) {
+    EMAIL("Email"),
     TELEGRAM("Telegram"),
-    WEBHOOK_REST_API("Webhook"),
     TWILIO("Twilio"),
+    WEBHOOK_REST_API("Webhook"),
 }

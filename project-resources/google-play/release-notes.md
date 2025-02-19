@@ -1,6 +1,12 @@
 # What's New
 📝 Release notes 
 
+## Release v1.4
+- Initial 1.x release of 'Remote Notify'! 🎉
+- Monitor battery 🔋 and storage 💾 levels of your remote Android devices.
+- Set up custom alerts and receive notifications via Email, Twilio SMS, Telegram, and REST webhooks.
+- 🆕 Added email ✉️ as a notification medium.
+
 ## Release v1.3
 - Initial 1.x release of 'Remote Notify'! 🎉
 - Monitor battery 🔋 and storage 💾 levels of your remote Android devices.

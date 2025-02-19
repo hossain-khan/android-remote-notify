@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.androidx.room)
@@ -25,6 +27,14 @@ android {
         versionCode = 5
         // 📣 Don't forget to update release notes! 🤓
         versionName = "1.4"
+
+        // Read key or other properties from local.properties
+        val localProperties =
+            project.rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use {
+                Properties().apply { load(it) }
+            }
+        val apiKey = localProperties?.getProperty("EMAIL_API_KEY") ?: "MISSING-KEY"
+        buildConfigField("String", "EMAIL_API_KEY", "\"$apiKey\"")
 
         // Git commit hash to identify build source
         buildConfigField("String", "GIT_COMMIT_HASH", "\"${getGitCommitHash()}\"")

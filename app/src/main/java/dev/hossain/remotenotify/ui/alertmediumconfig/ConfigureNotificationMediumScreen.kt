@@ -263,6 +263,14 @@ fun ConfigureNotificationMediumUi(
             }
 
             when (state.notifierType) {
+                NotifierType.EMAIL -> {
+                    EmailConfigInputUi(
+                        alertMediumConfig = state.alertMediumConfig,
+                        configValidationResult = state.configValidationResult,
+                        shouldShowValidationError = state.showValidationError,
+                        onConfigUpdate = onConfigUpdate,
+                    )
+                }
                 NotifierType.TELEGRAM -> {
                     TelegramConfigInputUi(
                         alertMediumConfig = state.alertMediumConfig,
