@@ -32,7 +32,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewDynamicColors
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
@@ -49,6 +50,7 @@ import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.toIconResId
+import dev.hossain.remotenotify.theme.ComposeAppTheme
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -297,13 +299,16 @@ private fun AlertTypeSelector(
     }
 }
 
-@Preview(showBackground = true)
 @Composable
+@PreviewLightDark
+@PreviewDynamicColors
 fun PreviewAddNewRemoteAlertUi() {
-    AddNewRemoteAlertUi(
-        state =
-            AddNewRemoteAlertScreen.State(
-                eventSink = {},
-            ),
-    )
+    ComposeAppTheme {
+        AddNewRemoteAlertUi(
+            state =
+                AddNewRemoteAlertScreen.State(
+                    eventSink = {},
+                ),
+        )
+    }
 }

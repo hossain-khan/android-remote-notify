@@ -47,6 +47,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.PreviewDynamicColors
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.foundation.rememberAnsweringNavigator
@@ -63,6 +65,7 @@ import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
+import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen
 import dev.hossain.remotenotify.worker.DEFAULT_PERIODIC_INTERVAL_MINUTES
 import dev.hossain.remotenotify.worker.sendPeriodicWorkRequest
@@ -478,3 +481,41 @@ private fun NotifierType.iconResId(): Int =
         NotifierType.TWILIO -> R.drawable.twilio_logo_outline
         NotifierType.WEBHOOK_REST_API -> R.drawable.webhook_24dp
     }
+
+@Composable
+@PreviewLightDark
+@PreviewDynamicColors
+private fun PreviewNotificationMediumListUi() {
+    ComposeAppTheme {
+        NotificationMediumListUi(
+            state =
+                NotificationMediumListScreen.State(
+                    workerIntervalMinutes = 60,
+                    notifiers =
+                        listOf(
+                            NotificationMediumListScreen.NotifierMediumInfo(
+                                notifierType = NotifierType.EMAIL,
+                                name = "Email",
+                                isConfigured = true,
+                            ),
+                            NotificationMediumListScreen.NotifierMediumInfo(
+                                notifierType = NotifierType.TELEGRAM,
+                                name = "Telegram",
+                                isConfigured = false,
+                            ),
+                            NotificationMediumListScreen.NotifierMediumInfo(
+                                notifierType = NotifierType.TWILIO,
+                                name = "Twilio SMS",
+                                isConfigured = true,
+                            ),
+                            NotificationMediumListScreen.NotifierMediumInfo(
+                                notifierType = NotifierType.WEBHOOK_REST_API,
+                                name = "Webhook",
+                                isConfigured = false,
+                            ),
+                        ),
+                    eventSink = {},
+                ),
+        )
+    }
+}
