@@ -50,7 +50,7 @@ class MailgunEmailNotificationSender
                     .Builder()
                     .add("from", config.fromEmail)
                     .add("to", config.toEmail)
-                    .add("subject", "Remote Alert: ${remoteAlert.javaClass.simpleName}")
+                    .add("subject", "Remote Notify Alert: ${remoteAlert.javaClass.simpleName}")
                     .add("text", message)
                     .build()
 
