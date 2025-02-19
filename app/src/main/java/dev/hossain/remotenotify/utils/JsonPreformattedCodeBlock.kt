@@ -32,7 +32,7 @@ fun PreformattedCodeBlock(
         // Allows anyone to copy the content of code block
         SelectionContainer {
             Text(
-                text = highlightJsonSyntax(codeBlock),
+                text = highlightJsonSyntax(formatJson(codeBlock)),
                 modifier = Modifier.padding(16.dp),
                 style =
                     MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace, fontSize = 10.sp),

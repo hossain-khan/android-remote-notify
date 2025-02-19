@@ -47,21 +47,25 @@ import com.slack.circuit.runtime.screen.Screen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.EmailQuotaManager
 import dev.hossain.remotenotify.data.EmailQuotaManager.Companion.ValidationKeys.EMAIL_DAILY_QUOTA
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
+import dev.hossain.remotenotify.model.DeviceAlert
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.notifier.of
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen.ConfigurationResult
+import dev.hossain.remotenotify.utils.PreformattedCodeBlock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
+import org.intellij.lang.annotations.Language
 import timber.log.Timber
 
 @Parcelize
@@ -74,6 +78,10 @@ data class ConfigureNotificationMediumScreen constructor(
         val configValidationResult: ConfigValidationResult,
         val alertMediumConfig: AlertMediumConfig?,
         val showValidationError: Boolean,
+        /**
+         * Sample JSON payload preview, only shown for webhook notifier.
+         */
+        val sampleJsonPayload: String,
         val snackbarMessage: String?,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
@@ -111,6 +119,7 @@ class ConfigureNotificationMediumPresenter
         @Assisted private val navigator: Navigator,
         private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
         private val emailQuotaManager: EmailQuotaManager,
+        private val alertFormatter: AlertFormatter,
     ) : Presenter<ConfigureNotificationMediumScreen.State> {
         @Composable
         override fun present(): ConfigureNotificationMediumScreen.State {
@@ -119,6 +128,16 @@ class ConfigureNotificationMediumPresenter
             var snackbarMessage by remember { mutableStateOf<String?>(null) }
             var isConfigured by remember { mutableStateOf(false) }
             var shouldShowValidationError by remember { mutableStateOf(false) }
+            val sampleJsonPayload by remember {
+                mutableStateOf(
+                    alertFormatter.format(
+                        RemoteAlert.StorageAlert(
+                            storageMinSpaceGb = 5,
+                        ),
+                        DeviceAlert.FormatType.JSON,
+                    ),
+                )
+            }
 
             val notificationSender = notifiers.of(senderNotifierType = screen.notifierType)
 
@@ -143,6 +162,7 @@ class ConfigureNotificationMediumPresenter
                 configValidationResult = validationResult,
                 alertMediumConfig = alertMediumConfig,
                 showValidationError = shouldShowValidationError,
+                sampleJsonPayload = sampleJsonPayload,
                 snackbarMessage = snackbarMessage,
             ) { event ->
                 when (event) {
@@ -277,45 +297,7 @@ fun ConfigureNotificationMediumUi(
                     .padding(innerPadding)
                     .padding(16.dp),
         ) {
-            val onConfigUpdate: (AlertMediumConfig?) -> Unit = {
-                state.eventSink(ConfigureNotificationMediumScreen.Event.UpdateConfigValue(it))
-            }
-
-            when (state.notifierType) {
-                NotifierType.EMAIL -> {
-                    EmailConfigInputUi(
-                        alertMediumConfig = state.alertMediumConfig,
-                        configValidationResult = state.configValidationResult,
-                        shouldShowValidationError = state.showValidationError,
-                        onConfigUpdate = onConfigUpdate,
-                    )
-                }
-                NotifierType.TELEGRAM -> {
-                    TelegramConfigInputUi(
-                        alertMediumConfig = state.alertMediumConfig,
-                        configValidationResult = state.configValidationResult,
-                        shouldShowValidationError = state.showValidationError,
-                        onConfigUpdate = onConfigUpdate,
-                    )
-                }
-                NotifierType.WEBHOOK_REST_API -> {
-                    WebhookConfigInputUi(
-                        alertMediumConfig = state.alertMediumConfig,
-                        configValidationResult = state.configValidationResult,
-                        shouldShowValidationError = state.showValidationError,
-                        onConfigUpdate = onConfigUpdate,
-                    )
-                }
-
-                NotifierType.TWILIO -> {
-                    TwilioConfigInputUi(
-                        alertMediumConfig = state.alertMediumConfig,
-                        configValidationResult = state.configValidationResult,
-                        shouldShowValidationError = state.showValidationError,
-                        onConfigUpdate = onConfigUpdate,
-                    )
-                }
-            }
+            NotifierConfigInputUi(state)
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -341,6 +323,77 @@ fun ConfigureNotificationMediumUi(
                     Text("Test Configuration")
                 }
             }
+
+            // Additional optional UI show based on notifier type
+            NotifierConfigSuffixUi(state)
+        }
+    }
+}
+
+@Composable
+private fun NotifierConfigInputUi(state: ConfigureNotificationMediumScreen.State) {
+    val onConfigUpdate: (AlertMediumConfig?) -> Unit = {
+        state.eventSink(ConfigureNotificationMediumScreen.Event.UpdateConfigValue(it))
+    }
+
+    val configInputUi: @Composable () -> Unit = {
+        when (state.notifierType) {
+            NotifierType.EMAIL ->
+                EmailConfigInputUi(
+                    state.alertMediumConfig,
+                    state.configValidationResult,
+                    state.showValidationError,
+                    onConfigUpdate,
+                )
+
+            NotifierType.TELEGRAM ->
+                TelegramConfigInputUi(
+                    state.alertMediumConfig,
+                    state.configValidationResult,
+                    state.showValidationError,
+                    onConfigUpdate,
+                )
+
+            NotifierType.WEBHOOK_REST_API ->
+                WebhookConfigInputUi(
+                    state.alertMediumConfig,
+                    state.configValidationResult,
+                    state.showValidationError,
+                    onConfigUpdate,
+                )
+
+            NotifierType.TWILIO ->
+                TwilioConfigInputUi(
+                    state.alertMediumConfig,
+                    state.configValidationResult,
+                    state.showValidationError,
+                    onConfigUpdate,
+                )
+        }
+    }
+    configInputUi()
+}
+
+/**
+ * Additional UI shown after the configure button and test configuration button.
+ */
+@Composable
+private fun NotifierConfigSuffixUi(
+    state: ConfigureNotificationMediumScreen.State,
+    modifier: Modifier = Modifier,
+) {
+    when (state.notifierType) {
+        NotifierType.WEBHOOK_REST_API -> {
+            // For webhook, show preview of JSON payload
+            Column(modifier = modifier.fillMaxWidth()) {
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Text("Sample JSON Payload", style = MaterialTheme.typography.titleSmall)
+                PreformattedCodeBlock(codeBlock = state.sampleJsonPayload, modifier = Modifier.fillMaxWidth())
+            }
+        }
+        else -> {
+            // No suffix for other notifiers
         }
     }
 }
@@ -358,6 +411,7 @@ private fun PreviewTelegramConfigurationUi() {
                     alertMediumConfig = AlertMediumConfig.TelegramConfig("bot-token", "chat-id"),
                     showValidationError = false,
                     snackbarMessage = null,
+                    sampleJsonPayload = "",
                     eventSink = {},
                 ),
         )
@@ -378,8 +432,20 @@ private fun PreviewWebhookConfigurationUi() {
                     alertMediumConfig = AlertMediumConfig.WebhookConfig("https://example.com"),
                     showValidationError = false,
                     snackbarMessage = null,
+                    sampleJsonPayload = SAMPLE_JSON,
                     eventSink = {},
                 ),
         )
     }
 }
+
+@Language("JSON")
+private const val SAMPLE_JSON = """
+{
+  "alertType": "STORAGE",
+  "deviceModel": "Samsung SM-S911W",
+  "androidVersion": "14",
+  "availableStorageGb": 2,
+  "isoDateTime": "2025-02-19T18:47:27.899442"
+}
+"""
