@@ -22,9 +22,9 @@ android {
         applicationId = "dev.hossain.remotenotify"
         minSdk = 30
         targetSdk = 35
-        versionCode = 4
+        versionCode = 5
         // 📣 Don't forget to update release notes! 🤓
-        versionName = "1.3"
+        versionName = "1.4"
 
         // Git commit hash to identify build source
         buildConfigField("String", "GIT_COMMIT_HASH", "\"${getGitCommitHash()}\"")
