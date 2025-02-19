@@ -92,7 +92,7 @@ private fun EducationContentUi(eventSink: (AlertsListScreen.Event) -> Unit) {
                         append("primary phone")
                     }
                     append(
-                        " via the notification mediums) about secondary phone's low battery and storage alert based on your configuration.",
+                        " via the notification mediums) about secondary device's low battery and storage alert based on your configuration.",
                     )
                 },
             style = MaterialTheme.typography.bodyLarge,

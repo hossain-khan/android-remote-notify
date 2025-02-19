@@ -16,10 +16,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-private val Context.mailgunConfigDataStore: DataStore<Preferences> by preferencesDataStore(name = "mailgun_config")
+private val Context.emailConfigDataStore: DataStore<Preferences> by preferencesDataStore(name = "email_config")
 
 @SingleIn(AppScope::class)
-class MailgunConfigDataStore
+class EmailConfigDataStore
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
@@ -33,7 +33,7 @@ class MailgunConfigDataStore
         }
 
         private val toEmail: Flow<String?> =
-            context.mailgunConfigDataStore.data
+            context.emailConfigDataStore.data
                 .map { it[TO_EMAIL] }
 
         suspend fun getConfig(): AlertMediumConfig.EmailConfig =
@@ -45,13 +45,13 @@ class MailgunConfigDataStore
             )
 
         suspend fun saveConfig(config: AlertMediumConfig.EmailConfig) {
-            context.mailgunConfigDataStore.edit { preferences ->
+            context.emailConfigDataStore.edit { preferences ->
                 preferences[TO_EMAIL] = config.toEmail
             }
         }
 
         override suspend fun clearConfig() {
-            context.mailgunConfigDataStore.edit { preferences ->
+            context.emailConfigDataStore.edit { preferences ->
                 preferences.clear()
             }
         }

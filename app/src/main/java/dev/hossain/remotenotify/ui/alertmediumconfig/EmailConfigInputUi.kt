@@ -19,7 +19,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import dev.hossain.remotenotify.data.ConfigValidationResult
-import dev.hossain.remotenotify.data.MailgunConfigDataStore.Companion.ValidationKeys
+import dev.hossain.remotenotify.data.EmailConfigDataStore.Companion.ValidationKeys
+import dev.hossain.remotenotify.data.EmailQuotaManager.Companion.ValidationKeys.EMAIL_DAILY_QUOTA
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.notifier.mailgun.MailgunConfig
 
@@ -54,6 +55,23 @@ internal fun EmailConfigInputUi(
                     },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Show quota warning
+        Text(
+            text = "⚠️ Limited to 2 emails per day due to service quota limitations.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+        )
+
+        if (shouldShowValidationError && configValidationResult.errors[EMAIL_DAILY_QUOTA] != null) {
+            Text(
+                text = configValidationResult.errors[EMAIL_DAILY_QUOTA]!!,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
             )
         }
 

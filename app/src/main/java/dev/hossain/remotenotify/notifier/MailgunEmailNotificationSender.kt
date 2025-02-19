@@ -4,7 +4,8 @@ import android.util.Base64
 import com.squareup.anvil.annotations.ContributesMultibinding
 import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
-import dev.hossain.remotenotify.data.MailgunConfigDataStore
+import dev.hossain.remotenotify.data.EmailConfigDataStore
+import dev.hossain.remotenotify.data.EmailQuotaManager
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.RemoteAlert
@@ -26,14 +27,20 @@ import android.util.Base64.encodeToString as encodeBase64
 class MailgunEmailNotificationSender
     @Inject
     constructor(
-        private val mailgunConfigDataStore: MailgunConfigDataStore,
+        private val emailConfigDataStore: EmailConfigDataStore,
+        private val emailQuotaManager: EmailQuotaManager,
         private val okHttpClient: OkHttpClient,
         private val alertFormatter: AlertFormatter,
     ) : NotificationSender {
         override val notifierType: NotifierType = NotifierType.EMAIL
 
         override suspend fun sendNotification(remoteAlert: RemoteAlert): Boolean {
-            val config = mailgunConfigDataStore.getConfig()
+            if (!emailQuotaManager.canSendEmail()) {
+                Timber.w("Daily email quota exceeded")
+                return false
+            }
+
+            val config = emailConfigDataStore.getConfig()
             val message = alertFormatter.format(remoteAlert)
 
             /*
@@ -67,24 +74,26 @@ class MailgunEmailNotificationSender
                     Timber.e("Failed to send email: ${response.code} - ${response.message}")
                     return false
                 }
+
+                emailQuotaManager.recordEmailSent()
                 Timber.d("Email sent successfully")
                 return true
             }
         }
 
-        override suspend fun hasValidConfig(): Boolean = mailgunConfigDataStore.hasValidConfig()
+        override suspend fun hasValidConfig(): Boolean = emailConfigDataStore.hasValidConfig()
 
         override suspend fun saveConfig(alertMediumConfig: AlertMediumConfig) {
             when (alertMediumConfig) {
-                is AlertMediumConfig.EmailConfig -> mailgunConfigDataStore.saveConfig(alertMediumConfig)
+                is AlertMediumConfig.EmailConfig -> emailConfigDataStore.saveConfig(alertMediumConfig)
                 else -> throw IllegalArgumentException("Invalid config type: $alertMediumConfig")
             }
         }
 
-        override suspend fun getConfig(): AlertMediumConfig = mailgunConfigDataStore.getConfig()
+        override suspend fun getConfig(): AlertMediumConfig = emailConfigDataStore.getConfig()
 
-        override suspend fun clearConfig() = mailgunConfigDataStore.clearConfig()
+        override suspend fun clearConfig() = emailConfigDataStore.clearConfig()
 
         override suspend fun validateConfig(alertMediumConfig: AlertMediumConfig): ConfigValidationResult =
-            mailgunConfigDataStore.validateConfig(alertMediumConfig)
+            emailConfigDataStore.validateConfig(alertMediumConfig)
     }
