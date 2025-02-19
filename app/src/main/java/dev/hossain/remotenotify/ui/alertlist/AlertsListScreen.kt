@@ -31,8 +31,10 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -53,6 +55,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
+import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertCheckLog
@@ -78,6 +81,7 @@ data object AlertsListScreen : Screen {
         val totalStorage: Long,
         val isAnyNotifierConfigured: Boolean,
         val latestAlertCheckLog: AlertCheckLog?,
+        val showFirstTimeDialog: Boolean,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -91,6 +95,8 @@ data object AlertsListScreen : Screen {
         data object AddNotificationDestination : Event()
 
         data object NavigateToAbout : Event()
+
+        data object DismissFirstTimeDialog : Event()
     }
 }
 
@@ -102,6 +108,7 @@ class AlertsListPresenter
         private val batteryMonitor: BatteryMonitor,
         private val storageMonitor: StorageMonitor,
         private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
+        private val appPreferencesDataStore: AppPreferencesDataStore,
     ) : Presenter<AlertsListScreen.State> {
         @Composable
         override fun present(): AlertsListScreen.State {
@@ -128,6 +135,12 @@ class AlertsListPresenter
                     .collect { value = it }
             }
 
+            val showFirstTimeDialog by produceState(false, notifications) {
+                appPreferencesDataStore.isFirstTimeDialogShown.collect { isShown ->
+                    value = !isShown && notifications.isEmpty()
+                }
+            }
+
             return AlertsListScreen.State(
                 remoteAlertConfigs = notifications,
                 batteryPercentage = deviceBatteryLevelPercentage,
@@ -135,6 +148,7 @@ class AlertsListPresenter
                 totalStorage = deviceTotalStorage,
                 isAnyNotifierConfigured = isAnyNotifierConfigured,
                 latestAlertCheckLog = lastCheckLog,
+                showFirstTimeDialog = showFirstTimeDialog,
             ) { event ->
                 when (event) {
                     is AlertsListScreen.Event.DeleteNotification -> {
@@ -155,6 +169,12 @@ class AlertsListPresenter
                     AlertsListScreen.Event.NavigateToAbout -> {
                         navigator.goTo(AboutAppScreen)
                     }
+
+                    AlertsListScreen.Event.DismissFirstTimeDialog -> {
+                        scope.launch {
+                            appPreferencesDataStore.markFirstTimeDialogShown()
+                        }
+                    }
                 }
             }
         }
@@ -173,6 +193,7 @@ fun AlertsListUi(
     state: AlertsListScreen.State,
     modifier: Modifier = Modifier,
 ) {
+    val sheetState: SheetState = rememberModalBottomSheetState()
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -379,7 +400,9 @@ private fun NoNotifierConfiguredCard(
         Column(
             modifier = Modifier.padding(16.dp),
         ) {
-            Text(text = "No notification medium configured. Please configure one.")
+            Text(
+                text = "You haven't set up a notification method yet. \n\nConfigure one now to receive alerts when your battery or storage level drops below your chosen limit.",
+            )
             Spacer(modifier = Modifier.size(8.dp))
             Button(onClick = onConfigureClick) {
                 Row(
@@ -619,6 +642,7 @@ fun PreviewAlertsListUi() {
                 totalStorage = 100,
                 isAnyNotifierConfigured = false,
                 latestAlertCheckLog = null,
+                showFirstTimeDialog = false,
                 eventSink = {},
             ),
     )
@@ -646,6 +670,7 @@ fun PreviewAlertsListUiWithLastCheck() {
                         alertType = AlertType.BATTERY,
                         isAlertSent = true,
                     ),
+                showFirstTimeDialog = false,
                 eventSink = {},
             ),
     )
