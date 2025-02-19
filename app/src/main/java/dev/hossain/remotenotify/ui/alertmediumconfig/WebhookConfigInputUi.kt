@@ -93,7 +93,6 @@ internal fun WebhookConfigInputUi(
                 } else {
                     Column {
                         Text("Enter the URL to receive notifications via webhook")
-                        Text("HTTP POST with json payload will be sent to the URL.")
                     }
                 }
             },
