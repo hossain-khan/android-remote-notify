@@ -217,3 +217,13 @@ val surfaceContainerLowDarkHighContrast = Color(0xFF1C211C)
 val surfaceContainerDarkHighContrast = Color(0xFF2C322D)
 val surfaceContainerHighDarkHighContrast = Color(0xFF373D38)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF434843)
+
+// JSON Syntax Highlighter
+val jsonKeyColor = Color(0xFF661075)
+val jsonKeyColorDark = Color(0xFFE1A8EF)
+val jsonStringColor = Color(0xFF09830E)
+val jsonStringColorDark = Color(0xFF99D69D)
+val jsonNumberColor = Color(0xFFA22320)
+val jsonNumberColorDark = Color(0xFFFF8B86)
+val jsonBooleanColor = Color(0xFF1E88E5)
+val jsonBooleanColorDark = Color(0xFF8BB8F4)
