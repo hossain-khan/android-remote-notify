@@ -16,13 +16,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -37,9 +37,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -68,7 +70,6 @@ import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.ui.about.AboutAppScreen
 import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
 import dev.hossain.remotenotify.ui.alertmediumlist.NotificationMediumListScreen
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
@@ -82,7 +83,7 @@ data object AlertsListScreen : Screen {
         val totalStorage: Long,
         val isAnyNotifierConfigured: Boolean,
         val latestAlertCheckLog: AlertCheckLog?,
-        val showFirstTimeDialog: Boolean,
+        val showEducationSheet: Boolean,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -96,6 +97,8 @@ data object AlertsListScreen : Screen {
         data object AddNotificationDestination : Event()
 
         data object NavigateToAbout : Event()
+
+        data object ShowEducationSheet : Event()
 
         data object DismissFirstTimeDialog : Event()
     }
@@ -117,6 +120,7 @@ class AlertsListPresenter
             val deviceBatteryLevelPercentage = remember { batteryMonitor.getBatteryLevel() }
             val deviceAvailableStorage = remember { storageMonitor.getAvailableStorageInGB() }
             val deviceTotalStorage = remember { storageMonitor.getTotalStorageInGB() }
+            var showEducationSheet by remember { mutableStateOf(false) }
 
             val notifications by produceState<List<RemoteAlert>>(emptyList()) {
                 remoteAlertRepository
@@ -136,16 +140,6 @@ class AlertsListPresenter
                     .collect { value = it }
             }
 
-            val showFirstTimeDialog by produceState(false, notifications) {
-                appPreferencesDataStore.isFirstTimeDialogShown.collect { isShown ->
-                    if (!isShown) {
-                        // Delay for ~1 second so that user is not startled immediately
-                        delay(1_500)
-                    }
-                    value = !isShown && notifications.isEmpty()
-                }
-            }
-
             return AlertsListScreen.State(
                 remoteAlertConfigs = notifications,
                 batteryPercentage = deviceBatteryLevelPercentage,
@@ -153,7 +147,7 @@ class AlertsListPresenter
                 totalStorage = deviceTotalStorage,
                 isAnyNotifierConfigured = isAnyNotifierConfigured,
                 latestAlertCheckLog = lastCheckLog,
-                showFirstTimeDialog = showFirstTimeDialog,
+                showEducationSheet = showEducationSheet,
             ) { event ->
                 when (event) {
                     is AlertsListScreen.Event.DeleteNotification -> {
@@ -176,8 +170,17 @@ class AlertsListPresenter
                     }
 
                     AlertsListScreen.Event.DismissFirstTimeDialog -> {
+                        Timber.d("Dismiss the first time user education dialog shown")
                         scope.launch {
-                            Timber.d("Marking first time user dialog shown")
+                            showEducationSheet = false
+                            appPreferencesDataStore.markFirstTimeDialogShown()
+                        }
+                    }
+
+                    AlertsListScreen.Event.ShowEducationSheet -> {
+                        Timber.d("Showing the first time user education dialog shown")
+                        scope.launch {
+                            showEducationSheet = true
                             appPreferencesDataStore.markFirstTimeDialogShown()
                         }
                     }
@@ -269,7 +272,13 @@ fun AlertsListUi(
 
                 // Show empty state or user configured alerts
                 if (state.remoteAlertConfigs.isEmpty()) {
-                    item(key = "alert_empty_view") { EmptyNotificationsState() }
+                    item(key = "alert_empty_view") {
+                        EmptyNotificationsState(
+                            onLearnMoreClick = {
+                                state.eventSink(AlertsListScreen.Event.ShowEducationSheet)
+                            },
+                        )
+                    }
                 } else {
                     item(key = "alerts_header") {
                         Text(
@@ -292,7 +301,7 @@ fun AlertsListUi(
                 }
             }
         }
-        if (state.showFirstTimeDialog) {
+        if (state.showEducationSheet) {
             FirstTimeUserEducationSheetUi(eventSink = state.eventSink, sheetState = sheetState)
         }
     }
@@ -579,9 +588,12 @@ fun NotificationItem(
 }
 
 @Composable
-private fun EmptyNotificationsState() {
+private fun EmptyNotificationsState(onLearnMoreClick: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(32.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
@@ -595,6 +607,12 @@ private fun EmptyNotificationsState() {
             "No alerts configured",
             style = MaterialTheme.typography.titleMedium,
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        ElevatedButton(
+            onClick = onLearnMoreClick,
+        ) {
+            Text("Learn More")
+        }
     }
 }
 
@@ -653,7 +671,7 @@ fun PreviewAlertsListUi() {
                 totalStorage = 100,
                 isAnyNotifierConfigured = false,
                 latestAlertCheckLog = null,
-                showFirstTimeDialog = false,
+                showEducationSheet = false,
                 eventSink = {},
             ),
     )
@@ -681,7 +699,7 @@ fun PreviewAlertsListUiWithLastCheck() {
                         alertType = AlertType.BATTERY,
                         isAlertSent = true,
                     ),
-                showFirstTimeDialog = false,
+                showEducationSheet = false,
                 eventSink = {},
             ),
     )
