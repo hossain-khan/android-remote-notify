@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.notifier
 
+import android.util.Base64
 import com.squareup.anvil.annotations.ContributesMultibinding
 import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
@@ -13,6 +14,7 @@ import okhttp3.Request
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
+import android.util.Base64.encodeToString as encodeBase64
 
 /**
  * Sends email notification using Mailgun API.
@@ -56,8 +58,7 @@ class MailgunEmailNotificationSender
                 Request
                     .Builder()
                     .url("https://api.mailgun.net/v3/${config.domain}/messages")
-                    // TODO fix me
-                    // .addHeader("Authorization", "Basic " + config.apiKey.toByteArray().encodeBase64())
+                    .addHeader("Authorization", "Basic " + encodeBase64("api:${config.apiKey}".toByteArray(), Base64.NO_WRAP))
                     .post(formBody)
                     .build()
 
