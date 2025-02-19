@@ -34,6 +34,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 
+/**
+ * UI for first time user education sheet.
+ * - https://developer.android.com/develop/ui/compose/components/bottom-sheets
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FirstTimeUserEducationSheetUi(

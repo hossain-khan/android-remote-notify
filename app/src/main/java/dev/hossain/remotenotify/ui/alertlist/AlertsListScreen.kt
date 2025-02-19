@@ -172,6 +172,7 @@ class AlertsListPresenter
 
                     AlertsListScreen.Event.DismissFirstTimeDialog -> {
                         scope.launch {
+                            Timber.d("Marking first time user dialog shown")
                             appPreferencesDataStore.markFirstTimeDialogShown()
                         }
                     }
@@ -285,6 +286,9 @@ fun AlertsListUi(
                     }
                 }
             }
+        }
+        if (state.showFirstTimeDialog) {
+            FirstTimeUserEducationSheetUi(eventSink = state.eventSink, sheetState = sheetState)
         }
     }
 }
