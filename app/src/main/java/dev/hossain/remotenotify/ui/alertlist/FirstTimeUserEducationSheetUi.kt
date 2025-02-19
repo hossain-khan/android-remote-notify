@@ -85,13 +85,15 @@ private fun EducationContentUi(eventSink: (AlertsListScreen.Event) -> Unit) {
                 buildAnnotatedString {
                     append("This app is designed to be installed on a ")
                     withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("secondary phone")
+                        append("secondary phone/device")
                     }
                     append(" that can notify you (on your ")
                     withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                         append("primary phone")
                     }
-                    append(") about its battery and storage alert based on your configuration.")
+                    append(
+                        " via the notification mediums) about secondary phone's low battery and storage alert based on your configuration.",
+                    )
                 },
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,

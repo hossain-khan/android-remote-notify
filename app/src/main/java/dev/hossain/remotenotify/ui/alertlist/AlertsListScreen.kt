@@ -68,6 +68,7 @@ import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.ui.about.AboutAppScreen
 import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
 import dev.hossain.remotenotify.ui.alertmediumlist.NotificationMediumListScreen
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
@@ -137,6 +138,10 @@ class AlertsListPresenter
 
             val showFirstTimeDialog by produceState(false, notifications) {
                 appPreferencesDataStore.isFirstTimeDialogShown.collect { isShown ->
+                    if (!isShown) {
+                        // Delay for ~1 second so that user is not startled immediately
+                        delay(1_500)
+                    }
                     value = !isShown && notifications.isEmpty()
                 }
             }
@@ -194,7 +199,7 @@ fun AlertsListUi(
     state: AlertsListScreen.State,
     modifier: Modifier = Modifier,
 ) {
-    val sheetState: SheetState = rememberModalBottomSheetState()
+    val sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -405,7 +410,9 @@ private fun NoNotifierConfiguredCard(
             modifier = Modifier.padding(16.dp),
         ) {
             Text(
-                text = "You haven't set up a notification method yet. \n\nConfigure one now to receive alerts when your battery or storage level drops below your chosen limit.",
+                text =
+                    "You haven't set up a notification method yet." +
+                        "\n\nConfigure one now to receive alerts when your battery or storage level drops below your chosen limit.",
             )
             Spacer(modifier = Modifier.size(8.dp))
             Button(onClick = onConfigureClick) {
