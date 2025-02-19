@@ -3,6 +3,7 @@ package dev.hossain.remotenotify.data
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -25,6 +26,7 @@ class AppPreferencesDataStore
         companion object {
             private val WORKER_INTERVAL_KEY = longPreferencesKey("worker_interval_minutes")
             private val LAST_REVIEW_REQUEST_KEY = longPreferencesKey("last_review_request_time")
+            private val FIRST_TIME_DIALOG_SHOWN = booleanPreferencesKey("first_time_dialog_shown")
         }
 
         suspend fun saveWorkerInterval(intervalMinutes: Long) {
@@ -50,4 +52,16 @@ class AppPreferencesDataStore
                 .map { preferences ->
                     preferences[LAST_REVIEW_REQUEST_KEY] ?: 0L
                 }
+
+        val isFirstTimeDialogShown: Flow<Boolean> =
+            context.appPreferencesDataStore.data
+                .map { preferences ->
+                    preferences[FIRST_TIME_DIALOG_SHOWN] ?: false
+                }
+
+        suspend fun markFirstTimeDialogShown() {
+            context.appPreferencesDataStore.edit { preferences ->
+                preferences[FIRST_TIME_DIALOG_SHOWN] = true
+            }
+        }
     }

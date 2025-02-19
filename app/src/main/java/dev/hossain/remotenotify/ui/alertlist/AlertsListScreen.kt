@@ -16,13 +16,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -31,13 +31,17 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -53,6 +57,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
+import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertCheckLog
@@ -78,6 +83,7 @@ data object AlertsListScreen : Screen {
         val totalStorage: Long,
         val isAnyNotifierConfigured: Boolean,
         val latestAlertCheckLog: AlertCheckLog?,
+        val showEducationSheet: Boolean,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -91,6 +97,10 @@ data object AlertsListScreen : Screen {
         data object AddNotificationDestination : Event()
 
         data object NavigateToAbout : Event()
+
+        data object ShowEducationSheet : Event()
+
+        data object DismissFirstTimeDialog : Event()
     }
 }
 
@@ -102,6 +112,7 @@ class AlertsListPresenter
         private val batteryMonitor: BatteryMonitor,
         private val storageMonitor: StorageMonitor,
         private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
+        private val appPreferencesDataStore: AppPreferencesDataStore,
     ) : Presenter<AlertsListScreen.State> {
         @Composable
         override fun present(): AlertsListScreen.State {
@@ -109,6 +120,7 @@ class AlertsListPresenter
             val deviceBatteryLevelPercentage = remember { batteryMonitor.getBatteryLevel() }
             val deviceAvailableStorage = remember { storageMonitor.getAvailableStorageInGB() }
             val deviceTotalStorage = remember { storageMonitor.getTotalStorageInGB() }
+            var showEducationSheet by remember { mutableStateOf(false) }
 
             val notifications by produceState<List<RemoteAlert>>(emptyList()) {
                 remoteAlertRepository
@@ -135,6 +147,7 @@ class AlertsListPresenter
                 totalStorage = deviceTotalStorage,
                 isAnyNotifierConfigured = isAnyNotifierConfigured,
                 latestAlertCheckLog = lastCheckLog,
+                showEducationSheet = showEducationSheet,
             ) { event ->
                 when (event) {
                     is AlertsListScreen.Event.DeleteNotification -> {
@@ -155,6 +168,22 @@ class AlertsListPresenter
                     AlertsListScreen.Event.NavigateToAbout -> {
                         navigator.goTo(AboutAppScreen)
                     }
+
+                    AlertsListScreen.Event.DismissFirstTimeDialog -> {
+                        Timber.d("Dismiss the first time user education dialog shown")
+                        scope.launch {
+                            showEducationSheet = false
+                            appPreferencesDataStore.markFirstTimeDialogShown()
+                        }
+                    }
+
+                    AlertsListScreen.Event.ShowEducationSheet -> {
+                        Timber.d("Showing the first time user education dialog shown")
+                        scope.launch {
+                            showEducationSheet = true
+                            appPreferencesDataStore.markFirstTimeDialogShown()
+                        }
+                    }
                 }
             }
         }
@@ -173,6 +202,7 @@ fun AlertsListUi(
     state: AlertsListScreen.State,
     modifier: Modifier = Modifier,
 ) {
+    val sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -242,7 +272,13 @@ fun AlertsListUi(
 
                 // Show empty state or user configured alerts
                 if (state.remoteAlertConfigs.isEmpty()) {
-                    item(key = "alert_empty_view") { EmptyNotificationsState() }
+                    item(key = "alert_empty_view") {
+                        EmptyNotificationsState(
+                            onLearnMoreClick = {
+                                state.eventSink(AlertsListScreen.Event.ShowEducationSheet)
+                            },
+                        )
+                    }
                 } else {
                     item(key = "alerts_header") {
                         Text(
@@ -264,6 +300,9 @@ fun AlertsListUi(
                     }
                 }
             }
+        }
+        if (state.showEducationSheet) {
+            FirstTimeUserEducationSheetUi(eventSink = state.eventSink, sheetState = sheetState)
         }
     }
 }
@@ -379,7 +418,11 @@ private fun NoNotifierConfiguredCard(
         Column(
             modifier = Modifier.padding(16.dp),
         ) {
-            Text(text = "No notification medium configured. Please configure one.")
+            Text(
+                text =
+                    "You haven't set up a notification method yet." +
+                        "\n\nConfigure one now to receive alerts when your battery or storage level drops below your chosen limit.",
+            )
             Spacer(modifier = Modifier.size(8.dp))
             Button(onClick = onConfigureClick) {
                 Row(
@@ -545,9 +588,12 @@ fun NotificationItem(
 }
 
 @Composable
-private fun EmptyNotificationsState() {
+private fun EmptyNotificationsState(onLearnMoreClick: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(32.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
@@ -561,6 +607,12 @@ private fun EmptyNotificationsState() {
             "No alerts configured",
             style = MaterialTheme.typography.titleMedium,
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        ElevatedButton(
+            onClick = onLearnMoreClick,
+        ) {
+            Text("Learn More")
+        }
     }
 }
 
@@ -619,6 +671,7 @@ fun PreviewAlertsListUi() {
                 totalStorage = 100,
                 isAnyNotifierConfigured = false,
                 latestAlertCheckLog = null,
+                showEducationSheet = false,
                 eventSink = {},
             ),
     )
@@ -646,6 +699,7 @@ fun PreviewAlertsListUiWithLastCheck() {
                         alertType = AlertType.BATTERY,
                         isAlertSent = true,
                     ),
+                showEducationSheet = false,
                 eventSink = {},
             ),
     )
