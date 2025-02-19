@@ -34,6 +34,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewDynamicColors
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
@@ -54,6 +56,7 @@ import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.notifier.of
+import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen.ConfigurationResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -361,10 +364,11 @@ private fun PreviewTelegramConfigurationUi() {
     }
 }
 
-@Preview
 @Composable
+@PreviewLightDark
+@PreviewDynamicColors
 private fun PreviewWebhookConfigurationUi() {
-    MaterialTheme {
+    ComposeAppTheme {
         ConfigureNotificationMediumUi(
             state =
                 ConfigureNotificationMediumScreen.State(

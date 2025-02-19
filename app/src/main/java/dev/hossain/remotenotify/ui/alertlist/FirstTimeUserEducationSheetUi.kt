@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,7 +31,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewDynamicColors
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 
@@ -125,12 +127,15 @@ private fun EducationContentUi(eventSink: (AlertsListScreen.Event) -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
 @Composable
+@PreviewLightDark
+@PreviewDynamicColors
 fun PreviewFirstTimeUserEducationSheetUi() {
     ComposeAppTheme {
-        EducationContentUi(
-            eventSink = { /* Preview event sink */ },
-        )
+        Surface {
+            EducationContentUi(
+                eventSink = { /* Preview event sink */ },
+            )
+        }
     }
 }

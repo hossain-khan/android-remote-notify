@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -16,7 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewDynamicColors
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.InAppReviewManager
@@ -64,10 +66,13 @@ fun FeedbackAndRequestMediumUi() {
     }
 }
 
-@Preview(showBackground = true)
 @Composable
+@PreviewLightDark
+@PreviewDynamicColors
 fun PreviewRatingSection() {
     ComposeAppTheme {
-        FeedbackAndRequestMediumUi()
+        Surface {
+            FeedbackAndRequestMediumUi()
+        }
     }
 }
