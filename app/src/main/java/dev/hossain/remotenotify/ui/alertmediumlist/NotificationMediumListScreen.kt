@@ -473,7 +473,8 @@ private fun formatDuration(minutes: Int): String =
 @DrawableRes
 private fun NotifierType.iconResId(): Int =
     when (this) {
+        NotifierType.EMAIL -> R.drawable.mail_24dp
         NotifierType.TELEGRAM -> R.drawable.telegram_logo_outline
-        NotifierType.WEBHOOK_REST_API -> R.drawable.webhook_24dp
         NotifierType.TWILIO -> R.drawable.twilio_logo_outline
+        NotifierType.WEBHOOK_REST_API -> R.drawable.webhook_24dp
     }
