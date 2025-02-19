@@ -6,7 +6,6 @@ import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.EmailConfigDataStore
 import dev.hossain.remotenotify.data.EmailQuotaManager
-import dev.hossain.remotenotify.data.EmailQuotaManager.Companion.ValidationKeys.EMAIL_DAILY_QUOTA
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.RemoteAlert
@@ -95,18 +94,6 @@ class MailgunEmailNotificationSender
 
         override suspend fun clearConfig() = emailConfigDataStore.clearConfig()
 
-        override suspend fun validateConfig(alertMediumConfig: AlertMediumConfig): ConfigValidationResult {
-            if (!emailQuotaManager.canSendEmail()) {
-                return ConfigValidationResult(
-                    isValid = false,
-                    errors =
-                        mapOf(
-                            EMAIL_DAILY_QUOTA to
-                                "Unfortunately, the email notification has limited quota that has been exceeded. Please try again tomorrow.",
-                        ),
-                )
-            }
-
-            return emailConfigDataStore.validateConfig(alertMediumConfig)
-        }
+        override suspend fun validateConfig(alertMediumConfig: AlertMediumConfig): ConfigValidationResult =
+            emailConfigDataStore.validateConfig(alertMediumConfig)
     }

@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.squareup.anvil.annotations.optional.SingleIn
+import dev.hossain.remotenotify.data.EmailQuotaManager.Companion.ValidationKeys.EMAIL_DAILY_QUOTA
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.di.ApplicationContext
 import kotlinx.coroutines.flow.first
@@ -54,6 +55,20 @@ class EmailQuotaManager
 
             return count < MAX_EMAILS_PER_DAY
         }
+
+        suspend fun validateQuota(): ConfigValidationResult =
+            if (canSendEmail().not()) {
+                ConfigValidationResult(
+                    isValid = false,
+                    errors =
+                        mapOf(
+                            EMAIL_DAILY_QUOTA to
+                                "Unfortunately, the email notification has limited quota that has been exceeded. Please try again tomorrow.",
+                        ),
+                )
+            } else {
+                ConfigValidationResult(isValid = true)
+            }
 
         suspend fun recordEmailSent() {
             context.emailQuotaDataStore.edit { preferences ->

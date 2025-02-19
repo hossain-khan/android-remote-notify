@@ -46,6 +46,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.data.ConfigValidationResult
+import dev.hossain.remotenotify.data.EmailQuotaManager
+import dev.hossain.remotenotify.data.EmailQuotaManager.Companion.ValidationKeys.EMAIL_DAILY_QUOTA
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.RemoteAlert
@@ -105,6 +107,7 @@ class ConfigureNotificationMediumPresenter
         @Assisted private val screen: ConfigureNotificationMediumScreen,
         @Assisted private val navigator: Navigator,
         private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
+        private val emailQuotaManager: EmailQuotaManager,
     ) : Presenter<ConfigureNotificationMediumScreen.State> {
         @Composable
         override fun present(): ConfigureNotificationMediumScreen.State {
@@ -163,6 +166,19 @@ class ConfigureNotificationMediumPresenter
                                 // Save the config first, which will be used to test out config
                                 val config = alertMediumConfig!!
                                 notificationSender.saveConfig(config)
+
+                                // For email notifier, validate quota before sending test
+                                if (screen.notifierType == NotifierType.EMAIL) {
+                                    val emailValidationResult = emailQuotaManager.validateQuota()
+                                    if (!emailValidationResult.isValid) {
+                                        // Show the quota exceeded message if present
+                                        emailValidationResult.errors[EMAIL_DAILY_QUOTA]?.let { error ->
+                                            snackbarMessage = error
+                                            return@launch
+                                        }
+                                    }
+                                }
+
                                 val success =
                                     withContext(Dispatchers.IO) {
                                         val testNotification = RemoteAlert.BatteryAlert(batteryPercentage = 5)
