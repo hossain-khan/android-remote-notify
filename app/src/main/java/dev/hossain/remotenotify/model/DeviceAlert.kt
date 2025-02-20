@@ -2,9 +2,11 @@ package dev.hossain.remotenotify.model
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 data class DeviceAlert(
     val alertType: AlertType,
+    val deviceBrand: String = android.os.Build.BRAND,
     val deviceModel: String = android.os.Build.MODEL,
     val androidVersion: String = android.os.Build.VERSION.RELEASE,
     val batteryLevel: Int? = null,
@@ -28,7 +30,15 @@ data class DeviceAlert(
         val payload =
             DeviceAlertJsonPayload(
                 alertType = alertType,
-                deviceModel = deviceModel,
+                deviceModel = "${android.os.Build.BRAND.replaceFirstChar {
+                    if (it.isLowerCase()) {
+                        it.titlecase(
+                            Locale.US,
+                        )
+                    } else {
+                        it.toString()
+                    }
+                }} ${android.os.Build.MODEL}",
                 androidVersion = androidVersion,
                 batteryLevel = batteryLevel,
                 availableStorageGb = availableStorageGb,
@@ -83,6 +93,7 @@ fun main() {
     val batteryAlert =
         DeviceAlert(
             alertType = AlertType.BATTERY,
+            deviceBrand = "Google",
             deviceModel = "Pixel 7",
             androidVersion = "Android 14",
             batteryLevel = 15,
@@ -91,7 +102,8 @@ fun main() {
     val storageAlert =
         DeviceAlert(
             alertType = AlertType.STORAGE,
-            deviceModel = "Samsung Galaxy S23",
+            deviceBrand = "Samsung",
+            deviceModel = "Galaxy S23",
             androidVersion = "Android 13",
             availableStorageGb = 3.2,
         )
