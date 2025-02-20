@@ -11,7 +11,7 @@ import androidx.work.WorkRequest
 import java.util.concurrent.TimeUnit
 
 internal const val DEFAULT_PERIODIC_INTERVAL_MINUTES = 60L
-internal const val DEVICE_VITALS_CHECKER_WORKER_TAG = "periodic-health-check"
+internal const val DEVICE_VITALS_CHECKER_WORKER_ID = "periodic-health-check"
 
 fun sendOneTimeWorkRequest(context: Context) {
     val workRequest: WorkRequest =
@@ -55,7 +55,7 @@ fun sendPeriodicWorkRequest(
     WorkManager
         .getInstance(context)
         .enqueueUniquePeriodicWork(
-            uniqueWorkName = DEVICE_VITALS_CHECKER_WORKER_TAG,
+            uniqueWorkName = DEVICE_VITALS_CHECKER_WORKER_ID,
             existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.UPDATE,
             request = workRequest,
         )

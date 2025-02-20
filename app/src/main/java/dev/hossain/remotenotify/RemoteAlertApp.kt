@@ -7,7 +7,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerFactory
 import dev.hossain.remotenotify.di.AppComponent
 import dev.hossain.remotenotify.utils.CrashlyticsTree
-import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_TAG
+import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_ID
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -61,7 +61,7 @@ class RemoteAlertApp :
         if (BuildConfig.DEBUG) {
             WorkManager
                 .getInstance(this)
-                .getWorkInfosByTagLiveData(DEVICE_VITALS_CHECKER_WORKER_TAG)
+                .getWorkInfosByTagLiveData(DEVICE_VITALS_CHECKER_WORKER_ID)
                 .observeForever { workInfos ->
                     Timber.d("Work status: ${workInfos?.map { it.state }}")
                 }
