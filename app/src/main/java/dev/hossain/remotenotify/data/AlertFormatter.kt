@@ -30,9 +30,10 @@ class AlertFormatter
                         )
                 }
             return when (formatType) {
+                FormatType.EXTENDED_TEXT -> deviceAlert.toExtendedText()
+                FormatType.HTML -> deviceAlert.toHtml()
                 FormatType.JSON -> deviceAlert.toJson()
                 FormatType.TEXT -> deviceAlert.toText()
-                FormatType.EXTENDED_TEXT -> deviceAlert.toExtendedText()
             }
         }
     }

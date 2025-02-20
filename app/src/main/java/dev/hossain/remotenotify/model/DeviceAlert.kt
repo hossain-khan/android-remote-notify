@@ -15,15 +15,17 @@ data class DeviceAlert(
 ) {
     fun format(formatType: FormatType): String =
         when (formatType) {
+            FormatType.EXTENDED_TEXT -> toExtendedText()
+            FormatType.HTML -> toHtml()
             FormatType.JSON -> toJson()
             FormatType.TEXT -> toText()
-            FormatType.EXTENDED_TEXT -> toExtendedText()
         }
 
     enum class FormatType {
+        EXTENDED_TEXT,
+        HTML,
         JSON,
         TEXT,
-        EXTENDED_TEXT,
     }
 
     internal fun toJson(): String {
@@ -40,42 +42,79 @@ data class DeviceAlert(
     }
 
     internal fun toText(): String {
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy 'at' HH:mm:ss")
         val formattedTimestamp = timestamp.format(formatter)
         val alertMessage =
             when (alertType) {
-                AlertType.BATTERY -> "Battery Level: $batteryLevel%"
-                AlertType.STORAGE -> "Available Storage: $availableStorageGb GB"
+                AlertType.BATTERY -> "Battery Level is at $batteryLevel%"
+                AlertType.STORAGE -> "Storage Space Available: $availableStorageGb GB"
             }
 
-        return """
-            ${alertType.name} Alert!
-            Device: ${deviceName()} ($androidVersion)
-            $alertMessage
-            Time: $formattedTimestamp
-            """.trimIndent()
+        return buildString {
+            append("⚠️ ${alertType.name.toTitleCase()} Alert")
+            append("\n📱 ${deviceName()}")
+            append("\n📍 Android $androidVersion")
+            append("\n${getAlertEmoji()} $alertMessage")
+            append("\n🕒 $formattedTimestamp")
+        }
     }
 
     internal fun toExtendedText(): String {
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val formatter = DateTimeFormatter.ofPattern("EEEE, MMM dd, yyyy 'at' HH:mm:ss")
         val formattedTimestamp = timestamp.format(formatter)
-        val alertMessage =
+        val (message, action) =
             when (alertType) {
-                AlertType.BATTERY -> "Battery Level: $batteryLevel%\nAction: Please check charging status."
-                AlertType.STORAGE -> "Available Storage: $availableStorageGb GB\nAction: Consider clearing storage space."
+                AlertType.BATTERY ->
+                    Pair(
+                        "Device battery is critically low at $batteryLevel%",
+                        "Please connect your device to a charger to prevent shutdown.",
+                    )
+                AlertType.STORAGE ->
+                    Pair(
+                        "Available storage space is low ($availableStorageGb GB)",
+                        "Consider removing unused apps or media files to free up space.",
+                    )
             }
-        val emoji =
+
+        return buildString {
+            append("${getAlertEmoji()} Alert: ${alertType.name.toTitleCase()}\n\n")
+            append("📱 Device: ${deviceName()}\n")
+            append("📍 System: Android $androidVersion\n")
+            append("ℹ️ Status: $message\n")
+            append("⚡ Action: $action\n\n")
+            append("🕒 Reported on: $formattedTimestamp")
+        }
+    }
+
+    internal fun toHtml(): String {
+        val formatter = DateTimeFormatter.ofPattern("EEEE, MMM dd, yyyy 'at' HH:mm:ss")
+        val formattedTimestamp = timestamp.format(formatter)
+        val (message, action) =
             when (alertType) {
-                AlertType.BATTERY -> "🪫"
-                AlertType.STORAGE -> "💾"
+                AlertType.BATTERY ->
+                    Pair(
+                        "Device battery is critically low at $batteryLevel%",
+                        "Please connect your device to a charger to prevent shutdown.",
+                    )
+                AlertType.STORAGE ->
+                    Pair(
+                        "Available storage space is low ($availableStorageGb GB)",
+                        "Consider removing unused apps or media files to free up space.",
+                    )
             }
 
         return """
-            $emoji ${alertType.name} Alert! $emoji
-
-            Device: ${deviceName()} ($androidVersion)
-            $alertMessage
-            Time: $formattedTimestamp
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #d32f2f;">${getAlertEmoji()} ${alertType.name.toTitleCase()} Alert</h2>
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <p style="margin: 5px 0;"><strong>📱 Device:</strong> ${deviceName()}</p>
+                    <p style="margin: 5px 0;"><strong>📍 System:</strong> Android $androidVersion</p>
+                    <p style="margin: 5px 0;"><strong>ℹ️ Status:</strong> $message</p>
+                    <p style="margin: 5px 0;"><strong>⚡ Action Required:</strong> $action</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>🕒 Reported on:</strong> $formattedTimestamp</p>
+                </div>
+                <p style="font-size: 12px; color: #666;">This is an automated alert from your Android device monitoring system.</p>
+            </div>
             """.trimIndent()
     }
 
@@ -89,6 +128,17 @@ data class DeviceAlert(
                 it.toString()
             }
         }} $deviceModel"
+
+    private fun getAlertEmoji() =
+        when (alertType) {
+            AlertType.BATTERY -> "🪫"
+            AlertType.STORAGE -> "💾"
+        }
+
+    private fun String.toTitleCase(): String =
+        lowercase().replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString()
+        }
 }
 
 // Example usage:
@@ -114,9 +164,23 @@ fun main() {
     println("Battery Alert (JSON):")
     println(batteryAlert.format(DeviceAlert.FormatType.JSON))
 
+    println("\n----------------------------------------\n")
+
     println("\nStorage Alert (TEXT):")
     println(storageAlert.format(DeviceAlert.FormatType.TEXT))
 
+    println("\n----------------------------------------\n")
+
+    println("\nBattery Alert (TEXT):")
+    println(batteryAlert.format(DeviceAlert.FormatType.TEXT))
+
+    println("\n----------------------------------------\n")
+
     println("\nBattery Alert (EXTENDED_TEXT):")
     println(batteryAlert.format(DeviceAlert.FormatType.EXTENDED_TEXT))
+
+    println("\n----------------------------------------\n")
+
+    println("\nBattery Alert (HTML):")
+    println(batteryAlert.format(DeviceAlert.FormatType.HTML))
 }

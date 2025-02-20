@@ -8,6 +8,7 @@ import dev.hossain.remotenotify.data.EmailConfigDataStore
 import dev.hossain.remotenotify.data.EmailQuotaManager
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
+import dev.hossain.remotenotify.model.DeviceAlert
 import dev.hossain.remotenotify.model.RemoteAlert
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
@@ -41,7 +42,7 @@ class MailgunEmailNotificationSender
             }
 
             val config = emailConfigDataStore.getConfig()
-            val message = alertFormatter.format(remoteAlert)
+            val htmlMessage = alertFormatter.format(remoteAlert, DeviceAlert.FormatType.HTML)
 
             /*
              * Example cURL command:
@@ -58,7 +59,7 @@ class MailgunEmailNotificationSender
                     .add("from", config.fromEmail)
                     .add("to", config.toEmail)
                     .add("subject", "Remote Notify Alert: ${remoteAlert.javaClass.simpleName}")
-                    .add("text", message)
+                    .add("html", htmlMessage)
                     .build()
 
             val request =
