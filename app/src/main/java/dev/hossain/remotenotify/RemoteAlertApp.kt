@@ -3,9 +3,11 @@ package dev.hossain.remotenotify
 import android.app.Application
 import android.util.Log
 import androidx.work.Configuration
+import androidx.work.WorkManager
 import androidx.work.WorkerFactory
 import dev.hossain.remotenotify.di.AppComponent
 import dev.hossain.remotenotify.utils.CrashlyticsTree
+import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_TAG
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -40,6 +42,9 @@ class RemoteAlertApp :
         // TEST WORKER CODE
 //        dev.hossain.remotenotify.worker
 //            .sendOneTimeWorkRequest(this)
+
+        // Check worker updates on debug builds
+        debugWorkRequestUpdates()
     }
 
     private fun installLoggingTree() {
@@ -49,6 +54,17 @@ class RemoteAlertApp :
         } else {
             // Plant the custom Crashlytics tree for production builds
             Timber.plant(CrashlyticsTree())
+        }
+    }
+
+    private fun debugWorkRequestUpdates() {
+        if (BuildConfig.DEBUG) {
+            WorkManager
+                .getInstance(this)
+                .getWorkInfosByTagLiveData(DEVICE_VITALS_CHECKER_WORKER_TAG)
+                .observeForever { workInfos ->
+                    Timber.d("Work status: ${workInfos?.map { it.state }}")
+                }
         }
     }
 }

@@ -11,6 +11,7 @@ import androidx.work.WorkRequest
 import java.util.concurrent.TimeUnit
 
 internal const val DEFAULT_PERIODIC_INTERVAL_MINUTES = 60L
+internal const val DEVICE_VITALS_CHECKER_WORKER_TAG = "periodic-health-check"
 
 fun sendOneTimeWorkRequest(context: Context) {
     val workRequest: WorkRequest =
@@ -32,28 +33,29 @@ fun sendPeriodicWorkRequest(
     context: Context,
     repeatIntervalMinutes: Long = DEFAULT_PERIODIC_INTERVAL_MINUTES,
 ) {
-    // Ensure minimum interval is respected (15 minutes as per WorkManager constraints)
     val intervalMinutes = repeatIntervalMinutes.coerceAtLeast(15)
 
     val workRequest =
         PeriodicWorkRequestBuilder<ObserveDeviceHealthWorker>(
             repeatInterval = intervalMinutes,
             repeatIntervalTimeUnit = TimeUnit.MINUTES,
+            // Add some flex interval to help with battery optimization
+            flexTimeInterval = (intervalMinutes / 2).coerceAtLeast(5),
+            flexTimeIntervalUnit = TimeUnit.MINUTES,
         ).setConstraints(
             Constraints
                 .Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
-                .setRequiresDeviceIdle(true)
+                // Don't add the device idle requirement
                 .setRequiresBatteryNotLow(false)
                 .setRequiresStorageNotLow(false)
                 .build(),
-        ).addTag("periodic-health-check")
-            .build()
+        ).build()
 
     WorkManager
         .getInstance(context)
         .enqueueUniquePeriodicWork(
-            uniqueWorkName = "periodic-health-check",
+            uniqueWorkName = DEVICE_VITALS_CHECKER_WORKER_TAG,
             existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.UPDATE,
             request = workRequest,
         )
