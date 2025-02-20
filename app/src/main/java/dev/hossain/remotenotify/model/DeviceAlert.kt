@@ -30,15 +30,7 @@ data class DeviceAlert(
         val payload =
             DeviceAlertJsonPayload(
                 alertType = alertType,
-                deviceModel = "${android.os.Build.BRAND.replaceFirstChar {
-                    if (it.isLowerCase()) {
-                        it.titlecase(
-                            Locale.US,
-                        )
-                    } else {
-                        it.toString()
-                    }
-                }} ${android.os.Build.MODEL}",
+                deviceModel = deviceName(),
                 androidVersion = androidVersion,
                 batteryLevel = batteryLevel,
                 availableStorageGb = availableStorageGb,
@@ -58,7 +50,7 @@ data class DeviceAlert(
 
         return """
             ${alertType.name} Alert!
-            Device: $deviceModel ($androidVersion)
+            Device: ${deviceName()} ($androidVersion)
             $alertMessage
             Time: $formattedTimestamp
             """.trimIndent()
@@ -81,11 +73,22 @@ data class DeviceAlert(
         return """
             $emoji ${alertType.name} Alert! $emoji
 
-            Device: $deviceModel ($androidVersion)
+            Device: ${deviceName()} ($androidVersion)
             $alertMessage
             Time: $formattedTimestamp
             """.trimIndent()
     }
+
+    private fun deviceName(): String =
+        "${deviceBrand.replaceFirstChar {
+            if (it.isLowerCase()) {
+                it.titlecase(
+                    Locale.US,
+                )
+            } else {
+                it.toString()
+            }
+        }} $deviceModel"
 }
 
 // Example usage:

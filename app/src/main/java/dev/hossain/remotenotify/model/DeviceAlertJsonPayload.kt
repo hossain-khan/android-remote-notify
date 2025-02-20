@@ -7,14 +7,25 @@ import kotlinx.serialization.json.Json
 /**
  * JSON Payload that is sent for webhook request.
  *
- * Sample Payload:
+ * Sample Payload - Battery Alert:
  * ```json
  * {
  *   "alertType": "BATTERY",
- *   "deviceModel": "Pixel 7",
+ *   "deviceModel": "Google Pixel 7",
  *   "androidVersion": "12",
- *   "batteryLevel": 5,
+ *   "batteryLevel": 8,
  *   "isoDateTime": "2025-02-15T17:12:25.982"
+ * }
+ * ```
+ *
+ * Sample Payload - Storage Alert:
+ * ```json
+ * {
+ *   "alertType": "STORAGE",
+ *   "deviceModel": "Samsung SM-S911W",
+ *   "androidVersion": "14",
+ *   "availableStorageGb": 4,
+ *   "isoDateTime": "2025-02-19T19:05:28.837761"
  * }
  * ```
  */
