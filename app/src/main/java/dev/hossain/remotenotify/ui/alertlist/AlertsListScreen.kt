@@ -532,7 +532,7 @@ private fun EmptyNotificationsState(onLearnMoreClick: () -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewAlertsListUi() {
+private fun PreviewAlertsListUi() {
     val sampleNotifications =
         listOf(
             RemoteAlert.BatteryAlert(batteryPercentage = 50),
@@ -556,7 +556,7 @@ fun PreviewAlertsListUi() {
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewAlertsListUiWithLastCheck() {
+private fun PreviewAlertsListUiWithLastCheck() {
     val sampleNotifications =
         listOf(
             RemoteAlert.BatteryAlert(batteryPercentage = 50),
