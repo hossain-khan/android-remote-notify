@@ -2,6 +2,8 @@ package dev.hossain.remotenotify.ui.addalert
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -14,11 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewDynamicColors
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 
 @Composable
@@ -36,7 +36,7 @@ internal fun BatteryOptimizationCard(
         ListItem(
             headlineContent = {
                 Text(
-                    "Enable More Reliable Checks",
+                    "Reliable Checks",
                     style = MaterialTheme.typography.titleMedium,
                 )
             },
@@ -48,7 +48,7 @@ internal fun BatteryOptimizationCard(
             },
             leadingContent = {
                 Icon(
-                    painter = painterResource(id = R.drawable.battery_5_bar_24dp),
+                    imageVector = Icons.Default.Info,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.primary,

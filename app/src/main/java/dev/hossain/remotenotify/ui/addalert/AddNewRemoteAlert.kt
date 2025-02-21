@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +41,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewDynamicColors
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
 import com.slack.circuit.runtime.CircuitUiState
@@ -59,6 +60,7 @@ import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.toIconResId
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.BatteryOptimizationHelper
+import dev.hossain.remotenotify.utils.findActivity
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -95,13 +97,29 @@ class AddNewRemoteAlertPresenter
         override fun present(): AddNewRemoteAlertScreen.State {
             val scope = rememberCoroutineScope()
             val context = LocalContext.current
-            var showBatteryOptSheet by remember { mutableStateOf(false) }
-            val isBatteryOptimized by remember {
+            var showBatteryOptimizeSheet by remember { mutableStateOf(false) }
+            var isBatteryOptimized by remember {
                 mutableStateOf(BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context))
             }
 
+            // Refresh battery optimization status when screen resumes
+            DisposableEffect(Unit) {
+                val activity = context.findActivity()
+                val lifecycleObserver =
+                    LifecycleEventObserver { _, event ->
+                        if (event == Lifecycle.Event.ON_RESUME) {
+                            isBatteryOptimized = BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context)
+                        }
+                    }
+                activity?.lifecycle?.addObserver(lifecycleObserver)
+
+                onDispose {
+                    activity?.lifecycle?.removeObserver(lifecycleObserver)
+                }
+            }
+
             return AddNewRemoteAlertScreen.State(
-                showBatteryOptSheet = showBatteryOptSheet,
+                showBatteryOptSheet = showBatteryOptimizeSheet,
                 isBatteryOptimized = isBatteryOptimized,
             ) { event ->
                 when (event) {
@@ -115,12 +133,13 @@ class AddNewRemoteAlertPresenter
                         navigator.pop()
                     }
                     AddNewRemoteAlertScreen.Event.ShowBatteryOptimizationSheet -> {
-                        showBatteryOptSheet = true
+                        showBatteryOptimizeSheet = true
                     }
                     AddNewRemoteAlertScreen.Event.DismissBatteryOptimizationSheet -> {
-                        showBatteryOptSheet = false
+                        showBatteryOptimizeSheet = false
                     }
                     AddNewRemoteAlertScreen.Event.OpenBatterySettings -> {
+                        showBatteryOptimizeSheet = false
                         val intent =
                             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                                 data = Uri.fromParts("package", context.packageName, null)

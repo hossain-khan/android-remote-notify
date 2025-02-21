@@ -106,7 +106,7 @@ private fun BatteryOptimizationUi(onSettingsClick: () -> Unit) {
             Text("Open Settings")
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
