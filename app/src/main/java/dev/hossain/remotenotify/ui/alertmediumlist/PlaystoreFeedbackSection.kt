@@ -26,14 +26,14 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @Composable
-fun FeedbackAndRequestMediumUi() {
+fun FeedbackAndRequestMediumUi(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val activity = context as? Activity
 
     Column(
         modifier =
-            Modifier
+        modifier
                 .wrapContentSize()
                 .padding(top = 32.dp)
                 .fillMaxWidth(),
@@ -69,7 +69,7 @@ fun FeedbackAndRequestMediumUi() {
 @Composable
 @PreviewLightDark
 @PreviewDynamicColors
-fun PreviewRatingSection() {
+private fun PreviewRatingSection() {
     ComposeAppTheme {
         Surface {
             FeedbackAndRequestMediumUi()

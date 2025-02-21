@@ -130,7 +130,7 @@ private fun EducationContentUi(eventSink: (AlertsListScreen.Event) -> Unit) {
 @Composable
 @PreviewLightDark
 @PreviewDynamicColors
-fun PreviewFirstTimeUserEducationSheetUi() {
+private fun PreviewFirstTimeUserEducationSheetUi() {
     ComposeAppTheme {
         Surface {
             EducationContentUi(

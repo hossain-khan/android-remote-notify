@@ -144,6 +144,11 @@ dependencies {
     implementation(libs.google.play.review.ktx)
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Linting
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    lintChecks(libs.compose.lint.checks)
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Testing
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     androidTestImplementation(libs.androidx.espresso.core)
