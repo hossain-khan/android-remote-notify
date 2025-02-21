@@ -1,8 +1,13 @@
 package dev.hossain.remotenotify.ui.addalert
 
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -23,6 +28,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -31,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewDynamicColors
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -51,12 +58,15 @@ import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.toIconResId
 import dev.hossain.remotenotify.theme.ComposeAppTheme
+import dev.hossain.remotenotify.utils.BatteryOptimizationHelper
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data object AddNewRemoteAlertScreen : Screen {
     data class State(
+        val showBatteryOptSheet: Boolean,
+        val isBatteryOptimized: Boolean,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -66,6 +76,12 @@ data object AddNewRemoteAlertScreen : Screen {
         ) : Event()
 
         data object NavigateBack : Event()
+
+        data object ShowBatteryOptimizationSheet : Event()
+
+        data object DismissBatteryOptimizationSheet : Event()
+
+        data object OpenBatterySettings : Event()
     }
 }
 
@@ -78,7 +94,16 @@ class AddNewRemoteAlertPresenter
         @Composable
         override fun present(): AddNewRemoteAlertScreen.State {
             val scope = rememberCoroutineScope()
-            return AddNewRemoteAlertScreen.State { event ->
+            val context = LocalContext.current
+            var showBatteryOptSheet by remember { mutableStateOf(false) }
+            val isBatteryOptimized by remember {
+                mutableStateOf(BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context))
+            }
+
+            return AddNewRemoteAlertScreen.State(
+                showBatteryOptSheet = showBatteryOptSheet,
+                isBatteryOptimized = isBatteryOptimized,
+            ) { event ->
                 when (event) {
                     is AddNewRemoteAlertScreen.Event.SaveNotification -> {
                         scope.launch {
@@ -88,6 +113,19 @@ class AddNewRemoteAlertPresenter
                     }
                     AddNewRemoteAlertScreen.Event.NavigateBack -> {
                         navigator.pop()
+                    }
+                    AddNewRemoteAlertScreen.Event.ShowBatteryOptimizationSheet -> {
+                        showBatteryOptSheet = true
+                    }
+                    AddNewRemoteAlertScreen.Event.DismissBatteryOptimizationSheet -> {
+                        showBatteryOptSheet = false
+                    }
+                    AddNewRemoteAlertScreen.Event.OpenBatterySettings -> {
+                        val intent =
+                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.fromParts("package", context.packageName, null)
+                            }
+                        context.startActivity(intent)
                     }
                 }
             }
@@ -109,6 +147,7 @@ fun AddNewRemoteAlertUi(
 ) {
     var type by remember { mutableStateOf(AlertType.BATTERY) }
     var threshold by remember { mutableIntStateOf(10) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Scaffold(
         modifier = modifier,
@@ -253,6 +292,29 @@ fun AddNewRemoteAlertUi(
             ) {
                 Text("Save Alert")
             }
+
+            if (!state.isBatteryOptimized) {
+                Spacer(modifier = Modifier.height(24.dp))
+                BatteryOptimizationCard(
+                    onOptimizeClick = {
+                        state.eventSink(AddNewRemoteAlertScreen.Event.ShowBatteryOptimizationSheet)
+                    },
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+
+        // Show bottom sheet if needed
+        if (state.showBatteryOptSheet) {
+            BatteryOptimizationBottomSheet(
+                sheetState = sheetState,
+                onSettingsClick = {
+                    state.eventSink(AddNewRemoteAlertScreen.Event.OpenBatterySettings)
+                },
+                onDismiss = {
+                    state.eventSink(AddNewRemoteAlertScreen.Event.DismissBatteryOptimizationSheet)
+                },
+            )
         }
     }
 }
@@ -307,6 +369,8 @@ fun PreviewAddNewRemoteAlertUi() {
         AddNewRemoteAlertUi(
             state =
                 AddNewRemoteAlertScreen.State(
+                    showBatteryOptSheet = false,
+                    isBatteryOptimized = false,
                     eventSink = {},
                 ),
         )
