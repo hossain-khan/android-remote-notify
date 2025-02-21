@@ -6,6 +6,8 @@ import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.TelegramConfigDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
+import dev.hossain.remotenotify.model.DeviceAlert
+import dev.hossain.remotenotify.model.DeviceAlert.FormatType
 import dev.hossain.remotenotify.model.RemoteAlert
 import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -29,7 +31,7 @@ class TelegramNotificationSender
 
         override suspend fun sendNotification(remoteAlert: RemoteAlert): Boolean {
             // Text of the message to be sent, 1-4096 characters after entities parsing
-            val message = alertFormatter.format(remoteAlert)
+            val message = alertFormatter.format(remoteAlert, FormatType.EXTENDED_TEXT)
 
             // Each bot is given a unique authentication token when it is created.
             // The token looks something like 123456:ABCDEF1234ghIklzyx57W2v1u123ew11 or 110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw
