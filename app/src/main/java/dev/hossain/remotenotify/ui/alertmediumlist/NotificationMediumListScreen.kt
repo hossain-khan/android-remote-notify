@@ -38,8 +38,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -127,7 +128,13 @@ class NotificationMediumListPresenter
             val context = LocalContext.current
             // Use remember and mutableStateOf to make the list observable
             var notifierMediumInfoList by remember { mutableStateOf(emptyList<NotificationMediumListScreen.NotifierMediumInfo>()) }
-            var workerIntervalMinutes by remember { mutableLongStateOf(DEFAULT_PERIODIC_INTERVAL_MINUTES) }
+
+            // Use produceState to handle the worker interval
+            val workerIntervalMinutes by produceState(DEFAULT_PERIODIC_INTERVAL_MINUTES) {
+                appPreferencesDataStore.workerIntervalFlow.collect {
+                    value = it
+                }
+            }
 
             val configureMediumNavigator =
                 rememberAnsweringNavigator<ConfigureNotificationMediumScreen.ConfigurationResult>(navigator) { result ->
@@ -171,18 +178,14 @@ class NotificationMediumListPresenter
                 updateNotifierList()
             }
 
-            // Load initial state and set up debounced updates
             LaunchedEffect(Unit) {
-                // Load initial value
-                workerIntervalMinutes = appPreferencesDataStore.workerIntervalFlow.first()
-
-                // Set up debounced updates
+                // Set up debounced updates to avoid frequent worker setup
                 workerIntervalFlow
-                    .debounce(500L) // Wait for 500ms of inactivity
+                    // Wait for 500ms of inactivity
+                    .debounce(500L)
                     .collect { minutes ->
                         Timber.d("Worker interval updated: $minutes minutes")
                         appPreferencesDataStore.saveWorkerInterval(minutes)
-
                         // Also setup the worker interval
                         sendPeriodicWorkRequest(context = context, repeatIntervalMinutes = minutes)
                     }
@@ -208,7 +211,6 @@ class NotificationMediumListPresenter
                     }
 
                     is NotificationMediumListScreen.Event.OnWorkerIntervalUpdated -> {
-                        workerIntervalMinutes = event.minutes // Update UI immediately
                         workerIntervalFlow.value = event.minutes // Trigger debounced update
                     }
                 }
@@ -361,6 +363,7 @@ private fun WorkerConfigCard(
     state: NotificationMediumListScreen.State,
     modifier: Modifier = Modifier,
 ) {
+    var intervalSliderValue by remember { mutableFloatStateOf(state.workerIntervalMinutes.toFloat()) }
     Card(
         modifier = modifier,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -392,7 +395,7 @@ private fun WorkerConfigCard(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Alert checked every ${formatDuration(state.workerIntervalMinutes.toInt())}",
+                text = "Alert checked every ${formatDuration(intervalSliderValue.toInt())}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.secondary,
             )
@@ -400,9 +403,10 @@ private fun WorkerConfigCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Slider(
-                value = state.workerIntervalMinutes.toFloat(),
-                onValueChange = {
-                    state.eventSink(NotificationMediumListScreen.Event.OnWorkerIntervalUpdated(it.toLong()))
+                value = intervalSliderValue,
+                onValueChange = { intervalValue: Float ->
+                    intervalSliderValue = intervalValue // Update UI immediately
+                    state.eventSink(NotificationMediumListScreen.Event.OnWorkerIntervalUpdated(intervalValue.toLong()))
                 },
                 valueRange = 30f..300f,
                 // steps = 270, // (300-30)/1 to have steps of 1 minute
