@@ -3,7 +3,9 @@ package dev.hossain.remotenotify.worker
 import android.content.Context
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -11,6 +13,7 @@ import androidx.work.WorkRequest
 import java.util.concurrent.TimeUnit
 
 internal const val DEFAULT_PERIODIC_INTERVAL_MINUTES = 60L
+internal const val DEVICE_VITALS_CHECKER_DEBUG_WORKER_ID = "onetime-debug-request"
 internal const val DEVICE_VITALS_CHECKER_WORKER_ID = "periodic-health-check"
 
 fun sendOneTimeWorkRequest(context: Context) {
@@ -26,7 +29,11 @@ fun sendOneTimeWorkRequest(context: Context) {
             ).addTag("onetime-test-request")
             .build()
 
-    WorkManager.getInstance(context).enqueue(workRequest)
+    WorkManager.getInstance(context).enqueueUniqueWork(
+        uniqueWorkName = DEVICE_VITALS_CHECKER_DEBUG_WORKER_ID,
+        existingWorkPolicy = ExistingWorkPolicy.REPLACE,
+        request = workRequest as OneTimeWorkRequest,
+    )
 }
 
 fun sendPeriodicWorkRequest(

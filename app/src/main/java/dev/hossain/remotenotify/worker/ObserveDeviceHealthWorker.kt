@@ -3,6 +3,7 @@ package dev.hossain.remotenotify.worker
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
@@ -65,6 +66,10 @@ class ObserveDeviceHealthWorker(
                     }
                 }
             }
+
+            // Add tag to track this work
+            setProgress(workDataOf("last_run_timestamp_ms" to System.currentTimeMillis()))
+
             return Result.success()
         } catch (e: Exception) {
             Timber.tag(WORKER_LOG_TAG).e(e, "Failed to observe device health")

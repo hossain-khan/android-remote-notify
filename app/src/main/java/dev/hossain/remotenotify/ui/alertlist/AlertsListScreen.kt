@@ -43,9 +43,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.work.WorkManager
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
 import com.slack.circuit.runtime.CircuitUiState
@@ -62,13 +64,14 @@ import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
-import dev.hossain.remotenotify.model.toIconResId
+import dev.hossain.remotenotify.model.WorkerStatus
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.ui.about.AboutAppScreen
 import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
 import dev.hossain.remotenotify.ui.alertmediumlist.NotificationMediumListScreen
+import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_ID
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
@@ -82,6 +85,7 @@ data object AlertsListScreen : Screen {
         val totalStorage: Long,
         val isAnyNotifierConfigured: Boolean,
         val latestAlertCheckLog: AlertCheckLog?,
+        val workerStatus: WorkerStatus?,
         val showEducationSheet: Boolean,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
@@ -116,6 +120,7 @@ class AlertsListPresenter
         @Composable
         override fun present(): AlertsListScreen.State {
             val scope = rememberCoroutineScope()
+            val context = LocalContext.current
             val deviceBatteryLevelPercentage = remember { batteryMonitor.getBatteryLevel() }
             val deviceAvailableStorage = remember { storageMonitor.getAvailableStorageInGB() }
             val deviceTotalStorage = remember { storageMonitor.getTotalStorageInGB() }
@@ -133,6 +138,24 @@ class AlertsListPresenter
                 value = notifiers.any { it.hasValidConfig() }
             }
 
+            val workerStatus by produceState<WorkerStatus?>(null) {
+                WorkManager
+                    .getInstance(context)
+                    .getWorkInfosByTagFlow(DEVICE_VITALS_CHECKER_WORKER_ID)
+                    .collect { workInfos ->
+                        val workInfo = workInfos.firstOrNull()
+                        value =
+                            workInfo?.let {
+                                Timber.d("Got worker status: ${it.state}")
+                                WorkerStatus(
+                                    state = it.state.name,
+                                    nextRunTimeMs = it.nextScheduleTimeMillis,
+                                    lastRunTimeMs = it.progress.getLong("last_run_timestamp_ms", 0),
+                                )
+                            }
+                    }
+            }
+
             val lastCheckLog by produceState<AlertCheckLog?>(null) {
                 remoteAlertRepository
                     .getLatestCheckLog()
@@ -146,6 +169,7 @@ class AlertsListPresenter
                 totalStorage = deviceTotalStorage,
                 isAnyNotifierConfigured = isAnyNotifierConfigured,
                 latestAlertCheckLog = lastCheckLog,
+                workerStatus = workerStatus,
                 showEducationSheet = showEducationSheet,
             ) { event ->
                 when (event) {
@@ -265,7 +289,7 @@ fun AlertsListUi(
                     }
                 } else {
                     item(key = "last_check_status") {
-                        LastCheckStatusCardUi(state.latestAlertCheckLog)
+                        LastCheckStatusCardUi(state.latestAlertCheckLog, state.workerStatus)
                     }
                 }
 
@@ -403,77 +427,6 @@ private fun DeviceCurrentStateUi(state: AlertsListScreen.State) {
 }
 
 @Composable
-private fun LastCheckStatusCardUi(
-    lastCheckLog: AlertCheckLog?,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-        ) {
-            Text(
-                text = "Last Check Status",
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (lastCheckLog == null) {
-                Text(
-                    text = "No checks have been performed yet",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        painter = painterResource(lastCheckLog.alertType.toIconResId()),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint =
-                            if (lastCheckLog.isAlertSent) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.primary
-                            },
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column {
-                        /*Text(
-                            text = when (lastCheckLog.alertType) {
-                                AlertType.BATTERY -> "Battery: ${lastCheckLog.alertStateValue}%"
-                                AlertType.STORAGE -> "Storage: ${lastCheckLog.alertStateValue}GB"
-                            },
-                            style = MaterialTheme.typography.bodyMedium,
-                        )*/
-                        Text(
-                            text = "Alert checked ${formatTimeAgo(lastCheckLog.checkedOn)}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        if (lastCheckLog.isAlertSent) {
-                            Text(
-                                text = "Alert sent",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun NotificationItem(
     remoteAlert: RemoteAlert,
     onDelete: () -> Unit,
@@ -577,44 +530,6 @@ private fun EmptyNotificationsState(onLearnMoreClick: () -> Unit) {
     }
 }
 
-private fun formatTimeAgo(timestamp: Long): String {
-    val now = System.currentTimeMillis()
-    val diff = now - timestamp
-    return when {
-        diff < 60_000 -> "just now"
-        diff < 3600_000 -> {
-            val minutes = diff / 60_000
-            "$minutes minute${if (minutes > 1) "s" else ""} ago"
-        }
-        diff < 86400_000 -> {
-            val hours = diff / 3600_000
-            val minutes = (diff % 3600_000) / 60_000
-            buildString {
-                append("$hours hour${if (hours > 1) "s" else ""}")
-                if (minutes > 0) {
-                    append(" $minutes minute${if (minutes > 1) "s" else ""}")
-                }
-                append(" ago")
-            }
-        }
-        diff < 2592000000 -> { // 30 days
-            val days = diff / 86400_000
-            val hours = (diff % 86400_000) / 3600_000
-            buildString {
-                append("$days day${if (days > 1) "s" else ""}")
-                if (hours > 0) {
-                    append(" $hours hour${if (hours > 1) "s" else ""}")
-                }
-                append(" ago")
-            }
-        }
-        else -> {
-            val days = diff / 86400_000
-            "$days days ago"
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewAlertsListUi() {
@@ -632,6 +547,7 @@ fun PreviewAlertsListUi() {
                 totalStorage = 100,
                 isAnyNotifierConfigured = false,
                 latestAlertCheckLog = null,
+                workerStatus = null,
                 showEducationSheet = false,
                 eventSink = {},
             ),
@@ -660,6 +576,7 @@ fun PreviewAlertsListUiWithLastCheck() {
                         alertType = AlertType.BATTERY,
                         isAlertSent = true,
                     ),
+                workerStatus = WorkerStatus("RUNNING", 0, 0),
                 showEducationSheet = false,
                 eventSink = {},
             ),
