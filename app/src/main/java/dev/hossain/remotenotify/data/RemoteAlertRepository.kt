@@ -34,9 +34,11 @@ interface RemoteAlertRepository {
         notifierType: NotifierType?,
     )
 
-    fun getLatestCheckForAlert(alertId: Long): Flow<AlertCheckLogEntity?>
+    fun getLatestCheckForAlert(alertId: Long): Flow<AlertCheckLog?>
 
     fun getLatestCheckLog(): Flow<AlertCheckLog?>
+
+    fun getAllAlertCheckLogs(): Flow<List<AlertCheckLog>>
 }
 
 @ContributesBinding(AppScope::class)
@@ -83,8 +85,21 @@ class RemoteAlertRepositoryImpl
             )
         }
 
-        // TODO - do not expose entity directly
-        override fun getLatestCheckForAlert(alertId: Long): Flow<AlertCheckLogEntity?> = alertCheckLogDao.getLatestCheckForAlert(alertId)
+        override fun getLatestCheckForAlert(alertId: Long): Flow<AlertCheckLog?> =
+            alertCheckLogDao
+                .getLatestCheckForAlert(alertId)
+                .map { it?.toAlertCheckLog() }
 
-        override fun getLatestCheckLog(): Flow<AlertCheckLog?> = alertCheckLogDao.getLatestCheckLog().map { it?.toAlertCheckLog() }
+        override fun getLatestCheckLog(): Flow<AlertCheckLog?> =
+            alertCheckLogDao
+                .getLatestCheckLog()
+                .map { it?.toAlertCheckLog() }
+
+        override fun getAllAlertCheckLogs(): Flow<List<AlertCheckLog>> =
+            alertCheckLogDao
+                .getAllLogsWithConfig()
+                .map { logEntityList ->
+                    logEntityList
+                        .map { alertCheckLogEntity -> alertCheckLogEntity.toAlertCheckLog() }
+                }
     }
