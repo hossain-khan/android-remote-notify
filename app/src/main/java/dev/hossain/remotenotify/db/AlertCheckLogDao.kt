@@ -12,6 +12,14 @@ interface AlertCheckLogDao {
 
     @Query(
         """
+        SELECT * FROM alert_check_log
+        ORDER BY checked_at DESC
+    """,
+    )
+    fun getAllCheckLogs(): Flow<List<AlertCheckLogEntity>>
+
+    @Query(
+        """
         SELECT * FROM alert_check_log 
         WHERE alert_config_id = :alertConfigId 
         ORDER BY checked_at DESC 
