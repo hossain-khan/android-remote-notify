@@ -23,7 +23,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewDynamicColors
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import dev.hossain.remotenotify.BuildConfig
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
@@ -140,16 +139,14 @@ internal fun LastCheckStatusCardUi(
                 }
             }
 
-            if (BuildConfig.DEBUG) {
-                TextButton(
-                    onClick = onViewAllLogs,
-                    colors =
-                        ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary,
-                        ),
-                ) {
-                    Text("View All Logs")
-                }
+            TextButton(
+                onClick = onViewAllLogs,
+                colors =
+                    ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary,
+                    ),
+            ) {
+                Text("View All Logs")
             }
         }
     }
