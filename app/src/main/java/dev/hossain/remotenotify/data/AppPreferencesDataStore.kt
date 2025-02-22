@@ -59,7 +59,7 @@ class AppPreferencesDataStore
                     preferences[FIRST_TIME_DIALOG_SHOWN] ?: false
                 }
 
-        suspend fun markFirstTimeDialogShown() {
+        suspend fun markEducationDialogShown() {
             context.appPreferencesDataStore.edit { preferences ->
                 preferences[FIRST_TIME_DIALOG_SHOWN] = true
             }

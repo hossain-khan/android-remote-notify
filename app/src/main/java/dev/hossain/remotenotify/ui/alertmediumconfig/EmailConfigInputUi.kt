@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -17,12 +19,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.EmailConfigDataStore.Companion.ValidationKeys
 import dev.hossain.remotenotify.data.EmailQuotaManager.Companion.ValidationKeys.EMAIL_DAILY_QUOTA
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.notifier.mailgun.MailgunConfig
+import dev.hossain.remotenotify.theme.ComposeAppTheme
 
 @Composable
 internal fun EmailConfigInputUi(
@@ -98,5 +102,49 @@ internal fun EmailConfigInputUi(
                 }
             },
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewEmailConfigInputWithError() {
+    ComposeAppTheme {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            EmailConfigInputUi(
+                alertMediumConfig =
+                    AlertMediumConfig.EmailConfig(
+                        apiKey = MailgunConfig.API_KEY,
+                        domain = MailgunConfig.DOMAIN,
+                        fromEmail = MailgunConfig.FROM_EMAIL,
+                        toEmail = "invalid-email",
+                    ),
+                configValidationResult =
+                    ConfigValidationResult(
+                        isValid = false,
+                        errors =
+                            mapOf(
+                                ValidationKeys.TO_EMAIL to "Invalid email address format",
+                                EMAIL_DAILY_QUOTA to "Daily email quota exceeded",
+                            ),
+                    ),
+                shouldShowValidationError = true,
+                onConfigUpdate = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewEmailConfigInputUiEmpty() {
+    ComposeAppTheme {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            EmailConfigInputUi(
+                alertMediumConfig = null,
+                configValidationResult = ConfigValidationResult(true, emptyMap()),
+                shouldShowValidationError = false,
+                onConfigUpdate = {},
+            )
+        }
     }
 }
