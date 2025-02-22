@@ -103,7 +103,7 @@ data object AlertsListScreen : Screen {
 
         data object ShowEducationSheet : Event()
 
-        data object DismissFirstTimeDialog : Event()
+        data object DismissEducationSheet : Event()
     }
 }
 
@@ -192,11 +192,11 @@ class AlertsListPresenter
                         navigator.goTo(AboutAppScreen)
                     }
 
-                    AlertsListScreen.Event.DismissFirstTimeDialog -> {
+                    AlertsListScreen.Event.DismissEducationSheet -> {
                         Timber.d("Dismiss the first time user education dialog shown")
                         scope.launch {
                             showEducationSheet = false
-                            appPreferencesDataStore.markFirstTimeDialogShown()
+                            appPreferencesDataStore.markEducationDialogShown()
                         }
                     }
 
@@ -204,7 +204,7 @@ class AlertsListPresenter
                         Timber.d("Showing the first time user education dialog shown")
                         scope.launch {
                             showEducationSheet = true
-                            appPreferencesDataStore.markFirstTimeDialogShown()
+                            appPreferencesDataStore.markEducationDialogShown()
                         }
                     }
                 }
@@ -325,7 +325,7 @@ fun AlertsListUi(
             }
         }
         if (state.showEducationSheet) {
-            FirstTimeUserEducationSheetUi(eventSink = state.eventSink, sheetState = sheetState)
+            AppUsageEducationSheetUi(eventSink = state.eventSink, sheetState = sheetState)
         }
     }
 }

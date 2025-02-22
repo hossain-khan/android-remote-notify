@@ -33,7 +33,7 @@ fun FeedbackAndRequestMediumUi(modifier: Modifier = Modifier) {
 
     Column(
         modifier =
-        modifier
+            modifier
                 .wrapContentSize()
                 .padding(top = 32.dp)
                 .fillMaxWidth(),

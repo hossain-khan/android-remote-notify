@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,7 +21,6 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
@@ -42,13 +39,13 @@ import dev.hossain.remotenotify.theme.ComposeAppTheme
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FirstTimeUserEducationSheetUi(
+fun AppUsageEducationSheetUi(
     eventSink: (AlertsListScreen.Event) -> Unit,
     sheetState: SheetState,
 ) {
     ModalBottomSheet(
         onDismissRequest = {
-            eventSink(AlertsListScreen.Event.DismissFirstTimeDialog)
+            eventSink(AlertsListScreen.Event.DismissEducationSheet)
         },
         sheetState = sheetState,
     ) {
@@ -105,7 +102,7 @@ private fun EducationContentUi(eventSink: (AlertsListScreen.Event) -> Unit) {
 
         Button(
             onClick = {
-                eventSink(AlertsListScreen.Event.DismissFirstTimeDialog)
+                eventSink(AlertsListScreen.Event.DismissEducationSheet)
             },
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -130,7 +127,7 @@ private fun EducationContentUi(eventSink: (AlertsListScreen.Event) -> Unit) {
 @Composable
 @PreviewLightDark
 @PreviewDynamicColors
-private fun PreviewFirstTimeUserEducationSheetUi() {
+private fun PreviewEducationContentUi() {
     ComposeAppTheme {
         Surface {
             EducationContentUi(
