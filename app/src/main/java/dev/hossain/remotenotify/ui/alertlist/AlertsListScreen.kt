@@ -16,12 +16,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -499,35 +497,6 @@ fun NotificationItem(
         },
         modifier = modifier.padding(horizontal = 4.dp),
     )
-}
-
-@Composable
-private fun EmptyNotificationsState(onLearnMoreClick: () -> Unit) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Icon(
-            Icons.Default.Notifications,
-            contentDescription = null,
-            modifier = Modifier.size(48.dp),
-            tint = MaterialTheme.colorScheme.secondary,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            "No alerts configured",
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        ElevatedButton(
-            onClick = onLearnMoreClick,
-        ) {
-            Text("Learn More")
-        }
-    }
 }
 
 @Preview(showBackground = true)
