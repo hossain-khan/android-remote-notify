@@ -50,16 +50,14 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
-import dev.hossain.remotenotify.db.AlertCheckLogDao
+import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
-import dev.hossain.remotenotify.model.toAlertCheckLog
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.formatTimeDuration
 import dev.hossain.remotenotify.utils.toTitleCase
-import kotlinx.coroutines.flow.map
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -85,7 +83,7 @@ class AlertCheckLogViewerPresenter
     constructor(
         @Assisted private val navigator: Navigator,
         private val appPreferencesDataStore: AppPreferencesDataStore,
-        private val alertCheckLogDao: AlertCheckLogDao,
+        private val remoteAlertRepository: RemoteAlertRepository,
     ) : Presenter<AlertCheckLogViewerScreen.State> {
         @Composable
         override fun present(): AlertCheckLogViewerScreen.State {
@@ -98,13 +96,9 @@ class AlertCheckLogViewerPresenter
             }
 
             val logs by produceState<List<AlertCheckLog>>(emptyList()) {
-                alertCheckLogDao
-                    .getAllLogsWithConfig()
-                    .map { entities ->
-                        entities.map { entity ->
-                            entity.toAlertCheckLog()
-                        }
-                    }.collect {
+                remoteAlertRepository
+                    .getAllAlertCheckLogs()
+                    .collect {
                         value = it
                         isLoading = false
                     }
