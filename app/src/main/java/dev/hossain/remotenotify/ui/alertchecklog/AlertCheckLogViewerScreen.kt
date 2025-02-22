@@ -54,6 +54,8 @@ import dev.hossain.remotenotify.db.AlertCheckLogDao
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
+import dev.hossain.remotenotify.model.toAlertCheckLog
+import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.formatTimeDuration
 import kotlinx.coroutines.flow.map
@@ -96,15 +98,10 @@ class AlertCheckLogViewerPresenter
 
             val logs by produceState<List<AlertCheckLog>>(emptyList()) {
                 alertCheckLogDao
-                    .getAllCheckLogs()
+                    .getAllLogsWithConfig()
                     .map { entities ->
                         entities.map { entity ->
-                            AlertCheckLog(
-                                checkedOn = entity.checkedAt,
-                                alertType = entity.alertType,
-                                isAlertSent = entity.alertTriggered,
-                                stateValue = entity.alertStateValue,
-                            )
+                            entity.toAlertCheckLog()
                         }
                     }.collect {
                         value = it
@@ -234,17 +231,19 @@ private fun LogItemCard(log: AlertCheckLog) {
             supportingContent = {
                 Column {
                     Text(
-                        text = formatTimeDuration(log.checkedOn),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    Text(
                         text =
                             when (log.alertType) {
-                                AlertType.BATTERY -> "${log.stateValue}% battery remaning"
-                                AlertType.STORAGE -> "${log.stateValue} GB storage remaining"
+                                AlertType.BATTERY -> "${log.stateValue}% battery was remaining"
+                                AlertType.STORAGE -> "${log.stateValue} GB storage was remaining"
                             },
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Checked ${formatTimeDuration(log.checkedOn)}",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text =
@@ -353,25 +352,45 @@ private fun PreviewAlertCheckLogViewerUi() {
                 checkedOn = System.currentTimeMillis() - 3600000, // 1 hour ago
                 alertType = AlertType.BATTERY,
                 isAlertSent = true,
+                notifierType = NotifierType.EMAIL,
                 stateValue = 15,
+                configId = 1,
+                configBatteryPercentage = 20,
+                configStorageMinSpaceGb = 0,
+                configCreatedOn = System.currentTimeMillis() - 86400000 * 7, // 7 days ago
             ),
             AlertCheckLog(
                 checkedOn = System.currentTimeMillis() - 7200000, // 2 hours ago
                 alertType = AlertType.STORAGE,
                 isAlertSent = false,
+                notifierType = null,
                 stateValue = 20,
+                configId = 2,
+                configBatteryPercentage = 0,
+                configStorageMinSpaceGb = 25,
+                configCreatedOn = System.currentTimeMillis() - 86400000 * 5, // 5 days ago
             ),
             AlertCheckLog(
                 checkedOn = System.currentTimeMillis() - 86400000, // 1 day ago
                 alertType = AlertType.BATTERY,
                 isAlertSent = false,
+                notifierType = null,
                 stateValue = 80,
+                configId = 1,
+                configBatteryPercentage = 20,
+                configStorageMinSpaceGb = 0,
+                configCreatedOn = System.currentTimeMillis() - 86400000 * 7, // 7 days ago
             ),
             AlertCheckLog(
                 checkedOn = System.currentTimeMillis() - 9250000,
                 alertType = AlertType.STORAGE,
                 isAlertSent = true,
+                notifierType = NotifierType.TELEGRAM,
                 stateValue = 2,
+                configId = 2,
+                configBatteryPercentage = 0,
+                configStorageMinSpaceGb = 25,
+                configCreatedOn = System.currentTimeMillis() - 86400000 * 5, // 5 days ago
             ),
         )
 

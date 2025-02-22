@@ -3,6 +3,7 @@ package dev.hossain.remotenotify.db
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -57,4 +58,13 @@ interface AlertCheckLogDao {
     """,
     )
     fun getLatestCheckLog(): Flow<AlertCheckLogEntity?>
+
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM alert_check_log
+        ORDER BY checked_at DESC
+    """,
+    )
+    fun getAllLogsWithConfig(): Flow<List<AlertLogWithConfig>>
 }

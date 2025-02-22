@@ -28,6 +28,7 @@ import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.WorkerStatus
 import dev.hossain.remotenotify.model.toIconResId
+import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.formatTimeDuration
 import dev.hossain.remotenotify.utils.toTitleCase
@@ -162,10 +163,15 @@ private fun PreviewLastCheckStatusCard() {
                 LastCheckStatusCardUi(
                     lastCheckLog =
                         AlertCheckLog(
-                            checkedOn = System.currentTimeMillis(),
+                            checkedOn = System.currentTimeMillis() - 300_000, // 5 minutes ago
                             alertType = AlertType.BATTERY,
-                            isAlertSent = false,
-                            stateValue = 17,
+                            isAlertSent = true,
+                            notifierType = NotifierType.TELEGRAM,
+                            stateValue = 12,
+                            configId = 1L,
+                            configBatteryPercentage = 20,
+                            configStorageMinSpaceGb = 0,
+                            configCreatedOn = System.currentTimeMillis() - 86400000, // 1 day ago
                         ),
                     workerStatus =
                         WorkerStatus(
@@ -180,10 +186,15 @@ private fun PreviewLastCheckStatusCard() {
                 LastCheckStatusCardUi(
                     lastCheckLog =
                         AlertCheckLog(
-                            checkedOn = System.currentTimeMillis() - 10_00_000,
+                            checkedOn = System.currentTimeMillis() - 300_000, // 5 minutes ago
                             alertType = AlertType.STORAGE,
-                            isAlertSent = false,
+                            isAlertSent = true,
+                            notifierType = NotifierType.WEBHOOK_REST_API,
                             stateValue = 12,
+                            configId = 1L,
+                            configBatteryPercentage = 0,
+                            configStorageMinSpaceGb = 16,
+                            configCreatedOn = System.currentTimeMillis() - 86400000, // 1 day ago
                         ),
                     workerStatus =
                         WorkerStatus(

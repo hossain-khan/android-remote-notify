@@ -66,6 +66,7 @@ import dev.hossain.remotenotify.model.WorkerStatus
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
+import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.ui.about.AboutAppScreen
 import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
 import dev.hossain.remotenotify.ui.alertchecklog.AlertCheckLogViewerScreen
@@ -559,7 +560,12 @@ private fun PreviewAlertsListUiWithLastCheck() {
                         checkedOn = System.currentTimeMillis() - 300_000, // 5 minutes ago
                         alertType = AlertType.BATTERY,
                         isAlertSent = true,
+                        notifierType = NotifierType.TELEGRAM,
                         stateValue = 12,
+                        configId = 1L,
+                        configBatteryPercentage = 20,
+                        configStorageMinSpaceGb = 0,
+                        configCreatedOn = System.currentTimeMillis() - 86400000, // 1 day ago
                     ),
                 workerStatus = WorkerStatus("RUNNING", 0, 0),
                 showEducationSheet = false,
