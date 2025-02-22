@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
@@ -47,10 +50,15 @@ import dev.hossain.remotenotify.db.AlertCheckLogDao
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
+import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.formatTimeDuration
 import kotlinx.coroutines.flow.map
 import kotlinx.parcelize.Parcelize
 
+/**
+ * Screen to view all the alert check logs.
+ * Currently this is only visible on debug build.
+ */
 @Parcelize
 data object AlertCheckLogViewerScreen : Screen {
     data class State(
@@ -193,11 +201,12 @@ private fun LogItemCard(log: AlertCheckLog) {
                     Text(
                         text =
                             when (log.alertType) {
-                                AlertType.BATTERY -> "${log.stateValue}% Battery"
-                                AlertType.STORAGE -> "${log.stateValue}GB Storage"
+                                AlertType.BATTERY -> "${log.stateValue}% battery remaning"
+                                AlertType.STORAGE -> "${log.stateValue} GB storage remaining"
                             },
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text =
                             if (log.isAlertSent) {
@@ -233,6 +242,49 @@ private fun LogItemCard(log: AlertCheckLog) {
                         },
                 )
             },
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewAlertCheckLogViewerUi() {
+    val sampleLogs =
+        listOf(
+            AlertCheckLog(
+                checkedOn = System.currentTimeMillis() - 3600000, // 1 hour ago
+                alertType = AlertType.BATTERY,
+                isAlertSent = true,
+                stateValue = 15,
+            ),
+            AlertCheckLog(
+                checkedOn = System.currentTimeMillis() - 7200000, // 2 hours ago
+                alertType = AlertType.STORAGE,
+                isAlertSent = false,
+                stateValue = 20,
+            ),
+            AlertCheckLog(
+                checkedOn = System.currentTimeMillis() - 86400000, // 1 day ago
+                alertType = AlertType.BATTERY,
+                isAlertSent = false,
+                stateValue = 80,
+            ),
+            AlertCheckLog(
+                checkedOn = System.currentTimeMillis() - 9250000,
+                alertType = AlertType.STORAGE,
+                isAlertSent = true,
+                stateValue = 2,
+            ),
+        )
+
+    ComposeAppTheme {
+        AlertCheckLogViewerUi(
+            state =
+                AlertCheckLogViewerScreen.State(
+                    logs = sampleLogs,
+                    isLoading = false,
+                    eventSink = {},
+                ),
         )
     }
 }
