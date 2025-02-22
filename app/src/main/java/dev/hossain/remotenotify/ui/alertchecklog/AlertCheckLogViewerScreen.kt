@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.ui.alertchecklog
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -128,7 +129,17 @@ fun AlertCheckLogViewerUi(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Logs") },
+                title = {
+                    Column {
+                        Text("Logs")
+                        if (!state.isLoading && state.logs.isNotEmpty()) {
+                            Text(
+                                "Total ${state.logs.size} alert check logs",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = {
                         state.eventSink(AlertCheckLogViewerScreen.Event.NavigateBack)
@@ -142,27 +153,41 @@ fun AlertCheckLogViewerUi(
             )
         },
     ) { padding ->
-        if (state.isLoading) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(16.dp),
-            ) {
-                items(count = state.logs.size, key = { state.logs[it].checkedOn }) { index ->
-                    LogItemCard(state.logs[index])
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+        ) {
+            if (state.isLoading) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        "Loading logs...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else if (state.logs.isEmpty()) {
+                EmptyLogsState()
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(16.dp),
+                ) {
+                    items(
+                        count = state.logs.size,
+                        key = { state.logs[it].checkedOn },
+                    ) { index ->
+                        LogItemCard(
+                            log = state.logs[index],
+                        )
+                    }
                 }
             }
         }
@@ -172,7 +197,7 @@ fun AlertCheckLogViewerUi(
 @Composable
 private fun LogItemCard(log: AlertCheckLog) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable { },
         colors =
             CardDefaults.cardColors(
                 containerColor =
