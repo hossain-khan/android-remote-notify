@@ -188,7 +188,6 @@ fun AlertCheckLogViewerUi(
 
                     items(
                         count = state.logs.size,
-                        key = { state.logs[it].checkedOn },
                     ) { index ->
                         LogItemCard(
                             log = state.logs[index],
