@@ -68,6 +68,7 @@ import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.ui.about.AboutAppScreen
 import dev.hossain.remotenotify.ui.addalert.AddNewRemoteAlertScreen
+import dev.hossain.remotenotify.ui.alertchecklog.AlertCheckLogViewerScreen
 import dev.hossain.remotenotify.ui.alertmediumlist.NotificationMediumListScreen
 import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_ID
 import kotlinx.coroutines.launch
@@ -102,6 +103,8 @@ data object AlertsListScreen : Screen {
         data object ShowEducationSheet : Event()
 
         data object DismissEducationSheet : Event()
+
+        data object ViewAllLogs : Event()
     }
 }
 
@@ -205,6 +208,10 @@ class AlertsListPresenter
                             appPreferencesDataStore.markEducationDialogShown()
                         }
                     }
+
+                    AlertsListScreen.Event.ViewAllLogs -> {
+                        navigator.goTo(AlertCheckLogViewerScreen)
+                    }
                 }
             }
         }
@@ -284,7 +291,13 @@ fun AlertsListUi(
                     }
                 } else {
                     item(key = "last_check_status") {
-                        LastCheckStatusCardUi(state.latestAlertCheckLog, state.workerStatus)
+                        LastCheckStatusCardUi(
+                            lastCheckLog = state.latestAlertCheckLog,
+                            workerStatus = state.workerStatus,
+                            onViewAllLogs = {
+                                state.eventSink(AlertsListScreen.Event.ViewAllLogs)
+                            },
+                        )
                     }
                 }
 
@@ -546,6 +559,7 @@ private fun PreviewAlertsListUiWithLastCheck() {
                         checkedOn = System.currentTimeMillis() - 300_000, // 5 minutes ago
                         alertType = AlertType.BATTERY,
                         isAlertSent = true,
+                        stateValue = 12,
                     ),
                 workerStatus = WorkerStatus("RUNNING", 0, 0),
                 showEducationSheet = false,
