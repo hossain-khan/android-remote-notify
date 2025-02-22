@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +61,7 @@ import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.toIconResId
+import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.BatteryOptimizationHelper
 import dev.hossain.remotenotify.utils.findActivity
@@ -71,6 +73,10 @@ data object AddNewRemoteAlertScreen : Screen {
     data class State(
         val showBatteryOptSheet: Boolean,
         val isBatteryOptimized: Boolean,
+        val selectedAlertType: AlertType,
+        val threshold: Int,
+        val availableStorage: Int,
+        val storageSliderMax: Int,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -86,6 +92,14 @@ data object AddNewRemoteAlertScreen : Screen {
         data object DismissBatteryOptimizationSheet : Event()
 
         data object OpenBatterySettings : Event()
+
+        data class UpdateAlertType(
+            val alertType: AlertType,
+        ) : Event()
+
+        data class UpdateThreshold(
+            val value: Int,
+        ) : Event()
     }
 }
 
@@ -94,6 +108,7 @@ class AddNewRemoteAlertPresenter
     constructor(
         @Assisted private val navigator: Navigator,
         private val remoteAlertRepository: RemoteAlertRepository,
+        private val storageMonitor: StorageMonitor,
     ) : Presenter<AddNewRemoteAlertScreen.State> {
         @Composable
         override fun present(): AddNewRemoteAlertScreen.State {
@@ -103,8 +118,23 @@ class AddNewRemoteAlertPresenter
             var isBatteryOptimized by remember {
                 mutableStateOf(BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context))
             }
+            var selectedType by remember { mutableStateOf(AlertType.BATTERY) }
+            var threshold by remember { mutableIntStateOf(10) }
 
-            // Refresh battery optimization status when screen resumes
+            val availableStorage = remember { storageMonitor.getAvailableStorageInGB().toInt() }
+            val storageSliderMax =
+                remember(availableStorage) {
+                    ((availableStorage + 9) / 10) * 10
+                }
+
+            // Update threshold if needed when switching types
+            LaunchedEffect(selectedType) {
+                if (selectedType == AlertType.STORAGE && threshold > storageSliderMax) {
+                    threshold = storageSliderMax
+                }
+            }
+
+            // Battery optimization observer
             DisposableEffect(Unit) {
                 val activity = context.findActivity()
                 val lifecycleObserver =
@@ -123,6 +153,10 @@ class AddNewRemoteAlertPresenter
             return AddNewRemoteAlertScreen.State(
                 showBatteryOptSheet = showBatteryOptimizeSheet,
                 isBatteryOptimized = isBatteryOptimized,
+                selectedAlertType = selectedType,
+                threshold = threshold,
+                availableStorage = availableStorage,
+                storageSliderMax = storageSliderMax,
             ) { event ->
                 when (event) {
                     is AddNewRemoteAlertScreen.Event.SaveNotification -> {
@@ -148,6 +182,12 @@ class AddNewRemoteAlertPresenter
                             }
                         context.startActivity(intent)
                     }
+                    is AddNewRemoteAlertScreen.Event.UpdateAlertType -> {
+                        selectedType = event.alertType
+                    }
+                    is AddNewRemoteAlertScreen.Event.UpdateThreshold -> {
+                        threshold = event.value
+                    }
                 }
             }
         }
@@ -166,8 +206,6 @@ fun AddNewRemoteAlertUi(
     state: AddNewRemoteAlertScreen.State,
     modifier: Modifier = Modifier,
 ) {
-    var type by remember { mutableStateOf(AlertType.BATTERY) }
-    var threshold by remember { mutableIntStateOf(10) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Scaffold(
@@ -209,8 +247,10 @@ fun AddNewRemoteAlertUi(
                         style = MaterialTheme.typography.labelMedium,
                     )
                     AlertTypeSelector(
-                        selectedType = type,
-                        onTypeSelected = { type = it },
+                        selectedType = state.selectedAlertType,
+                        onTypeSelected = { type ->
+                            state.eventSink(AddNewRemoteAlertScreen.Event.UpdateAlertType(type))
+                        },
                         modifier = Modifier.padding(top = 8.dp),
                     )
                 }
@@ -229,7 +269,7 @@ fun AddNewRemoteAlertUi(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Text(
-                        when (type) {
+                        when (state.selectedAlertType) {
                             AlertType.BATTERY -> "Battery Level Threshold"
                             AlertType.STORAGE -> "Storage Space Threshold"
                         },
@@ -238,27 +278,27 @@ fun AddNewRemoteAlertUi(
 
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
-                            when (type) {
-                                AlertType.BATTERY -> "Alert when battery falls below $threshold%"
-                                AlertType.STORAGE -> "Alert when available storage is below ${threshold}GB"
+                            when (state.selectedAlertType) {
+                                AlertType.BATTERY -> "Alert when battery falls below ${state.threshold}%"
+                                AlertType.STORAGE -> "Alert when available storage is below ${state.threshold}GB"
                             },
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Slider(
-                            value = threshold.toFloat(),
-                            onValueChange = { threshold = it.toInt() },
+                            value = state.threshold.toFloat(),
+                            onValueChange = { value ->
+                                state.eventSink(AddNewRemoteAlertScreen.Event.UpdateThreshold(value.toInt()))
+                            },
                             valueRange =
-                                when (type) {
+                                when (state.selectedAlertType) {
                                     AlertType.BATTERY -> 5f..50f
-                                    AlertType.STORAGE -> 1f..32f
+                                    AlertType.STORAGE -> 1f..state.storageSliderMax.toFloat()
                                 },
                             steps =
-                                when (type) {
-                                    // Creates 45 possible values: 5,6,7,...,49,50
+                                when (state.selectedAlertType) {
                                     AlertType.BATTERY -> 44
-                                    // Creates 31 possible values: 1,2,3,...,31,32
-                                    AlertType.STORAGE -> 30
+                                    AlertType.STORAGE -> state.storageSliderMax - 2
                                 },
                         )
                     }
@@ -276,7 +316,7 @@ fun AddNewRemoteAlertUi(
                 ListItem(
                     headlineContent = {
                         Text(
-                            when (type) {
+                            when (state.selectedAlertType) {
                                 AlertType.BATTERY -> "Battery Alert"
                                 AlertType.STORAGE -> "Storage Alert"
                             },
@@ -284,15 +324,19 @@ fun AddNewRemoteAlertUi(
                     },
                     supportingContent = {
                         Text(
-                            when (type) {
-                                AlertType.BATTERY -> "Will notify when battery is below $threshold%"
-                                AlertType.STORAGE -> "Will notify when storage is below ${threshold}GB"
+                            when (state.selectedAlertType) {
+                                AlertType.BATTERY -> "Will notify when battery is below ${state.threshold}%"
+                                AlertType.STORAGE ->
+                                    buildString {
+                                        append("Will notify when storage is below ${state.threshold}GB")
+                                        append(" (Currently: ${state.availableStorage}GB available)")
+                                    }
                             },
                         )
                     },
                     leadingContent = {
                         Icon(
-                            painter = painterResource(type.toIconResId()),
+                            painter = painterResource(state.selectedAlertType.toIconResId()),
                             contentDescription = null,
                         )
                     },
@@ -303,14 +347,14 @@ fun AddNewRemoteAlertUi(
             Button(
                 onClick = {
                     val notification =
-                        when (type) {
-                            AlertType.BATTERY -> RemoteAlert.BatteryAlert(batteryPercentage = threshold)
-                            AlertType.STORAGE -> RemoteAlert.StorageAlert(storageMinSpaceGb = threshold)
+                        when (state.selectedAlertType) {
+                            AlertType.BATTERY -> RemoteAlert.BatteryAlert(batteryPercentage = state.threshold)
+                            AlertType.STORAGE -> RemoteAlert.StorageAlert(storageMinSpaceGb = state.threshold)
                         }
                     state.eventSink(AddNewRemoteAlertScreen.Event.SaveNotification(notification))
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = threshold > 0,
+                enabled = state.threshold > 0,
             ) {
                 Text("Save Alert")
             }
@@ -393,6 +437,10 @@ private fun PreviewAddNewRemoteAlertUi() {
                 AddNewRemoteAlertScreen.State(
                     showBatteryOptSheet = false,
                     isBatteryOptimized = false,
+                    selectedAlertType = AlertType.BATTERY,
+                    threshold = 10,
+                    availableStorage = 56,
+                    storageSliderMax = 96,
                     eventSink = {},
                 ),
         )
