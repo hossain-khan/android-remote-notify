@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -47,6 +49,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
+import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.db.AlertCheckLogDao
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertCheckLog
@@ -65,6 +68,7 @@ data object AlertCheckLogViewerScreen : Screen {
     data class State(
         val logs: List<AlertCheckLog>,
         val isLoading: Boolean,
+        val checkIntervalMinutes: Long,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -77,11 +81,18 @@ class AlertCheckLogViewerPresenter
     @AssistedInject
     constructor(
         @Assisted private val navigator: Navigator,
+        private val appPreferencesDataStore: AppPreferencesDataStore,
         private val alertCheckLogDao: AlertCheckLogDao,
     ) : Presenter<AlertCheckLogViewerScreen.State> {
         @Composable
         override fun present(): AlertCheckLogViewerScreen.State {
             var isLoading by remember { mutableStateOf(true) }
+
+            val checkIntervalMinutes by produceState(0L) {
+                appPreferencesDataStore.workerIntervalFlow.collect {
+                    value = it
+                }
+            }
 
             val logs by produceState<List<AlertCheckLog>>(emptyList()) {
                 alertCheckLogDao
@@ -104,11 +115,13 @@ class AlertCheckLogViewerPresenter
             return AlertCheckLogViewerScreen.State(
                 logs = logs,
                 isLoading = isLoading,
-            ) { event ->
-                when (event) {
-                    AlertCheckLogViewerScreen.Event.NavigateBack -> navigator.pop()
-                }
-            }
+                checkIntervalMinutes = checkIntervalMinutes,
+                eventSink = { event ->
+                    when (event) {
+                        AlertCheckLogViewerScreen.Event.NavigateBack -> navigator.pop()
+                    }
+                },
+            )
         }
 
         @CircuitInject(AlertCheckLogViewerScreen::class, AppScope::class)
@@ -132,12 +145,6 @@ fun AlertCheckLogViewerUi(
                 title = {
                     Column {
                         Text("Logs")
-                        if (!state.isLoading && state.logs.isNotEmpty()) {
-                            Text(
-                                "Total ${state.logs.size} alert check logs",
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        }
                     }
                 },
                 navigationIcon = {
@@ -180,6 +187,13 @@ fun AlertCheckLogViewerUi(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(16.dp),
                 ) {
+                    item(key = "logs_summary") {
+                        LogsSummaryInfo(
+                            totalLogs = state.logs.size,
+                            checkIntervalMinutes = state.checkIntervalMinutes,
+                        )
+                    }
+
                     items(
                         count = state.logs.size,
                         key = { state.logs[it].checkedOn },
@@ -271,6 +285,65 @@ private fun LogItemCard(log: AlertCheckLog) {
     }
 }
 
+@Composable
+private fun LogsSummaryInfo(
+    totalLogs: Int,
+    checkIntervalMinutes: Long,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+            ),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+        ) {
+            if (checkIntervalMinutes > 0L) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.schedule_24dp),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Alerts checked every $checkIntervalMinutes minutes",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
+            }
+            if (totalLogs > 0) {
+                if (checkIntervalMinutes > 0L) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.format_list_bulleted_24dp),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Total $totalLogs alert check logs",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun PreviewAlertCheckLogViewerUi() {
@@ -308,6 +381,7 @@ private fun PreviewAlertCheckLogViewerUi() {
                 AlertCheckLogViewerScreen.State(
                     logs = sampleLogs,
                     isLoading = false,
+                    checkIntervalMinutes = 60,
                     eventSink = {},
                 ),
         )
