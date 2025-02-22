@@ -27,6 +27,7 @@ import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.WorkerStatus
 import dev.hossain.remotenotify.model.toIconResId
 import dev.hossain.remotenotify.theme.ComposeAppTheme
+import dev.hossain.remotenotify.utils.toTitleCase
 
 @Composable
 internal fun LastCheckStatusCardUi(
@@ -56,7 +57,7 @@ internal fun LastCheckStatusCardUi(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.schedule_24dp),
+                        painter = painterResource(R.drawable.pending_actions_24dp),
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.primary,
@@ -94,7 +95,7 @@ internal fun LastCheckStatusCardUi(
                             style = MaterialTheme.typography.bodyMedium,
                         )*/
                         Text(
-                            text = "Alert checked ${formatTimeAgo(lastCheckLog.checkedOn)}",
+                            text = "Alert checked ${formatTimeDuration(lastCheckLog.checkedOn)}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -124,59 +125,78 @@ internal fun LastCheckStatusCardUi(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Worker State: ${status.state}",
+                        text = buildString {
+                            append("Worker State: ${status.state.toTitleCase()}")
+                            status.nextRunTimeMs?.let {
+                                append(", Next check: ${formatTimeDuration(it)}")
+                            }
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-
-                    status.nextRunTimeMs?.let {
-                        Text(
-                            text = ", Next check: ${formatTimeAgo(it)}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
                 }
             }
         }
     }
 }
 
-private fun formatTimeAgo(timestamp: Long): String {
+/**
+ * Formats timestamp to human readable time in past or future.
+ *
+ * Examples:
+ * - Past: "2 hours 30 minutes ago"
+ * - Future: "in 2 hours 30 minutes"
+ * - Now: "just now"
+ * - Past: "5 days 2 hours ago"
+ * - Future: "in 5 days 2 hours"
+ */
+private fun formatTimeDuration(timestamp: Long): String {
     val now = System.currentTimeMillis()
-    val diff = now - timestamp
-    return when {
-        diff < 60_000 -> "just now"
-        diff < 3600_000 -> {
-            val minutes = diff / 60_000
-            "$minutes minute${if (minutes > 1) "s" else ""} ago"
-        }
-        diff < 86400_000 -> {
-            val hours = diff / 3600_000
-            val minutes = (diff % 3600_000) / 60_000
-            buildString {
-                append("$hours hour${if (hours > 1) "s" else ""}")
-                if (minutes > 0) {
-                    append(" $minutes minute${if (minutes > 1) "s" else ""}")
-                }
-                append(" ago")
+    val diff = timestamp - now
+    val absoluteDiff = kotlin.math.abs(diff)
+
+    // Function to handle pluralization
+    fun pluralize(count: Long, unit: String) = "$count $unit${if (count > 1) "s" else ""}"
+
+    // Build time components
+    fun buildTimeString(
+        primary: Pair<Long, String>,
+        secondary: Pair<Long, String>? = null
+    ): String = buildString {
+        append(pluralize(primary.first, primary.second))
+        secondary?.let { (value, unit) ->
+            if (value > 0) {
+                append(" ${pluralize(value, unit)}")
             }
         }
-        diff < 2592000000 -> { // 30 days
-            val days = diff / 86400_000
-            val hours = (diff % 86400_000) / 3600_000
-            buildString {
-                append("$days day${if (days > 1) "s" else ""}")
-                if (hours > 0) {
-                    append(" $hours hour${if (hours > 1) "s" else ""}")
-                }
-                append(" ago")
-            }
+    }
+
+    val timeString = when {
+        absoluteDiff < 60_000 -> "just now"
+        absoluteDiff < 3600_000 -> {
+            val minutes = absoluteDiff / 60_000
+            pluralize(minutes, "minute")
+        }
+        absoluteDiff < 86400_000 -> {
+            val hours = absoluteDiff / 3600_000
+            val minutes = (absoluteDiff % 3600_000) / 60_000
+            buildTimeString(hours to "hour", minutes to "minute")
+        }
+        absoluteDiff < 2592000000 -> { // 30 days
+            val days = absoluteDiff / 86400_000
+            val hours = (absoluteDiff % 86400_000) / 3600_000
+            buildTimeString(days to "day", hours to "hour")
         }
         else -> {
-            val days = diff / 86400_000
-            "$days days ago"
+            val days = absoluteDiff / 86400_000
+            pluralize(days, "day")
         }
+    }
+
+    return when {
+        diff > 0 -> "in $timeString" // Future
+        diff < 0 -> "$timeString ago" // Past
+        else -> timeString // Now
     }
 }
 
@@ -197,7 +217,7 @@ private fun PreviewLastCheckStatusCard() {
                     workerStatus =
                         WorkerStatus(
                             state = "RUNNING",
-                            nextRunTimeMs = System.currentTimeMillis() + 3600_000,
+                            nextRunTimeMs = System.currentTimeMillis() + 3990_000,
                             lastRunTimeMs = System.currentTimeMillis(),
                         ),
                 )

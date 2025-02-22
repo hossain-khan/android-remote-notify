@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.model
 
+import dev.hossain.remotenotify.utils.toTitleCase
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -133,11 +134,6 @@ data class DeviceAlert(
         when (alertType) {
             AlertType.BATTERY -> "🪫"
             AlertType.STORAGE -> "💾"
-        }
-
-    private fun String.toTitleCase(): String =
-        lowercase().replaceFirstChar {
-            if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString()
         }
 }
 

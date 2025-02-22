@@ -383,7 +383,7 @@ private fun AlertTypeSelector(
 @Composable
 @PreviewLightDark
 @PreviewDynamicColors
-fun PreviewAddNewRemoteAlertUi() {
+private fun PreviewAddNewRemoteAlertUi() {
     ComposeAppTheme {
         AddNewRemoteAlertUi(
             state =
