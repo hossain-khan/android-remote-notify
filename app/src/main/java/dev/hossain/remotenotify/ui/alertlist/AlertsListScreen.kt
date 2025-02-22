@@ -269,10 +269,7 @@ fun AlertsListUi(
                 modifier = Modifier.fillMaxSize(),
             ) {
                 item(key = "device_info_header") {
-                    Text(
-                        text = "Device Status",
-                        style = MaterialTheme.typography.labelMedium,
-                    )
+                    SectionHeader("Device Status")
                 }
                 // Display battery percentage at the top
                 item(key = "device_state_info") { DeviceCurrentStateUi(state) }
@@ -302,10 +299,7 @@ fun AlertsListUi(
                     }
                 } else {
                     item(key = "alerts_header") {
-                        Text(
-                            text = "Your Alerts",
-                            style = MaterialTheme.typography.labelMedium,
-                        )
+                        SectionHeader("Your Configured Alerts")
                     }
                     itemsIndexed(
                         items = state.remoteAlertConfigs,
@@ -496,6 +490,14 @@ fun NotificationItem(
             }
         },
         modifier = modifier.padding(horizontal = 4.dp),
+    )
+}
+
+@Composable
+private fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelMedium,
     )
 }
 
