@@ -70,6 +70,7 @@ import timber.log.Timber
 
 /**
  * Screen to list all notification mediums that allows user to configure, edit, and reset.
+ * This also allows user to configure worker interval using [WorkerConfigCard].
  */
 @Parcelize
 data object NotificationMediumListScreen : Screen {
@@ -273,7 +274,7 @@ fun NotificationMediumListUi(
                             .padding(vertical = 8.dp),
                 )
             }
-            item(key = "bottom") {
+            item(key = "bottom-feedback") {
                 FeedbackAndRequestMediumUi()
             }
         }
