@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +61,7 @@ import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.toIconResId
+import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.BatteryOptimizationHelper
 import dev.hossain.remotenotify.utils.findActivity
@@ -170,6 +172,23 @@ fun AddNewRemoteAlertUi(
     var threshold by remember { mutableIntStateOf(10) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    // Use StorageMonitor for storage info
+    val context = LocalContext.current
+    val storageMonitor = remember { StorageMonitor(context) }
+    val availableStorage = remember { storageMonitor.getAvailableStorageInGB().toInt() }
+    val storageSliderMax =
+        remember(availableStorage) {
+            // Round up to nearest 10
+            ((availableStorage + 9) / 10) * 10
+        }
+
+    // Update threshold if needed when switching types
+    LaunchedEffect(type) {
+        if (type == AlertType.STORAGE && threshold > storageSliderMax) {
+            threshold = storageSliderMax
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -251,14 +270,12 @@ fun AddNewRemoteAlertUi(
                             valueRange =
                                 when (type) {
                                     AlertType.BATTERY -> 5f..50f
-                                    AlertType.STORAGE -> 1f..32f
+                                    AlertType.STORAGE -> 1f..storageSliderMax.toFloat()
                                 },
                             steps =
                                 when (type) {
-                                    // Creates 45 possible values: 5,6,7,...,49,50
                                     AlertType.BATTERY -> 44
-                                    // Creates 31 possible values: 1,2,3,...,31,32
-                                    AlertType.STORAGE -> 30
+                                    AlertType.STORAGE -> storageSliderMax - 2
                                 },
                         )
                     }
@@ -286,7 +303,11 @@ fun AddNewRemoteAlertUi(
                         Text(
                             when (type) {
                                 AlertType.BATTERY -> "Will notify when battery is below $threshold%"
-                                AlertType.STORAGE -> "Will notify when storage is below ${threshold}GB"
+                                AlertType.STORAGE ->
+                                    buildString {
+                                        append("Will notify when storage is below ${threshold}GB")
+                                        append(" (Currently: ${availableStorage}GB available)")
+                                    }
                             },
                         )
                     },
