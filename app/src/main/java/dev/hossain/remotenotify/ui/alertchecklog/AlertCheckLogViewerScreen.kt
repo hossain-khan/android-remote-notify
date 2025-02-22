@@ -58,6 +58,7 @@ import dev.hossain.remotenotify.model.toAlertCheckLog
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.formatTimeDuration
+import dev.hossain.remotenotify.utils.toTitleCase
 import kotlinx.coroutines.flow.map
 import kotlinx.parcelize.Parcelize
 
@@ -230,11 +231,20 @@ private fun LogItemCard(log: AlertCheckLog) {
             },
             supportingContent = {
                 Column {
+                    // Show configured threshold and actual value
                     Text(
                         text =
                             when (log.alertType) {
-                                AlertType.BATTERY -> "${log.stateValue}% battery was remaining"
-                                AlertType.STORAGE -> "${log.stateValue} GB storage was remaining"
+                                AlertType.BATTERY ->
+                                    buildString {
+                                        append("${log.stateValue}% battery")
+                                        append(" (Alert threshold: ${log.configBatteryPercentage}%)")
+                                    }
+                                AlertType.STORAGE ->
+                                    buildString {
+                                        append("${log.stateValue} GB storage")
+                                        append(" (Alert threshold: ${log.configStorageMinSpaceGb} GB)")
+                                    }
                             },
                         style = MaterialTheme.typography.bodyMedium,
                     )
@@ -245,21 +255,25 @@ private fun LogItemCard(log: AlertCheckLog) {
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text =
-                            if (log.isAlertSent) {
-                                "Alert triggered & sent notifications"
-                            } else {
-                                "Alert not triggered"
-                            },
-                        style = MaterialTheme.typography.bodySmall,
-                        color =
-                            if (log.isAlertSent) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text =
+                                if (log.isAlertSent) {
+                                    "Alert triggered & sent via ${log.notifierType?.name?.toTitleCase() ?: "N/A"}"
+                                } else {
+                                    "Alert not triggered"
+                                },
+                            style = MaterialTheme.typography.bodySmall,
+                            color =
+                                if (log.isAlertSent) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                        )
+                    }
                 }
             },
             leadingContent = {
