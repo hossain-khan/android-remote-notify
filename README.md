@@ -1,7 +1,7 @@
 # Android - Remote Notify 🔔
 Very specialized app that will notify about remote android device diagnostic data, specifically low battery level and storage.
 
-> [!TIP]  
+> [!NOTE]  
 > Why❓  
 > <img src="https://github.com/user-attachments/assets/0c14f049-02fc-4184-af26-ba9a6f7e530c" height="180" align="right">
 > Sometimes android devices you want to monitor might not be co-located with you, and you want to be notified ahead of time of those metrics so that you can take action. For example:
