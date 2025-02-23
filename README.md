@@ -12,7 +12,7 @@ Very specialized app that will notify about remote android device diagnostic dat
 
 > [!CAUTION]  
 > LIMITATION: This app uses the [`WorkManager`](https://developer.android.com/reference/androidx/work/WorkManager) to schedule the periodic check for device health. 
-> The Work Manager is not guaranteed to run at exact time, it may be delayed or not run at all when the device is in deep DOZE mode or using battery saver. 
+> The Work Manager is not guaranteed to run at exact time, it may be delayed or not run at all when the device is in deep [DOZE](https://developer.android.com/training/monitoring-device-state/doze-standby) mode or using battery saver. 
 > So, please use the app with this limitation in mind.
 
 ## Quick Summary
