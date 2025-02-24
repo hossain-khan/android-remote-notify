@@ -5,6 +5,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import dev.hossain.remotenotify.data.RemoteAlertRepository
+import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.monitor.BatteryMonitor
@@ -12,6 +13,7 @@ import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
 /**
@@ -44,7 +46,20 @@ class ObserveDeviceHealthWorker(
             Timber.tag(WORKER_LOG_TAG).d("Available storage: $deviceCurrentAvailableStorage")
 
             // Send notifications if thresholds are met
-            alerts.forEach { alert ->
+            alerts.forEach { alert: RemoteAlert ->
+                val lastAlertLog: AlertCheckLog? = repository.getLatestCheckForAlert(alert.alertId).first()
+
+                // Skip if last alert was triggered within 24 hours
+                if (lastAlertLog?.isAlertSent == true) {
+                    val hoursSinceLastAlert = (System.currentTimeMillis() - lastAlertLog.checkedOn) / (1000 * 60 * 60)
+                    if (hoursSinceLastAlert < 24) {
+                        // NOTE: This is to avoid spamming the notification
+                        // If the 24 hour limit changes, make sure to update `Add Alert` screen to reflect that.
+                        Timber.tag(WORKER_LOG_TAG).d("Skipping alert: Last notification was sent $hoursSinceLastAlert hours ago")
+                        return@forEach
+                    }
+                }
+
                 when (alert) {
                     is RemoteAlert.BatteryAlert -> {
                         val triggered = deviceCurrentBatteryLevel <= alert.batteryPercentage
