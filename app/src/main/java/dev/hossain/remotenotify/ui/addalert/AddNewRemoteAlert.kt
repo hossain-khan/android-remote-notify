@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.PreviewDynamicColors
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -323,16 +324,25 @@ fun AddNewRemoteAlertUi(
                         )
                     },
                     supportingContent = {
-                        Text(
-                            when (state.selectedAlertType) {
-                                AlertType.BATTERY -> "Will notify when battery is below ${state.threshold}%"
-                                AlertType.STORAGE ->
-                                    buildString {
-                                        append("Will notify when storage is below ${state.threshold}GB")
-                                        append(" (Currently: ${state.availableStorage}GB available)")
-                                    }
-                            },
-                        )
+                        Column {
+                            Text(
+                                when (state.selectedAlertType) {
+                                    AlertType.BATTERY -> "Will notify when battery is below ${state.threshold}%"
+                                    AlertType.STORAGE ->
+                                        buildString {
+                                            append("Will notify when storage is below ${state.threshold}GB")
+                                            append(" (Currently: ${state.availableStorage}GB available)")
+                                        }
+                                },
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                "NOTE: Same alert will be sent only once every 24 hours.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                fontStyle = FontStyle.Italic,
+                            )
+                        }
                     },
                     leadingContent = {
                         Icon(
