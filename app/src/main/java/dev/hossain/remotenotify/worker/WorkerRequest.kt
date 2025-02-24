@@ -12,7 +12,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import java.util.concurrent.TimeUnit
 
-internal const val DEFAULT_PERIODIC_INTERVAL_MINUTES = 60L
+internal const val DEFAULT_PERIODIC_INTERVAL_MINUTES = 120L
 internal const val DEVICE_VITALS_CHECKER_DEBUG_WORKER_ID = "onetime-debug-request"
 internal const val DEVICE_VITALS_CHECKER_WORKER_ID = "periodic-health-check"
 
