@@ -62,9 +62,10 @@ interface AlertCheckLogDao {
     @Transaction
     @Query(
         """
-        SELECT * FROM alert_check_log
-        ORDER BY checked_at DESC
-    """,
+            SELECT * FROM alert_check_log
+            ORDER BY checked_at DESC
+            LIMIT :limit
+        """,
     )
-    fun getAllLogsWithConfig(): Flow<List<AlertLogWithConfig>>
+    fun getAllLogsWithConfig(limit: Int = 20): Flow<List<AlertLogWithConfig>>
 }
