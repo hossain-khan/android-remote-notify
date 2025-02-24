@@ -172,8 +172,8 @@ class NotificationMediumListPresenter
             LaunchedEffect(Unit) {
                 // Set up debounced updates to avoid frequent worker setup
                 workerIntervalFlow
-                    // Wait for 500ms of inactivity
-                    .debounce(500L)
+                    // Wait for 1 second of inactivity
+                    .debounce(1_000L)
                     .collect { minutes ->
                         Timber.d("Worker interval updated: $minutes minutes")
                         appPreferencesDataStore.saveWorkerInterval(minutes)
