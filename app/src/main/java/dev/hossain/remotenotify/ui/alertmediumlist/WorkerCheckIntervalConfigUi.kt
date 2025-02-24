@@ -37,8 +37,8 @@ internal fun WorkerConfigCard(
     modifier: Modifier = Modifier,
 ) {
     var intervalSliderValue by remember { mutableFloatStateOf(state.workerIntervalMinutes.toFloat()) }
-    val valueRangeStart = 60f // 1 hour
-    val valueRangeEnd = 720f // 12 hours
+    val alertCheckIntervalRangeStart = 60f // 1 hour
+    val alertCheckIntervalRangeEnd = 720f // 12 hours
 
     Card(
         modifier = modifier,
@@ -83,7 +83,7 @@ internal fun WorkerConfigCard(
                     intervalSliderValue = intervalValue // Update UI immediately
                     state.eventSink(NotificationMediumListScreen.Event.OnWorkerIntervalUpdated(intervalValue.toLong()))
                 },
-                valueRange = valueRangeStart..valueRangeEnd,
+                valueRange = alertCheckIntervalRangeStart..alertCheckIntervalRangeEnd,
                 modifier = Modifier.fillMaxWidth(),
                 colors =
                     SliderDefaults.colors(
@@ -100,12 +100,12 @@ internal fun WorkerConfigCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "${(valueRangeStart / 60).toInt()}h",
+                    text = "${(alertCheckIntervalRangeStart / 60).toInt()}h",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = "${(valueRangeEnd / 60).toInt()}h",
+                    text = "${(alertCheckIntervalRangeEnd / 60).toInt()}h",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
