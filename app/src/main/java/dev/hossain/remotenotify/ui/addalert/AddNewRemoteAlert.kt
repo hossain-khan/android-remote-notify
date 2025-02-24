@@ -297,8 +297,8 @@ fun AddNewRemoteAlertUi(
                                 },
                             steps =
                                 when (state.selectedAlertType) {
-                                    AlertType.BATTERY -> 44
-                                    AlertType.STORAGE -> state.storageSliderMax - 2
+                                    AlertType.BATTERY -> 44 // Total steps: (50-5) - 1 = 44 steps
+                                    AlertType.STORAGE -> (state.storageSliderMax - 1) // From 1 to max, so max-1 steps
                                 },
                         )
                     }
@@ -441,6 +441,26 @@ private fun PreviewAddNewRemoteAlertUi() {
                     threshold = 10,
                     availableStorage = 56,
                     storageSliderMax = 96,
+                    eventSink = {},
+                ),
+        )
+    }
+}
+
+@Composable
+@PreviewLightDark
+@PreviewDynamicColors
+private fun PreviewStorageAlertUi() {
+    ComposeAppTheme {
+        AddNewRemoteAlertUi(
+            state =
+                AddNewRemoteAlertScreen.State(
+                    showBatteryOptSheet = false,
+                    isBatteryOptimized = true,
+                    selectedAlertType = AlertType.STORAGE,
+                    threshold = 8,
+                    availableStorage = 16,
+                    storageSliderMax = 20,
                     eventSink = {},
                 ),
         )
