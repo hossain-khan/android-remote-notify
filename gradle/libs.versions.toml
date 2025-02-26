@@ -3,7 +3,7 @@ activityCompose = "1.10.0"
 
 # Adaptive library to create adaptive UIs
 # https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive
-adaptiveAndroid = "1.1.0-beta02"
+adaptiveAndroid = "1.1.0-rc01"
 
 agp = "8.8.1"
 
