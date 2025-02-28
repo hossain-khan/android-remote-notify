@@ -5,6 +5,9 @@ on:
   push:
     branches: [ "main" ]
 
+env:
+  EMAIL_API_KEY: 'FAKE_KEY_TO_PASS_CI'
+
 jobs:
   android-post-check:
 

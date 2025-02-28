@@ -33,7 +33,13 @@ android {
             project.rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use {
                 Properties().apply { load(it) }
             }
-        val apiKey = localProperties?.getProperty("EMAIL_API_KEY") ?: "MISSING-KEY"
+        val apiKey = System.getenv("EMAIL_API_KEY") ?: localProperties?.getProperty("EMAIL_API_KEY") ?: ""
+        if (apiKey.isBlank()) {
+            error("""
+                EMAIL_API_KEY is not set in `local.properties`
+                Please add 'EMAIL_API_KEY=your_api_key' to `local.properties` file.
+            """.trimIndent())
+        }
         buildConfigField("String", "EMAIL_API_KEY", "\"$apiKey\"")
 
         // Git commit hash to identify build source
