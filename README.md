@@ -1,3 +1,5 @@
+[![Android CI](https://github.com/hossain-khan/android-remote-notify/actions/workflows/android.yml/badge.svg)](https://github.com/hossain-khan/android-remote-notify/actions/workflows/android.yml) [![codecov](https://codecov.io/github/hossain-khan/android-remote-notify/graph/badge.svg?token=26MHI7A8QP)](https://codecov.io/github/hossain-khan/android-remote-notify)
+
 # Android - Remote Notify 🔔
 Very specialized app that will notify about remote android device diagnostic data, specifically low battery level and storage.
 
