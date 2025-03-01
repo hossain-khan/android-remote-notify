@@ -178,6 +178,7 @@ dependencies {
     testImplementation(libs.google.truth)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
     testImplementation(libs.okhttp.mock.webserver)
     testImplementation(libs.retrofit.mock.server)
     testImplementation(libs.robolectric)
