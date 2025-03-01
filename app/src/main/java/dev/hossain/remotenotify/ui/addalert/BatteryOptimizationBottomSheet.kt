@@ -20,8 +20,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -38,7 +36,7 @@ import dev.hossain.remotenotify.theme.ComposeAppTheme
 fun BatteryOptimizationBottomSheet(
     sheetState: SheetState,
     onSettingsClick: () -> Unit,
-    onDontRemind: () -> Unit,
+    onDontRemindAgain: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -47,14 +45,14 @@ fun BatteryOptimizationBottomSheet(
         sheetState = sheetState,
         modifier = modifier,
     ) {
-        BatteryOptimizationUi(onSettingsClick = onSettingsClick, onDontRemind = onDontRemind)
+        BatteryOptimizationUi(onSettingsClick = onSettingsClick, onDontRemindAgain = onDontRemindAgain)
     }
 }
 
 @Composable
 private fun BatteryOptimizationUi(
     onSettingsClick: () -> Unit,
-    onDontRemind: () -> Unit,
+    onDontRemindAgain: () -> Unit,
 ) {
     Column(
         modifier =
@@ -116,7 +114,7 @@ private fun BatteryOptimizationUi(
             }
 
             TextButton(
-                onClick = onDontRemind,
+                onClick = onDontRemindAgain,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Don't remind me again")
@@ -133,7 +131,7 @@ private fun BatteryOptimizationUi(
 private fun PreviewBatteryOptimizationUi() {
     ComposeAppTheme {
         Surface {
-            BatteryOptimizationUi({}, {})
+            BatteryOptimizationUi(onSettingsClick = {}, onDontRemindAgain = {})
         }
     }
 }

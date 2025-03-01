@@ -27,7 +27,7 @@ class AppPreferencesDataStore
             private val WORKER_INTERVAL_KEY = longPreferencesKey("worker_interval_minutes")
             private val LAST_REVIEW_REQUEST_KEY = longPreferencesKey("last_review_request_time")
             private val FIRST_TIME_DIALOG_SHOWN = booleanPreferencesKey("first_time_dialog_shown")
-            private val HIDE_BATTERY_OPT_REMINDER = booleanPreferencesKey("hide_battery_opt_reminder")
+            private val HIDE_BATTERY_OPTIMIZATION_REMINDER = booleanPreferencesKey("hide_battery_optimization_reminder")
         }
 
         suspend fun saveWorkerInterval(intervalMinutes: Long) {
@@ -69,12 +69,12 @@ class AppPreferencesDataStore
         val hideBatteryOptReminder: Flow<Boolean> =
             context.appPreferencesDataStore.data
                 .map { preferences ->
-                    preferences[HIDE_BATTERY_OPT_REMINDER] ?: false
+                    preferences[HIDE_BATTERY_OPTIMIZATION_REMINDER] ?: false
                 }
 
         suspend fun setHideBatteryOptReminder(hide: Boolean) {
             context.appPreferencesDataStore.edit { preferences ->
-                preferences[HIDE_BATTERY_OPT_REMINDER] = hide
+                preferences[HIDE_BATTERY_OPTIMIZATION_REMINDER] = hide
             }
         }
     }

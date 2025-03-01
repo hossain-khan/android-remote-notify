@@ -96,7 +96,7 @@ data object AddNewRemoteAlertScreen : Screen {
 
         data object OpenBatterySettings : Event()
 
-        data object HideBatteryOptReminder : Event()
+        data object HideBatteryOptimizationReminder : Event()
 
         data class UpdateAlertType(
             val alertType: AlertType,
@@ -203,7 +203,7 @@ class AddNewRemoteAlertPresenter
                     is AddNewRemoteAlertScreen.Event.UpdateThreshold -> {
                         threshold = event.value
                     }
-                    AddNewRemoteAlertScreen.Event.HideBatteryOptReminder -> {
+                    AddNewRemoteAlertScreen.Event.HideBatteryOptimizationReminder -> {
                         scope.launch {
                             appPreferencesDataStore.setHideBatteryOptReminder(true)
                         }
@@ -407,8 +407,8 @@ fun AddNewRemoteAlertUi(
                 onSettingsClick = {
                     state.eventSink(AddNewRemoteAlertScreen.Event.OpenBatterySettings)
                 },
-                onDontRemind = {
-                    state.eventSink(AddNewRemoteAlertScreen.Event.HideBatteryOptReminder)
+                onDontRemindAgain = {
+                    state.eventSink(AddNewRemoteAlertScreen.Event.HideBatteryOptimizationReminder)
                     state.eventSink(AddNewRemoteAlertScreen.Event.DismissBatteryOptimizationSheet)
                 },
                 onDismiss = {
