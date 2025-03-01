@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -27,7 +26,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -41,7 +39,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,19 +47,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -74,8 +66,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -103,7 +93,6 @@ import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.formatTimeDuration
 import dev.hossain.remotenotify.utils.toTitleCase
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.text.SimpleDateFormat
@@ -112,7 +101,7 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Screen to view all the alert check logs with filtering and search capabilities.
+ * Screen to view all the alert check logs with filtering capabilities.
  */
 @Parcelize
 data object AlertCheckLogViewerScreen : Screen {
@@ -121,7 +110,6 @@ data object AlertCheckLogViewerScreen : Screen {
         val filteredLogs: List<AlertCheckLog>,
         val isLoading: Boolean,
         val checkIntervalMinutes: Long,
-        val searchQuery: String = "",
         val showTriggeredOnly: Boolean = false,
         val selectedAlertType: AlertType? = null,
         val selectedNotifierType: NotifierType? = null,
@@ -131,13 +119,27 @@ data object AlertCheckLogViewerScreen : Screen {
 
     sealed class Event : CircuitUiEvent {
         data object NavigateBack : Event()
-        data class SearchQueryChanged(val query: String) : Event()
-        data object ToggleTriggeredOnly : Event() 
-        data class FilterByAlertType(val alertType: AlertType?) : Event()
-        data class FilterByNotifierType(val notifierType: NotifierType?) : Event()
-        data class FilterByDateRange(val startDate: Long?, val endDate: Long?) : Event()
+
+        data object ToggleTriggeredOnly : Event()
+
+        data class FilterByAlertType(
+            val alertType: AlertType?,
+        ) : Event()
+
+        data class FilterByNotifierType(
+            val notifierType: NotifierType?,
+        ) : Event()
+
+        data class FilterByDateRange(
+            val startDate: Long?,
+            val endDate: Long?,
+        ) : Event()
+
         data object ClearFilters : Event()
-        data class ExportLogs(val logs: List<AlertCheckLog>) : Event()
+
+        data class ExportLogs(
+            val logs: List<AlertCheckLog>,
+        ) : Event()
     }
 }
 
@@ -151,7 +153,6 @@ class AlertCheckLogViewerPresenter
         @Composable
         override fun present(): AlertCheckLogViewerScreen.State {
             var isLoading by remember { mutableStateOf(true) }
-            var searchQuery by rememberSaveable { mutableStateOf("") }
             var showTriggeredOnly by rememberSaveable { mutableStateOf(false) }
             var selectedAlertType by rememberSaveable { mutableStateOf<AlertType?>(null) }
             var selectedNotifierType by rememberSaveable { mutableStateOf<NotifierType?>(null) }
@@ -174,32 +175,28 @@ class AlertCheckLogViewerPresenter
             }
 
             // Apply all filters
-            val filteredLogs = allLogs.filter { log ->
-                val startDate = startDate
-                val endDate = endDate
-                val matchesQuery = searchQuery.isEmpty() || 
-                    log.alertType.name.contains(searchQuery, ignoreCase = true) ||
-                    (log.notifierType?.name?.contains(searchQuery, ignoreCase = true) ?: false)
-                
-                val matchesTriggeredFilter = !showTriggeredOnly || log.isAlertSent
-                
-                val matchesAlertTypeFilter = selectedAlertType == null || log.alertType == selectedAlertType
-                
-                val matchesNotifierTypeFilter = selectedNotifierType == null || log.notifierType == selectedNotifierType
-                
-                val matchesDateRange = (startDate == null || log.checkedOn >= startDate) &&
-                    (endDate == null || log.checkedOn <= endDate)
-                
-                matchesQuery && matchesTriggeredFilter && matchesAlertTypeFilter && 
-                    matchesNotifierTypeFilter && matchesDateRange
-            }
+            val filteredLogs =
+                allLogs.filter { log ->
+                    val startDate = startDate
+                    val endDate = endDate
+                    val matchesTriggeredFilter = !showTriggeredOnly || log.isAlertSent
+                    val matchesAlertTypeFilter = selectedAlertType == null || log.alertType == selectedAlertType
+                    val matchesNotifierTypeFilter = selectedNotifierType == null || log.notifierType == selectedNotifierType
+                    val matchesDateRange =
+                        (startDate == null || log.checkedOn >= startDate) &&
+                            (endDate == null || log.checkedOn <= endDate)
+
+                    matchesTriggeredFilter &&
+                        matchesAlertTypeFilter &&
+                        matchesNotifierTypeFilter &&
+                        matchesDateRange
+                }
 
             return AlertCheckLogViewerScreen.State(
                 logs = allLogs,
                 filteredLogs = filteredLogs,
                 isLoading = isLoading,
                 checkIntervalMinutes = checkIntervalMinutes,
-                searchQuery = searchQuery,
                 showTriggeredOnly = showTriggeredOnly,
                 selectedAlertType = selectedAlertType,
                 selectedNotifierType = selectedNotifierType,
@@ -207,9 +204,6 @@ class AlertCheckLogViewerPresenter
                 eventSink = { event ->
                     when (event) {
                         AlertCheckLogViewerScreen.Event.NavigateBack -> navigator.pop()
-                        is AlertCheckLogViewerScreen.Event.SearchQueryChanged -> {
-                            searchQuery = event.query
-                        }
                         AlertCheckLogViewerScreen.Event.ToggleTriggeredOnly -> {
                             showTriggeredOnly = !showTriggeredOnly
                         }
@@ -224,7 +218,6 @@ class AlertCheckLogViewerPresenter
                             endDate = event.endDate
                         }
                         AlertCheckLogViewerScreen.Event.ClearFilters -> {
-                            searchQuery = ""
                             showTriggeredOnly = false
                             selectedAlertType = null
                             selectedNotifierType = null
@@ -258,23 +251,23 @@ fun AlertCheckLogViewerUi(
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     var showFilterSheet by remember { mutableStateOf(false) }
-    var showSearchBar by remember { mutableStateOf(false) }
     var showOptionsMenu by remember { mutableStateOf(false) }
     var showDatePickerDialog by remember { mutableStateOf(false) }
     var datePickerMode by remember { mutableIntStateOf(0) } // 0 for start date, 1 for end date
-    
+
     var expandedLogId by remember { mutableLongStateOf(-1L) }
-    
+
     val filterSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    
-    val hasActiveFilters = state.showTriggeredOnly || 
-                           state.selectedAlertType != null || 
-                           state.selectedNotifierType != null || 
-                           state.dateRange.first != null || 
-                           state.dateRange.second != null
-    
+
+    val hasActiveFilters =
+        state.showTriggeredOnly ||
+            state.selectedAlertType != null ||
+            state.selectedNotifierType != null ||
+            state.dateRange.first != null ||
+            state.dateRange.second != null
+
     val datePickerState = rememberDatePickerState()
 
     Scaffold(
@@ -283,45 +276,19 @@ fun AlertCheckLogViewerUi(
         topBar = {
             TopAppBar(
                 title = {
-                    if (!showSearchBar) {
-                        Column {
-                            Text("Logs History")
-                            if (state.filteredLogs.size != state.logs.size) {
-                                Text(
-                                    "Showing ${state.filteredLogs.size} of ${state.logs.size}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            }
-                        }
-                    } else {
-                        SearchBar(
-                            query = state.searchQuery,
-                            onQueryChange = { state.eventSink(AlertCheckLogViewerScreen.Event.SearchQueryChanged(it)) },
-                            onSearch = { showSearchBar = false },
-                            active = true,
-                            onActiveChange = { showSearchBar = it },
-                            placeholder = { Text("Search logs...") },
-                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-                            trailingIcon = { 
-                                if (state.searchQuery.isNotEmpty()) {
-                                    IconButton(onClick = { state.eventSink(AlertCheckLogViewerScreen.Event.SearchQueryChanged("")) }) {
-                                        Icon(Icons.Default.Clear, contentDescription = "Clear Search")
-                                    }
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            // Search suggestions could go here if needed
+                    Column {
+                        Text("Logs History")
+                        if (state.filteredLogs.size != state.logs.size) {
+                            Text(
+                                "Showing ${state.filteredLogs.size} of ${state.logs.size}",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
                         }
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        if (showSearchBar) {
-                            showSearchBar = false
-                        } else {
-                            state.eventSink(AlertCheckLogViewerScreen.Event.NavigateBack)
-                        }
+                        state.eventSink(AlertCheckLogViewerScreen.Event.NavigateBack)
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -330,76 +297,69 @@ fun AlertCheckLogViewerUi(
                     }
                 },
                 actions = {
-                    if (!showSearchBar) {
-                        // Search button
-                        IconButton(onClick = { showSearchBar = true }) {
+                    // Filter button with badge if filters are active
+                    IconButton(onClick = { showFilterSheet = true }) {
+                        BadgedBox(
+                            badge = {
+                                if (hasActiveFilters) {
+                                    Badge { }
+                                }
+                            },
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search",
+                                painter = painterResource(R.drawable.filter_alt_24dp),
+                                contentDescription = "Filter",
+                                tint =
+                                    if (hasActiveFilters) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface
+                                    },
                             )
                         }
-                        
-                        // Filter button with badge if filters are active
-                        IconButton(onClick = { showFilterSheet = true }) {
-                            BadgedBox(
-                                badge = {
-                                    if (hasActiveFilters) {
-                                        Badge { }
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.filter_alt_24dp),
-                                    contentDescription = "Filter",
-                                    tint = if (hasActiveFilters) 
-                                        MaterialTheme.colorScheme.primary 
-                                    else 
-                                        MaterialTheme.colorScheme.onSurface
-                                )
-                            }
+                    }
+
+                    // Options menu
+                    Box {
+                        IconButton(onClick = { showOptionsMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "More Options",
+                            )
                         }
-                        
-                        // Options menu
-                        Box {
-                            IconButton(onClick = { showOptionsMenu = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "More Options",
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = showOptionsMenu,
-                                onDismissRequest = { showOptionsMenu = false },
-                                offset = DpOffset(x = (-16).dp, y = 0.dp)
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text("Export Logs") },
-                                    leadingIcon = { 
-                                        Icon(Icons.Default.Share, contentDescription = null) 
-                                    },
-                                    onClick = {
-                                        showOptionsMenu = false
-                                        state.eventSink(AlertCheckLogViewerScreen.Event.ExportLogs(state.filteredLogs))
-                                        coroutineScope.launch {
-                                            val result = snackbarHostState.showSnackbar(
+                        DropdownMenu(
+                            expanded = showOptionsMenu,
+                            onDismissRequest = { showOptionsMenu = false },
+                            offset = DpOffset(x = (-16).dp, y = 0.dp),
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Export Logs") },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Share, contentDescription = null)
+                                },
+                                onClick = {
+                                    showOptionsMenu = false
+                                    state.eventSink(AlertCheckLogViewerScreen.Event.ExportLogs(state.filteredLogs))
+                                    coroutineScope.launch {
+                                        val result =
+                                            snackbarHostState.showSnackbar(
                                                 message = "Export feature coming soon!",
-                                                actionLabel = "OK"
+                                                actionLabel = "OK",
                                             )
-                                        }
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Clear All Filters") },
-                                    leadingIcon = { 
-                                        Icon(Icons.Default.Clear, contentDescription = null) 
-                                    },
-                                    enabled = hasActiveFilters,
-                                    onClick = {
-                                        showOptionsMenu = false
-                                        state.eventSink(AlertCheckLogViewerScreen.Event.ClearFilters)
-                                    },
-                                )
-                            }
+                                    }
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Clear All Filters") },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Clear, contentDescription = null)
+                                },
+                                enabled = hasActiveFilters,
+                                onClick = {
+                                    showOptionsMenu = false
+                                    state.eventSink(AlertCheckLogViewerScreen.Event.ClearFilters)
+                                },
+                            )
                         }
                     }
                 },
@@ -407,9 +367,10 @@ fun AlertCheckLogViewerUi(
         },
     ) { padding ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding),
         ) {
             if (state.isLoading) {
                 Column(
@@ -428,7 +389,7 @@ fun AlertCheckLogViewerUi(
                 EmptyLogsState()
             } else if (state.filteredLogs.isEmpty()) {
                 NoMatchingLogsState(
-                    onClearFilters = { state.eventSink(AlertCheckLogViewerScreen.Event.ClearFilters) }
+                    onClearFilters = { state.eventSink(AlertCheckLogViewerScreen.Event.ClearFilters) },
                 )
             } else {
                 LazyColumn(
@@ -443,14 +404,14 @@ fun AlertCheckLogViewerUi(
                             filteredLogs = state.filteredLogs.size,
                             checkIntervalMinutes = state.checkIntervalMinutes,
                             hasActiveFilters = hasActiveFilters,
-                            onClearFilters = { 
+                            onClearFilters = {
                                 if (hasActiveFilters) {
                                     state.eventSink(AlertCheckLogViewerScreen.Event.ClearFilters)
                                 }
-                            }
+                            },
                         )
                     }
-                    
+
                     // Active filters display
                     if (hasActiveFilters) {
                         item(key = "active_filters") {
@@ -460,61 +421,62 @@ fun AlertCheckLogViewerUi(
                                 notifierType = state.selectedNotifierType,
                                 dateRange = state.dateRange,
                                 onClearFilter = { filter ->
-                                    when(filter) {
+                                    when (filter) {
                                         "triggered" -> state.eventSink(AlertCheckLogViewerScreen.Event.ToggleTriggeredOnly)
                                         "alertType" -> state.eventSink(AlertCheckLogViewerScreen.Event.FilterByAlertType(null))
                                         "notifierType" -> state.eventSink(AlertCheckLogViewerScreen.Event.FilterByNotifierType(null))
                                         "dateRange" -> state.eventSink(AlertCheckLogViewerScreen.Event.FilterByDateRange(null, null))
                                     }
-                                }
+                                },
                             )
                         }
                     }
 
                     items(
                         count = state.filteredLogs.size,
-                        key = { index -> state.filteredLogs[index].checkedOn }
+                        key = { index -> state.filteredLogs[index].checkedOn },
                     ) { index ->
                         val log = state.filteredLogs[index]
                         val isExpanded = expandedLogId == log.checkedOn
-                        
+
                         LogItemCard(
                             log = log,
                             isExpanded = isExpanded,
-                            onClick = { 
+                            onClick = {
                                 expandedLogId = if (isExpanded) -1L else log.checkedOn
                             },
                             onCopyDetails = {
-                                val logDetails = buildString {
-                                    append("Type: ${log.alertType.name}\n")
-                                    append("Time: ${formatDateTime(log.checkedOn)}\n")
-                                    append("Status: ${if (log.isAlertSent) "Alert Sent" else "No Alert"}\n")
-                                    
-                                    if (log.alertType == AlertType.BATTERY) {
-                                        append("Battery Level: ${log.stateValue}% (Threshold: ${log.configBatteryPercentage}%)\n")
-                                    } else {
-                                        append("Free Storage: ${log.stateValue}GB (Threshold: ${log.configStorageMinSpaceGb}GB)\n")
+                                val logDetails =
+                                    buildString {
+                                        append("Type: ${log.alertType.name}\n")
+                                        append("Time: ${formatDateTime(log.checkedOn)}\n")
+                                        append("Status: ${if (log.isAlertSent) "Alert Sent" else "No Alert"}\n")
+
+                                        if (log.alertType == AlertType.BATTERY) {
+                                            append("Battery Level: ${log.stateValue}% (Threshold: ${log.configBatteryPercentage}%)\n")
+                                        } else {
+                                            append("Free Storage: ${log.stateValue}GB (Threshold: ${log.configStorageMinSpaceGb}GB)\n")
+                                        }
+
+                                        if (log.isAlertSent && log.notifierType != null) {
+                                            append("Notification sent via: ${log.notifierType.displayName}\n")
+                                        }
                                     }
-                                    
-                                    if (log.isAlertSent && log.notifierType != null) {
-                                        append("Notification sent via: ${log.notifierType.displayName}\n")
-                                    }
-                                }
                                 clipboardManager.setText(AnnotatedString(logDetails))
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar("Log details copied to clipboard")
                                 }
-                            }
+                            },
                         )
                     }
                 }
             }
-            
+
             // Show date picker dialog for date range filtering
             if (showDatePickerDialog) {
                 val confirmEnabled = datePickerState.selectedDateMillis != null
                 val dialogTitle = if (datePickerMode == 0) "Select Start Date" else "Select End Date"
-                
+
                 DatePickerDialog(
                     onDismissRequest = { showDatePickerDialog = false },
                     confirmButton = {
@@ -523,9 +485,12 @@ fun AlertCheckLogViewerUi(
                                 if (datePickerMode == 0) {
                                     // Start date
                                     val startDate = datePickerState.selectedDateMillis
-                                    state.eventSink(AlertCheckLogViewerScreen.Event.FilterByDateRange(
-                                        startDate, state.dateRange.second
-                                    ))
+                                    state.eventSink(
+                                        AlertCheckLogViewerScreen.Event.FilterByDateRange(
+                                            startDate,
+                                            state.dateRange.second,
+                                        ),
+                                    )
                                 } else {
                                     // End date - set to end of day
                                     var endDate = datePickerState.selectedDateMillis
@@ -537,13 +502,16 @@ fun AlertCheckLogViewerUi(
                                         calendar.set(Calendar.SECOND, 59)
                                         endDate = calendar.timeInMillis
                                     }
-                                    state.eventSink(AlertCheckLogViewerScreen.Event.FilterByDateRange(
-                                        state.dateRange.first, endDate
-                                    ))
+                                    state.eventSink(
+                                        AlertCheckLogViewerScreen.Event.FilterByDateRange(
+                                            state.dateRange.first,
+                                            endDate,
+                                        ),
+                                    )
                                 }
                                 showDatePickerDialog = false
                             },
-                            enabled = confirmEnabled
+                            enabled = confirmEnabled,
                         ) {
                             Text("OK")
                         }
@@ -553,24 +521,24 @@ fun AlertCheckLogViewerUi(
                             Text("Cancel")
                         }
                     },
-                    tonalElevation = 4.dp
+                    tonalElevation = 4.dp,
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     ) {
                         Text(
                             text = dialogTitle,
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(bottom = 16.dp)
+                            modifier = Modifier.padding(bottom = 16.dp),
                         )
                         DatePicker(
                             state = datePickerState,
-                            showModeToggle = false
+                            showModeToggle = false,
                         )
                     }
                 }
             }
-            
+
             // Filter bottom sheet
             if (showFilterSheet) {
                 ModalBottomSheet(
@@ -583,7 +551,7 @@ fun AlertCheckLogViewerUi(
                             state.eventSink(AlertCheckLogViewerScreen.Event.FilterByAlertType(alertType))
                         },
                         onFilterByNotifierType = { notifierType ->
-                            state.eventSink(AlertCheckLogViewerScreen.Event.FilterByNotifierType(notifierType)) 
+                            state.eventSink(AlertCheckLogViewerScreen.Event.FilterByNotifierType(notifierType))
                         },
                         onToggleTriggeredOnly = {
                             state.eventSink(AlertCheckLogViewerScreen.Event.ToggleTriggeredOnly)
@@ -598,7 +566,7 @@ fun AlertCheckLogViewerUi(
                         },
                         onClose = {
                             showFilterSheet = false
-                        }
+                        },
                     )
                 }
             }
@@ -617,60 +585,61 @@ private fun FilterBottomSheetContent(
     onClose: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "Filter Logs",
                 style = MaterialTheme.typography.titleLarge,
             )
-            
+
             TextButton(onClick = onClearFilters) {
                 Text("Clear All")
             }
         }
-        
+
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-        
+
         Text(
             text = "Alert Status",
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(vertical = 8.dp)
+            modifier = Modifier.padding(vertical = 8.dp),
         )
-        
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Checkbox(
                 checked = currentState.showTriggeredOnly,
-                onCheckedChange = { onToggleTriggeredOnly() }
+                onCheckedChange = { onToggleTriggeredOnly() },
             )
             Text("Show Triggered Alerts Only")
         }
-        
+
         Text(
             text = "Alert Type",
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(vertical = 8.dp)
+            modifier = Modifier.padding(vertical = 8.dp),
         )
-        
+
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 16.dp),
         ) {
             FilterChip(
                 selected = currentState.selectedAlertType == null,
                 onClick = { onFilterByAlertType(null) },
-                label = { Text("All") }
+                label = { Text("All") },
             )
-            
+
             FilterChip(
                 selected = currentState.selectedAlertType == AlertType.BATTERY,
                 onClick = { onFilterByAlertType(AlertType.BATTERY) },
@@ -679,13 +648,13 @@ private fun FilterBottomSheetContent(
                         Icon(
                             painter = painterResource(R.drawable.battery_5_bar_24dp),
                             contentDescription = null,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
                     }
                 },
-                label = { Text("Battery") }
+                label = { Text("Battery") },
             )
-            
+
             FilterChip(
                 selected = currentState.selectedAlertType == AlertType.STORAGE,
                 onClick = { onFilterByAlertType(AlertType.STORAGE) },
@@ -694,77 +663,85 @@ private fun FilterBottomSheetContent(
                         Icon(
                             painter = painterResource(R.drawable.hard_disk_24dp),
                             contentDescription = null,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
                     }
                 },
-                label = { Text("Storage") }
+                label = { Text("Storage") },
             )
         }
-        
+
         Text(
             text = "Notification Method",
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(vertical = 8.dp)
+            modifier = Modifier.padding(vertical = 8.dp),
         )
-        
+
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .padding(bottom = 16.dp)
-                .fillMaxWidth()
+            modifier =
+                Modifier
+                    .padding(bottom = 16.dp)
+                    .fillMaxWidth(),
         ) {
             FilterChip(
                 selected = currentState.selectedNotifierType == null,
                 onClick = { onFilterByNotifierType(null) },
-                label = { Text("All") }
+                label = { Text("All") },
             )
-            
+
             // Create a chip for each notifier type
             NotifierType.values().forEach { notifierType ->
                 FilterChip(
                     selected = currentState.selectedNotifierType == notifierType,
                     onClick = { onFilterByNotifierType(notifierType) },
-                    label = { Text(notifierType.displayName) }
+                    label = { Text(notifierType.displayName) },
                 )
             }
         }
-        
+
         Text(
             text = "Date Range",
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(vertical = 8.dp)
+            modifier = Modifier.padding(vertical = 8.dp),
         )
-        
+
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             // Start date
             OutlinedTextField(
-                value = if (currentState.dateRange.first != null) 
-                    SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                        .format(Date(currentState.dateRange.first!!)) 
-                    else "",
+                value =
+                    if (currentState.dateRange.first != null) {
+                        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                            .format(Date(currentState.dateRange.first!!))
+                    } else {
+                        ""
+                    },
                 onValueChange = { },
                 readOnly = true,
                 label = { Text("Start Date") },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
                 trailingIcon = {
                     IconButton(onClick = { onSelectDateRange(true) }) {
                         Icon(Icons.Default.DateRange, contentDescription = "Select Start Date")
                     }
-                }
+                },
             )
-            
+
             // End date
             OutlinedTextField(
-                value = if (currentState.dateRange.second != null) 
-                    SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                        .format(Date(currentState.dateRange.second!!)) 
-                    else "",
+                value =
+                    if (currentState.dateRange.second != null) {
+                        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                            .format(Date(currentState.dateRange.second!!))
+                    } else {
+                        ""
+                    },
                 onValueChange = { },
                 readOnly = true,
                 label = { Text("End Date") },
@@ -773,21 +750,21 @@ private fun FilterBottomSheetContent(
                     IconButton(onClick = { onSelectDateRange(false) }) {
                         Icon(Icons.Default.DateRange, contentDescription = "Select End Date")
                     }
-                }
+                },
             )
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.End,
         ) {
             TextButton(onClick = onClose) {
                 Text("Apply Filters")
             }
         }
-        
+
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
@@ -798,23 +775,24 @@ private fun ActiveFiltersSection(
     alertType: AlertType?,
     notifierType: NotifierType?,
     dateRange: Pair<Long?, Long?>,
-    onClearFilter: (String) -> Unit
+    onClearFilter: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
     ) {
         Text(
             text = "Active Filters:",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 4.dp)
+            modifier = Modifier.padding(bottom = 4.dp),
         )
-        
+
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(vertical = 4.dp)
+            modifier = Modifier.padding(vertical = 4.dp),
         ) {
             if (showTriggeredOnly) {
                 FilterChip(
@@ -825,34 +803,34 @@ private fun ActiveFiltersSection(
                         Icon(
                             imageVector = Icons.Default.Clear,
                             contentDescription = "Clear Filter",
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
-                    }
+                    },
                 )
             }
-            
+
             if (alertType != null) {
                 FilterChip(
                     selected = true,
                     onClick = { onClearFilter("alertType") },
-                    label = { 
+                    label = {
                         Text(
-                            when(alertType) {
+                            when (alertType) {
                                 AlertType.BATTERY -> "Battery"
                                 AlertType.STORAGE -> "Storage"
-                            }
-                        ) 
+                            },
+                        )
                     },
                     trailingIcon = {
                         Icon(
                             imageVector = Icons.Default.Clear,
                             contentDescription = "Clear Filter",
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
-                    }
+                    },
                 )
             }
-            
+
             if (notifierType != null) {
                 FilterChip(
                     selected = true,
@@ -862,37 +840,40 @@ private fun ActiveFiltersSection(
                         Icon(
                             imageVector = Icons.Default.Clear,
                             contentDescription = "Clear Filter",
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
-                    }
+                    },
                 )
             }
-            
+
             if (dateRange.first != null || dateRange.second != null) {
                 FilterChip(
                     selected = true,
                     onClick = { onClearFilter("dateRange") },
-                    label = { 
-                        val dateText = when {
-                            dateRange.first != null && dateRange.second != null -> "Date Range"
-                            dateRange.first != null -> "From ${
-                                SimpleDateFormat("MMM dd", Locale.getDefault())
-                                    .format(Date(dateRange.first!!))
-                            }"
-                            else -> "Until ${
-                                SimpleDateFormat("MMM dd", Locale.getDefault())
-                                    .format(Date(dateRange.second!!))
-                            }"
-                        }
-                        Text(dateText) 
+                    label = {
+                        val dateText =
+                            when {
+                                dateRange.first != null && dateRange.second != null -> "Date Range"
+                                dateRange.first != null ->
+                                    "From ${
+                                        SimpleDateFormat("MMM dd", Locale.getDefault())
+                                            .format(Date(dateRange.first!!))
+                                    }"
+                                else ->
+                                    "Until ${
+                                        SimpleDateFormat("MMM dd", Locale.getDefault())
+                                            .format(Date(dateRange.second!!))
+                                    }"
+                            }
+                        Text(dateText)
                     },
                     trailingIcon = {
                         Icon(
                             imageVector = Icons.Default.Clear,
                             contentDescription = "Clear Filter",
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
-                    }
+                    },
                 )
             }
         }
@@ -904,7 +885,7 @@ private fun LogItemCard(
     log: AlertCheckLog,
     isExpanded: Boolean,
     onClick: () -> Unit,
-    onCopyDetails: () -> Unit
+    onCopyDetails: () -> Unit,
 ) {
     val cardColor by animateColorAsState(
         if (log.isAlertSent) {
@@ -912,13 +893,14 @@ private fun LogItemCard(
         } else {
             MaterialTheme.colorScheme.surface
         },
-        label = "cardColor"
+        label = "cardColor",
     )
-    
+
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = cardColor),
     ) {
         ListItem(
@@ -975,45 +957,45 @@ private fun LogItemCard(
                                 },
                         )
                     }
-                    
+
                     AnimatedVisibility(
                         visible = isExpanded,
                         enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
+                        exit = shrinkVertically() + fadeOut(),
                     ) {
                         Column(
-                            modifier = Modifier.padding(top = 8.dp)
+                            modifier = Modifier.padding(top = 8.dp),
                         ) {
                             HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 4.dp)
+                                modifier = Modifier.padding(vertical = 4.dp),
                             )
-                            
+
                             Text(
                                 text = "Details:",
                                 style = MaterialTheme.typography.labelMedium,
                             )
-                            
+
                             Text(
                                 text = "Full date: ${formatDateTime(log.checkedOn)}",
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(top = 4.dp)
+                                modifier = Modifier.padding(top = 4.dp),
                             )
-                            
+
                             Text(
                                 text = "Config ID: ${log.configId}",
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(top = 2.dp)
+                                modifier = Modifier.padding(top = 2.dp),
                             )
-                            
+
                             Text(
                                 text = "Config created: ${formatDateTime(log.configCreatedOn)}",
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(top = 2.dp)
+                                modifier = Modifier.padding(top = 2.dp),
                             )
-                            
+
                             TextButton(
                                 onClick = onCopyDetails,
-                                modifier = Modifier.align(Alignment.End)
+                                modifier = Modifier.align(Alignment.End),
                             ) {
                                 Text("Copy Details")
                             }
@@ -1080,7 +1062,7 @@ private fun LogsSummaryInfo(
                     )
                 }
             }
-            
+
             if (totalLogs > 0) {
                 if (checkIntervalMinutes > 0L) {
                     Spacer(modifier = Modifier.height(8.dp))
@@ -1088,7 +1070,7 @@ private fun LogsSummaryInfo(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -1112,11 +1094,11 @@ private fun LogsSummaryInfo(
                             )
                         }
                     }
-                    
+
                     if (hasActiveFilters) {
                         TextButton(
                             onClick = onClearFilters,
-                            modifier = Modifier.padding(start = 8.dp)
+                            modifier = Modifier.padding(start = 8.dp),
                         ) {
                             Text("Clear Filters")
                         }
@@ -1130,9 +1112,10 @@ private fun LogsSummaryInfo(
 @Composable
 private fun NoMatchingLogsState(onClearFilters: () -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -1227,6 +1210,4 @@ private fun PreviewAlertCheckLogViewerUi() {
 }
 
 // Make sure we have a formatDateTime utility function
-private fun formatDateTime(timestamp: Long): String {
-    return SimpleDateFormat("MMM dd, yyyy HH:mm:ss", Locale.getDefault()).format(Date(timestamp))
-}
+private fun formatDateTime(timestamp: Long): String = SimpleDateFormat("MMM dd, yyyy HH:mm:ss", Locale.getDefault()).format(Date(timestamp))
