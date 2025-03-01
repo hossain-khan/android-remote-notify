@@ -57,6 +57,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
+import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
@@ -78,6 +79,7 @@ data object AddNewRemoteAlertScreen : Screen {
         val threshold: Int,
         val availableStorage: Int,
         val storageSliderMax: Int,
+        val hideBatteryOptReminder: Boolean,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -93,6 +95,8 @@ data object AddNewRemoteAlertScreen : Screen {
         data object DismissBatteryOptimizationSheet : Event()
 
         data object OpenBatterySettings : Event()
+
+        data object HideBatteryOptReminder : Event()
 
         data class UpdateAlertType(
             val alertType: AlertType,
@@ -110,6 +114,7 @@ class AddNewRemoteAlertPresenter
         @Assisted private val navigator: Navigator,
         private val remoteAlertRepository: RemoteAlertRepository,
         private val storageMonitor: StorageMonitor,
+        private val appPreferencesDataStore: AppPreferencesDataStore,
     ) : Presenter<AddNewRemoteAlertScreen.State> {
         @Composable
         override fun present(): AddNewRemoteAlertScreen.State {
@@ -119,6 +124,8 @@ class AddNewRemoteAlertPresenter
             var isBatteryOptimized by remember {
                 mutableStateOf(BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context))
             }
+            var hideBatteryOptReminder by remember { mutableStateOf(false) }
+
             var selectedType by remember { mutableStateOf(AlertType.BATTERY) }
             var threshold by remember { mutableIntStateOf(10) }
 
@@ -132,6 +139,12 @@ class AddNewRemoteAlertPresenter
             LaunchedEffect(selectedType) {
                 if (selectedType == AlertType.STORAGE && threshold > storageSliderMax) {
                     threshold = storageSliderMax
+                }
+            }
+
+            LaunchedEffect(Unit) {
+                appPreferencesDataStore.hideBatteryOptReminder.collect { hidden ->
+                    hideBatteryOptReminder = hidden
                 }
             }
 
@@ -158,6 +171,7 @@ class AddNewRemoteAlertPresenter
                 threshold = threshold,
                 availableStorage = availableStorage,
                 storageSliderMax = storageSliderMax,
+                hideBatteryOptReminder = hideBatteryOptReminder,
             ) { event ->
                 when (event) {
                     is AddNewRemoteAlertScreen.Event.SaveNotification -> {
@@ -188,6 +202,11 @@ class AddNewRemoteAlertPresenter
                     }
                     is AddNewRemoteAlertScreen.Event.UpdateThreshold -> {
                         threshold = event.value
+                    }
+                    AddNewRemoteAlertScreen.Event.HideBatteryOptReminder -> {
+                        scope.launch {
+                            appPreferencesDataStore.setHideBatteryOptReminder(true)
+                        }
                     }
                 }
             }
@@ -369,7 +388,8 @@ fun AddNewRemoteAlertUi(
                 Text("Save Alert")
             }
 
-            if (!state.isBatteryOptimized) {
+            // Only show card if both conditions are met
+            if (!state.isBatteryOptimized && !state.hideBatteryOptReminder) {
                 Spacer(modifier = Modifier.height(24.dp))
                 BatteryOptimizationCard(
                     onOptimizeClick = {
@@ -386,6 +406,10 @@ fun AddNewRemoteAlertUi(
                 sheetState = sheetState,
                 onSettingsClick = {
                     state.eventSink(AddNewRemoteAlertScreen.Event.OpenBatterySettings)
+                },
+                onDontRemind = {
+                    state.eventSink(AddNewRemoteAlertScreen.Event.HideBatteryOptReminder)
+                    state.eventSink(AddNewRemoteAlertScreen.Event.DismissBatteryOptimizationSheet)
                 },
                 onDismiss = {
                     state.eventSink(AddNewRemoteAlertScreen.Event.DismissBatteryOptimizationSheet)
@@ -451,6 +475,7 @@ private fun PreviewAddNewRemoteAlertUi() {
                     threshold = 10,
                     availableStorage = 56,
                     storageSliderMax = 96,
+                    hideBatteryOptReminder = false,
                     eventSink = {},
                 ),
         )
@@ -471,6 +496,7 @@ private fun PreviewStorageAlertUi() {
                     threshold = 8,
                     availableStorage = 16,
                     storageSliderMax = 20,
+                    hideBatteryOptReminder = false,
                     eventSink = {},
                 ),
         )

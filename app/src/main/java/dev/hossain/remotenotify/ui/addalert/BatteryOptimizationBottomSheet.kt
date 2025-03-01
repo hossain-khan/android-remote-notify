@@ -18,6 +18,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -37,6 +38,7 @@ import dev.hossain.remotenotify.theme.ComposeAppTheme
 fun BatteryOptimizationBottomSheet(
     sheetState: SheetState,
     onSettingsClick: () -> Unit,
+    onDontRemind: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -45,12 +47,15 @@ fun BatteryOptimizationBottomSheet(
         sheetState = sheetState,
         modifier = modifier,
     ) {
-        BatteryOptimizationUi(onSettingsClick)
+        BatteryOptimizationUi(onSettingsClick = onSettingsClick, onDontRemind = onDontRemind)
     }
 }
 
 @Composable
-private fun BatteryOptimizationUi(onSettingsClick: () -> Unit) {
+private fun BatteryOptimizationUi(
+    onSettingsClick: () -> Unit,
+    onDontRemind: () -> Unit,
+) {
     Column(
         modifier =
             Modifier
@@ -93,17 +98,29 @@ private fun BatteryOptimizationUi(onSettingsClick: () -> Unit) {
         }
 
         // Action Button
-        FilledTonalButton(
-            onClick = onSettingsClick,
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Icon(
-                Icons.Default.Settings,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Open Settings")
+            FilledTonalButton(
+                onClick = onSettingsClick,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(
+                    Icons.Default.Settings,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Open Settings")
+            }
+
+            TextButton(
+                onClick = onDontRemind,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Don't remind me again")
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -116,7 +133,7 @@ private fun BatteryOptimizationUi(onSettingsClick: () -> Unit) {
 private fun PreviewBatteryOptimizationUi() {
     ComposeAppTheme {
         Surface {
-            BatteryOptimizationUi {}
+            BatteryOptimizationUi({}, {})
         }
     }
 }
