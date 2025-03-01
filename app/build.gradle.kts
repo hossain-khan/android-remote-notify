@@ -77,6 +77,14 @@ android {
         // https://developer.android.com/jetpack/androidx/releases/room#gradle-plugin
         schemaDirectory("$projectDir/schemas")
     }
+
+    // Needed for Kover
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 dependencies {
