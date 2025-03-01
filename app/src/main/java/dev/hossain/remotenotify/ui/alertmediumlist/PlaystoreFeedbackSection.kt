@@ -51,13 +51,13 @@ fun FeedbackAndRequestMediumUi(modifier: Modifier = Modifier) {
             },
         ) {
             Text(
-                text = "Request New Medium",
+                text = "Share Feedback",
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Provide feedback on Google Play Store and request new medium.",
+            text = "Consider sharing your feedback on Play Store or suggesting new mediums.",
             style = MaterialTheme.typography.labelSmall,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.secondary,
