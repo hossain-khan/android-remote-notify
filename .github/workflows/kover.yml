@@ -9,6 +9,9 @@ on:
 permissions:
   pull-requests: write
 
+env:
+  EMAIL_API_KEY: 'FAKE_KEY_TO_PASS_CI'
+
 jobs:
   kover-coverage:
     runs-on: ubuntu-24.04
