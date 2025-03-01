@@ -40,21 +40,21 @@ import dev.hossain.remotenotify.theme.ComposeAppTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppUsageEducationSheetUi(
-    eventSink: (AlertsListScreen.Event) -> Unit,
     sheetState: SheetState,
+    onDismissLearnMore: () -> Unit,
 ) {
     ModalBottomSheet(
         onDismissRequest = {
-            eventSink(AlertsListScreen.Event.DismissEducationSheet)
+            onDismissLearnMore()
         },
         sheetState = sheetState,
     ) {
-        EducationContentUi(eventSink)
+        EducationContentUi(onDismissLearnMore)
     }
 }
 
 @Composable
-private fun EducationContentUi(eventSink: (AlertsListScreen.Event) -> Unit) {
+private fun EducationContentUi(onDismissLearnMore: () -> Unit) {
     Column(
         modifier =
             Modifier
@@ -102,7 +102,7 @@ private fun EducationContentUi(eventSink: (AlertsListScreen.Event) -> Unit) {
 
         Button(
             onClick = {
-                eventSink(AlertsListScreen.Event.DismissEducationSheet)
+                onDismissLearnMore()
             },
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -131,7 +131,7 @@ private fun PreviewEducationContentUi() {
     ComposeAppTheme {
         Surface {
             EducationContentUi(
-                eventSink = { /* Preview event sink */ },
+                onDismissLearnMore = {},
             )
         }
     }

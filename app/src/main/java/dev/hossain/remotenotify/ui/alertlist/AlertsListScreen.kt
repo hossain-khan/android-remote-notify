@@ -277,7 +277,7 @@ fun AlertsListUi(
                 modifier = Modifier.fillMaxSize(),
             ) {
                 item(key = "device_info_header") {
-                    SectionHeader("Device Status")
+                    SectionHeader("Device Current Status")
                 }
                 // Display battery percentage at the top
                 item(key = "device_state_info") { DeviceCurrentStateUi(state) }
@@ -331,7 +331,9 @@ fun AlertsListUi(
             }
         }
         if (state.showEducationSheet) {
-            AppUsageEducationSheetUi(eventSink = state.eventSink, sheetState = sheetState)
+            AppUsageEducationSheetUi(sheetState = sheetState) {
+                state.eventSink(AlertsListScreen.Event.DismissEducationSheet)
+            }
         }
     }
 }
