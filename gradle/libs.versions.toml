@@ -49,6 +49,10 @@ junitVersion = "1.2.1"
 
 kotlin = "2.1.10"
 
+# MockK mocking library for Kotlin
+# https://mockk.io
+mockk = "1.13.10"
+
 # Kotlin linter with built-in formatter
 # https://github.com/jeremymailen/kotlinter-gradle
 # https://github.com/pinterest/ktlint
@@ -184,6 +188,10 @@ eithernet = { group = "com.slack.eithernet", name = "eithernet", version.ref = "
 eithernet-integration-retrofit = { group = "com.slack.eithernet", name = "eithernet-integration-retrofit", version.ref = "eithernet" }
 
 robolectric = { group = "org.robolectric", name = "robolectric", version = "4.14.1" }
+
+# MockK mocking library for Kotlin
+# https://mockk.io
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 
 # open-meteo-api-kotlin
 # https://github.com/open-meteo/open-meteo-api-kotlin/releases
