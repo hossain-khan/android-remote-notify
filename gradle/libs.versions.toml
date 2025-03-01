@@ -51,7 +51,7 @@ kotlin = "2.1.10"
 
 # MockK mocking library for Kotlin
 # https://mockk.io
-mockk = "1.13.10"
+mockk = "1.13.17"
 
 # Kotlin linter with built-in formatter
 # https://github.com/jeremymailen/kotlinter-gradle
