@@ -29,9 +29,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -63,6 +63,7 @@ import dev.hossain.remotenotify.worker.sendPeriodicWorkRequest
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -120,12 +121,9 @@ class NotificationMediumListPresenter
             // Use remember and mutableStateOf to make the list observable
             var notifierMediumInfoList by remember { mutableStateOf(emptyList<NotificationMediumListScreen.NotifierMediumInfo>()) }
 
-            // Use produceState to handle the worker interval
-            val workerIntervalMinutes by produceState(DEFAULT_PERIODIC_INTERVAL_MINUTES) {
-                appPreferencesDataStore.workerIntervalFlow.collect {
-                    value = it
-                }
-            }
+            // Collect worker interval directly from DataStore preferences
+            val workerIntervalMinutes by appPreferencesDataStore.workerIntervalFlow
+                .collectAsState(initial = DEFAULT_PERIODIC_INTERVAL_MINUTES)
 
             val configureMediumNavigator =
                 rememberAnsweringNavigator<ConfigureNotificationMediumScreen.ConfigurationResult>(navigator) { result ->
@@ -174,7 +172,9 @@ class NotificationMediumListPresenter
                 workerIntervalFlow
                     // Wait for 1 second of inactivity
                     .debounce(1_000L)
-                    .collect { minutes ->
+                    .filter {
+                        it != DEFAULT_PERIODIC_INTERVAL_MINUTES
+                    }.collect { minutes ->
                         Timber.d("Worker interval updated: $minutes minutes")
                         appPreferencesDataStore.saveWorkerInterval(minutes)
                         // Also setup the worker interval

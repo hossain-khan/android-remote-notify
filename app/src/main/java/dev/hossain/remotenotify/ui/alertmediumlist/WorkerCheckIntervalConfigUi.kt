@@ -36,7 +36,11 @@ internal fun WorkerConfigCard(
     state: NotificationMediumListScreen.State,
     modifier: Modifier = Modifier,
 ) {
-    var intervalSliderValue by remember { mutableFloatStateOf(state.workerIntervalMinutes.toFloat()) }
+    // Update intervalSliderValue whenever state.workerIntervalMinutes changes
+    var intervalSliderValue by remember(state.workerIntervalMinutes) {
+        mutableFloatStateOf(state.workerIntervalMinutes.toFloat())
+    }
+
     val alertCheckIntervalRangeStart = 60f // 1 hour
     val alertCheckIntervalRangeEnd = 720f // 12 hours
 
