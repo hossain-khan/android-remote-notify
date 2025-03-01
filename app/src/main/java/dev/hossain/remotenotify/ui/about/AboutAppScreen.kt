@@ -21,8 +21,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,12 +54,14 @@ import dev.hossain.remotenotify.BuildConfig
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.theme.ComposeAppTheme
+import dev.hossain.remotenotify.ui.alertlist.AppUsageEducationSheetUi
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data object AboutAppScreen : Screen {
     data class State(
         val appVersion: String,
+        val showEducationSheet: Boolean,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -64,6 +69,10 @@ data object AboutAppScreen : Screen {
         data object GoBack : Event()
 
         data object OpenGitHubProject : Event()
+
+        data object OpenLearnMoreSheet : Event()
+
+        data object DismissLearnMoreSheet : Event()
     }
 }
 
@@ -75,6 +84,7 @@ class AboutAppPresenter
         @Composable
         override fun present(): AboutAppScreen.State {
             val uriHandler = LocalUriHandler.current
+            var showEducationSheet by remember { mutableStateOf(false) }
 
             val appVersion =
                 buildString {
@@ -87,6 +97,7 @@ class AboutAppPresenter
 
             return AboutAppScreen.State(
                 appVersion,
+                showEducationSheet = showEducationSheet,
             ) { event ->
                 when (event) {
                     AboutAppScreen.Event.GoBack -> {
@@ -95,6 +106,14 @@ class AboutAppPresenter
 
                     AboutAppScreen.Event.OpenGitHubProject -> {
                         uriHandler.openUri("https://github.com/hossain-khan/android-remote-notify")
+                    }
+
+                    AboutAppScreen.Event.OpenLearnMoreSheet -> {
+                        showEducationSheet = true
+                    }
+
+                    AboutAppScreen.Event.DismissLearnMoreSheet -> {
+                        showEducationSheet = false
                     }
                 }
             }
@@ -114,6 +133,7 @@ fun AboutAppScreen(
     state: AboutAppScreen.State,
     modifier: Modifier = Modifier,
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -153,7 +173,7 @@ fun AboutAppScreen(
                             .padding(top = 16.dp)
                             .align(Alignment.CenterHorizontally),
                 )
-                Text("This app monitors Android device battery and storage, alerting you to low levels so you can take action.")
+                AppTagLineWithLinkedText(state.eventSink)
                 Spacer(modifier = Modifier.height(32.dp))
             }
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -193,6 +213,13 @@ fun AboutAppScreen(
                 )
             }
         }
+
+        // Add the education sheet
+        if (state.showEducationSheet) {
+            AppUsageEducationSheetUi(
+                sheetState = sheetState,
+            ) { state.eventSink(AboutAppScreen.Event.DismissLearnMoreSheet) }
+        }
     }
 }
 
@@ -204,7 +231,7 @@ private fun AppTagLineWithLinkedText(
     // Tag line: Your no-fuss, personal weather alerter.
     val annotatedLinkString =
         buildAnnotatedString {
-            append("Your no-fuss, personal weather ")
+            append("App that monitors this device's battery and storage levels and ")
             withLink(
                 LinkAnnotation.Url(
                     // Dummy URL, not used for this use case.
@@ -215,14 +242,15 @@ private fun AppTagLineWithLinkedText(
                             hoveredStyle = SpanStyle(color = MaterialTheme.colorScheme.secondary),
                         ),
                     linkInteractionListener = {
+                        eventSink(AboutAppScreen.Event.OpenLearnMoreSheet)
                     },
                 ),
             ) {
                 withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                    append("alerter")
+                    append("alerts you")
                 }
             }
-            append(".")
+            append(" when the levels are lower than what you've set.")
         }
     Text(
         text = annotatedLinkString,
@@ -234,10 +262,11 @@ private fun AppTagLineWithLinkedText(
 @Composable
 @PreviewLightDark
 @PreviewDynamicColors
-fun AboutAppScreenPreview() {
+private fun AboutAppScreenPreview() {
     val sampleState =
         AboutAppScreen.State(
-            appVersion = "v1.0.0 (b135e2a)",
+            appVersion = "v1.8.1 (letzg00)",
+            showEducationSheet = false,
             eventSink = {},
         )
     ComposeAppTheme {
