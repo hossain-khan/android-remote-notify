@@ -17,8 +17,10 @@ internal fun String.toTitleCase(): String =
  * - Past: "5 days 2 hours ago"
  * - Future: "in 5 days 2 hours"
  */
-internal fun formatTimeDuration(timestamp: Long): String {
-    val now = System.currentTimeMillis()
+internal fun formatTimeDuration(
+    timestamp: Long,
+    now: Long = System.currentTimeMillis(),
+): String {
     val diff = timestamp - now
     val absoluteDiff = kotlin.math.abs(diff)
 

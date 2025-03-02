@@ -83,19 +83,24 @@ class StringFormatExtTest {
 
     @Test
     fun `formatTimeDuration handles future times`() {
-        val now = System.currentTimeMillis()
+        // Use a fixed timestamp instead of current time
+        val baseTime = 1704067200000L // 2024-01-01 00:00:00 UTC
 
         // Test in 5 minutes
-        assertThat(formatTimeDuration(now + TimeUnit.MINUTES.toMillis(5))).isEqualTo("in 5 minutes")
+        assertThat(formatTimeDuration(baseTime + TimeUnit.MINUTES.toMillis(5), baseTime))
+            .isEqualTo("in 5 minutes")
 
         // Test in 2 hours
-        assertThat(formatTimeDuration(now + TimeUnit.HOURS.toMillis(2))).isEqualTo("in 2 hours")
+        assertThat(formatTimeDuration(baseTime + TimeUnit.HOURS.toMillis(2), baseTime))
+            .isEqualTo("in 2 hours")
 
         // Test in 2 hours 30 minutes
         val twoAndHalfHoursInMillis = TimeUnit.HOURS.toMillis(2) + TimeUnit.MINUTES.toMillis(30)
-        assertThat(formatTimeDuration(now + twoAndHalfHoursInMillis)).isEqualTo("in 2 hours 30 minutes")
+        assertThat(formatTimeDuration(baseTime + twoAndHalfHoursInMillis, baseTime))
+            .isEqualTo("in 2 hours 30 minutes")
 
         // Test in 3 days
-        assertThat(formatTimeDuration(now + TimeUnit.DAYS.toMillis(3))).isEqualTo("in 3 days")
+        assertThat(formatTimeDuration(baseTime + TimeUnit.DAYS.toMillis(3), baseTime))
+            .isEqualTo("in 3 days")
     }
 }
