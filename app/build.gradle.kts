@@ -103,6 +103,7 @@ kover {
                     "*Parcelize",
                     "*Preview",
                     // Generated classes by Dagger 🗡️
+                    "dagger.internal.DaggerGenerated",
                     "javax.annotation.processing.Generated"
                 )
             }
