@@ -5,12 +5,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.runtime.remember
 import com.slack.circuit.backstack.rememberSaveableBackStack
 import com.slack.circuit.foundation.Circuit
 import com.slack.circuit.foundation.CircuitCompositionLocals
 import com.slack.circuit.foundation.NavigableCircuitContent
 import com.slack.circuit.foundation.rememberCircuitNavigator
-import com.slack.circuitx.gesturenavigation.GestureNavigationDecoration
+import com.slack.circuit.overlay.ContentWithOverlays
+import com.slack.circuit.sharedelements.SharedElementTransitionLayout
+import com.slack.circuitx.gesturenavigation.GestureNavigationDecorationFactory
 import com.squareup.anvil.annotations.ContributesMultibinding
 import dev.hossain.remotenotify.di.ActivityKey
 import dev.hossain.remotenotify.di.AppScope
@@ -25,6 +29,7 @@ class MainActivity
     constructor(
         private val circuit: Circuit,
     ) : ComponentActivity() {
+        @OptIn(ExperimentalSharedTransitionApi::class)
         override fun onCreate(savedInstanceState: Bundle?) {
             enableEdgeToEdge()
             super.onCreate(savedInstanceState)
@@ -37,14 +42,19 @@ class MainActivity
 
                     // See https://slackhq.github.io/circuit/circuit-content/
                     CircuitCompositionLocals(circuit) {
-                        NavigableCircuitContent(
-                            navigator = navigator,
-                            backStack = backStack,
-                            decoration =
-                                GestureNavigationDecoration {
-                                    navigator.pop()
-                                },
-                        )
+                        // See https://slackhq.github.io/circuit/shared-elements/
+                        SharedElementTransitionLayout {
+                            ContentWithOverlays {
+                                NavigableCircuitContent(
+                                    navigator = navigator,
+                                    backStack = backStack,
+                                    decoratorFactory =
+                                    remember(navigator) {
+                                        GestureNavigationDecorationFactory(onBackInvoked = navigator::pop)
+                                    },
+                                )
+                            }
+                        }
                     }
                 }
             }
