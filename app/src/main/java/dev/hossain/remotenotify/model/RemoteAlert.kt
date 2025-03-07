@@ -19,7 +19,7 @@ sealed interface RemoteAlert {
     ) : RemoteAlert
 }
 
-fun RemoteAlert.toAlertConfigEntity(): AlertConfigEntity =
+internal fun RemoteAlert.toAlertConfigEntity(): AlertConfigEntity =
     when (this) {
         is RemoteAlert.BatteryAlert ->
             AlertConfigEntity(
@@ -37,8 +37,17 @@ fun RemoteAlert.toAlertConfigEntity(): AlertConfigEntity =
             )
     }
 
-fun AlertConfigEntity.toRemoteAlert(): RemoteAlert =
+internal fun AlertConfigEntity.toRemoteAlert(): RemoteAlert =
     when (type) {
         AlertType.BATTERY -> RemoteAlert.BatteryAlert(id, batteryPercentage)
         AlertType.STORAGE -> RemoteAlert.StorageAlert(id, storageMinSpaceGb)
+    }
+
+/**
+ * The alert type display name based on [RemoteAlert].
+ */
+internal fun RemoteAlert.toTypeDisplayName(): String =
+    when (this) {
+        is RemoteAlert.BatteryAlert -> "Battery"
+        is RemoteAlert.StorageAlert -> "Storage"
     }
