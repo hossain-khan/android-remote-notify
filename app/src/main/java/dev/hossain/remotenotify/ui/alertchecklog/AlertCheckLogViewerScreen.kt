@@ -435,6 +435,7 @@ fun AlertCheckLogViewerUi(
                                         "dateRange" -> state.eventSink(AlertCheckLogViewerScreen.Event.FilterByDateRange(null, null))
                                     }
                                 },
+                                modifier = Modifier.animateItem(),
                             )
                         }
                     }
@@ -588,11 +589,12 @@ private fun ActiveFiltersSection(
     alertType: AlertType?,
     notifierType: NotifierType?,
     dateRange: Pair<Long?, Long?>,
+    modifier: Modifier = Modifier,
     onClearFilter: (String) -> Unit,
 ) {
     Column(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
                 .animateContentSize(
