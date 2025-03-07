@@ -51,6 +51,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -72,6 +73,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
@@ -93,6 +95,7 @@ import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
+import dev.hossain.remotenotify.utils.formatDateTime
 import dev.hossain.remotenotify.utils.formatDuration
 import dev.hossain.remotenotify.utils.formatTimeElapsed
 import dev.hossain.remotenotify.utils.toTitleCase
@@ -990,18 +993,13 @@ private fun LogItemCard(
                             Text(
                                 text = "Details:",
                                 style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
                             )
 
                             Text(
-                                text = "Full date: ${formatDateTime(log.checkedOn)}",
+                                text = "Check date: ${formatDateTime(log.checkedOn)}",
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(top = 4.dp),
-                            )
-
-                            Text(
-                                text = "Config ID: ${log.configId}",
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(top = 2.dp),
                             )
 
                             Text(
@@ -1226,5 +1224,27 @@ private fun PreviewAlertCheckLogViewerUi() {
     }
 }
 
-// Make sure we have a formatDateTime utility function
-private fun formatDateTime(timestamp: Long): String = SimpleDateFormat("MMM dd, yyyy HH:mm:ss", Locale.getDefault()).format(Date(timestamp))
+@Preview(showBackground = true)
+@Composable
+private fun PreviewFilterBottomSheetContent_NoFilters() {
+    ComposeAppTheme {
+        Surface {
+            FilterBottomSheetContent(
+                currentState =
+                    AlertCheckLogViewerScreen.State(
+                        logs = emptyList(),
+                        filteredLogs = emptyList(),
+                        isLoading = false,
+                        checkIntervalMinutes = 60,
+                        eventSink = {},
+                    ),
+                onFilterByAlertType = {},
+                onFilterByNotifierType = {},
+                onToggleTriggeredOnly = {},
+                onSelectDateRange = {},
+                onClearFilters = {},
+                onClose = {},
+            )
+        }
+    }
+}
