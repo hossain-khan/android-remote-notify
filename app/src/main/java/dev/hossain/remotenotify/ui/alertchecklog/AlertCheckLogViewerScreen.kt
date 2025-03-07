@@ -92,7 +92,7 @@ import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.formatDuration
-import dev.hossain.remotenotify.utils.formatTimeDuration
+import dev.hossain.remotenotify.utils.formatTimeElapsed
 import dev.hossain.remotenotify.utils.toTitleCase
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -934,7 +934,7 @@ private fun LogItemCard(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Checked ${formatTimeDuration(log.checkedOn)}",
+                        text = "Checked ${formatTimeElapsed(log.checkedOn)}",
                         style = MaterialTheme.typography.bodySmall,
                     )
 

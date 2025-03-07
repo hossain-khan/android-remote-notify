@@ -1,6 +1,5 @@
 package dev.hossain.remotenotify.utils
 
-import androidx.compose.runtime.Composable
 import java.util.Locale
 
 internal fun String.toTitleCase(): String =
@@ -18,7 +17,7 @@ internal fun String.toTitleCase(): String =
  * - Past: "5 days 2 hours ago"
  * - Future: "in 5 days 2 hours"
  */
-internal fun formatTimeDuration(
+internal fun formatTimeElapsed(
     timestamp: Long,
     now: Long = System.currentTimeMillis(),
 ): String {
@@ -75,6 +74,9 @@ internal fun formatTimeDuration(
     }
 }
 
+/**
+ * Formats duration in minutes to human readable format.
+ */
 internal fun formatDuration(minutes: Int): String =
     when {
         minutes < 60 -> "$minutes ${if (minutes == 1) "minute" else "minutes"}"
