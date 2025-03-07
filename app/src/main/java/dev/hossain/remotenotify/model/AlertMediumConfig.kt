@@ -45,6 +45,9 @@ sealed interface AlertMediumConfig {
     ) : AlertMediumConfig
 }
 
+/**
+ * Provides a preview text for the configuration.
+ */
 internal fun AlertMediumConfig.configPreviewText(): String =
     when (this) {
         is AlertMediumConfig.TelegramConfig -> {
