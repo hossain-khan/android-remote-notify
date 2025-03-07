@@ -10,6 +10,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -678,28 +680,10 @@ private fun FilterBottomSheetContent(
             modifier = Modifier.padding(vertical = 8.dp),
         )
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier =
-                Modifier
-                    .padding(bottom = 16.dp)
-                    .fillMaxWidth(),
-        ) {
-            FilterChip(
-                selected = currentState.selectedNotifierType == null,
-                onClick = { onFilterByNotifierType(null) },
-                label = { Text("All") },
-            )
-
-            // Create a chip for each notifier type
-            NotifierType.values().forEach { notifierType ->
-                FilterChip(
-                    selected = currentState.selectedNotifierType == notifierType,
-                    onClick = { onFilterByNotifierType(notifierType) },
-                    label = { Text(notifierType.displayName) },
-                )
-            }
-        }
+        NotifierTypeFilterChips(
+            currentState = currentState,
+            onFilterByNotifierType = onFilterByNotifierType,
+        )
 
         Text(
             text = "Date Range",
@@ -767,6 +751,38 @@ private fun FilterBottomSheetContent(
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun NotifierTypeFilterChips(
+    currentState: AlertCheckLogViewerScreen.State,
+    onFilterByNotifierType: (NotifierType?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+    ) {
+        FilterChip(
+            selected = currentState.selectedNotifierType == null,
+            onClick = { onFilterByNotifierType(null) },
+            label = { Text("All") },
+        )
+
+        // Create a chip for each notifier type
+        NotifierType.entries.forEach { notifierType ->
+            FilterChip(
+                selected = currentState.selectedNotifierType == notifierType,
+                onClick = { onFilterByNotifierType(notifierType) },
+                label = { Text(notifierType.displayName) },
+            )
+        }
     }
 }
 
