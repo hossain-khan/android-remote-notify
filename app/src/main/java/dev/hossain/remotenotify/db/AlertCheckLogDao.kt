@@ -67,5 +67,5 @@ interface AlertCheckLogDao {
             LIMIT :limit
         """,
     )
-    fun getAllLogsWithConfig(limit: Int = 20): Flow<List<AlertLogWithConfig>>
+    fun getAllLogsWithConfig(limit: Int = 30): Flow<List<AlertLogWithConfig>>
 }
