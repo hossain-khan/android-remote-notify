@@ -2,14 +2,21 @@ package dev.hossain.remotenotify.ui.alertchecklog
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -574,6 +581,7 @@ fun AlertCheckLogViewerUi(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ActiveFiltersSection(
     showTriggeredOnly: Boolean,
@@ -586,7 +594,14 @@ private fun ActiveFiltersSection(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp),
+                .padding(bottom = 8.dp)
+                .animateContentSize(
+                    animationSpec =
+                        spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMedium,
+                        ),
+                ),
     ) {
         Text(
             text = "Active Filters:",
@@ -595,11 +610,17 @@ private fun ActiveFiltersSection(
             modifier = Modifier.padding(bottom = 4.dp),
         )
 
-        Row(
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(vertical = 4.dp),
         ) {
-            if (showTriggeredOnly) {
+            // Triggered Only Filter
+            AnimatedVisibility(
+                visible = showTriggeredOnly,
+                enter = fadeIn() + expandHorizontally(),
+                exit = fadeOut() + shrinkHorizontally(),
+            ) {
                 FilterChip(
                     selected = true,
                     onClick = { onClearFilter("triggered") },
@@ -614,7 +635,12 @@ private fun ActiveFiltersSection(
                 )
             }
 
-            if (alertType != null) {
+            // Alert Type Filter
+            AnimatedVisibility(
+                visible = alertType != null,
+                enter = fadeIn() + expandHorizontally(),
+                exit = fadeOut() + shrinkHorizontally(),
+            ) {
                 FilterChip(
                     selected = true,
                     onClick = { onClearFilter("alertType") },
@@ -623,6 +649,7 @@ private fun ActiveFiltersSection(
                             when (alertType) {
                                 AlertType.BATTERY -> "Battery"
                                 AlertType.STORAGE -> "Storage"
+                                else -> ""
                             },
                         )
                     },
@@ -636,11 +663,16 @@ private fun ActiveFiltersSection(
                 )
             }
 
-            if (notifierType != null) {
+            // Notifier Type Filter
+            AnimatedVisibility(
+                visible = notifierType != null,
+                enter = fadeIn() + expandHorizontally(),
+                exit = fadeOut() + shrinkHorizontally(),
+            ) {
                 FilterChip(
                     selected = true,
                     onClick = { onClearFilter("notifierType") },
-                    label = { Text(notifierType.displayName) },
+                    label = { Text(notifierType?.displayName ?: "") },
                     trailingIcon = {
                         Icon(
                             imageVector = Icons.Default.Clear,
@@ -651,7 +683,12 @@ private fun ActiveFiltersSection(
                 )
             }
 
-            if (dateRange.first != null || dateRange.second != null) {
+            // Date Range Filter
+            AnimatedVisibility(
+                visible = dateRange.first != null || dateRange.second != null,
+                enter = fadeIn() + expandHorizontally(),
+                exit = fadeOut() + shrinkHorizontally(),
+            ) {
                 FilterChip(
                     selected = true,
                     onClick = { onClearFilter("dateRange") },
