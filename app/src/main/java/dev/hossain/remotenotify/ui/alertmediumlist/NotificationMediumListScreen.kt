@@ -86,7 +86,7 @@ data object NotificationMediumListScreen : Screen {
         val notifierType: NotifierType,
         val name: String,
         val isConfigured: Boolean,
-        val previewText: String? = null,
+        val configPreviewText: String? = null,
     )
 
     sealed class Event : CircuitUiEvent {
@@ -160,7 +160,7 @@ class NotificationMediumListPresenter
                                 notifierType = sender.notifierType,
                                 name = sender.notifierType.displayName,
                                 isConfigured = sender.hasValidConfig(),
-                                previewText = if (sender.hasValidConfig()) sender.getConfig().configPreviewText() else null,
+                                configPreviewText = if (sender.hasValidConfig()) sender.getConfig().configPreviewText() else null,
                             )
                         }
             }
@@ -301,7 +301,7 @@ private fun NotifierCard(
             },
             supportingContent = {
                 if (notifier.isConfigured) {
-                    notifier.previewText?.let {
+                    notifier.configPreviewText?.let {
                         Text(
                             text = it,
                             color = MaterialTheme.colorScheme.primary,
@@ -376,7 +376,7 @@ private fun PreviewNotificationMediumListUi() {
                                 notifierType = NotifierType.EMAIL,
                                 name = "Email",
                                 isConfigured = true,
-                                previewText = "user@example.com",
+                                configPreviewText = "user@example.com",
                             ),
                             NotificationMediumListScreen.NotifierMediumInfo(
                                 notifierType = NotifierType.TELEGRAM,
@@ -387,7 +387,7 @@ private fun PreviewNotificationMediumListUi() {
                                 notifierType = NotifierType.TWILIO,
                                 name = "Twilio SMS",
                                 isConfigured = true,
-                                previewText = "+1234...7890",
+                                configPreviewText = "+1234...7890",
                             ),
                             NotificationMediumListScreen.NotifierMediumInfo(
                                 notifierType = NotifierType.WEBHOOK_REST_API,
