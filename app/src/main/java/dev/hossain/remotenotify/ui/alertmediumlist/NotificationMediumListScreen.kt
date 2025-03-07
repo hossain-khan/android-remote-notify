@@ -54,6 +54,7 @@ import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.di.AppScope
+import dev.hossain.remotenotify.model.configPreviewText
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
@@ -85,6 +86,7 @@ data object NotificationMediumListScreen : Screen {
         val notifierType: NotifierType,
         val name: String,
         val isConfigured: Boolean,
+        val configPreviewText: String? = null,
     )
 
     sealed class Event : CircuitUiEvent {
@@ -158,6 +160,7 @@ class NotificationMediumListPresenter
                                 notifierType = sender.notifierType,
                                 name = sender.notifierType.displayName,
                                 isConfigured = sender.hasValidConfig(),
+                                configPreviewText = if (sender.hasValidConfig()) sender.getConfig().configPreviewText() else null,
                             )
                         }
             }
@@ -297,15 +300,23 @@ private fun NotifierCard(
                 Text(text = notifier.name, style = MaterialTheme.typography.titleMedium)
             },
             supportingContent = {
-                Text(
-                    text = if (notifier.isConfigured) "Configured" else "Not Configured",
-                    color =
-                        if (notifier.isConfigured) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.error
-                        },
-                )
+                if (notifier.isConfigured) {
+                    notifier.configPreviewText?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    } ?: Text(
+                        text = "Configured",
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                } else {
+                    Text(
+                        text = "Not Configured",
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             },
             leadingContent = {
                 Icon(
@@ -365,6 +376,7 @@ private fun PreviewNotificationMediumListUi() {
                                 notifierType = NotifierType.EMAIL,
                                 name = "Email",
                                 isConfigured = true,
+                                configPreviewText = "user@example.com",
                             ),
                             NotificationMediumListScreen.NotifierMediumInfo(
                                 notifierType = NotifierType.TELEGRAM,
@@ -375,6 +387,7 @@ private fun PreviewNotificationMediumListUi() {
                                 notifierType = NotifierType.TWILIO,
                                 name = "Twilio SMS",
                                 isConfigured = true,
+                                configPreviewText = "+1234...7890",
                             ),
                             NotificationMediumListScreen.NotifierMediumInfo(
                                 notifierType = NotifierType.WEBHOOK_REST_API,

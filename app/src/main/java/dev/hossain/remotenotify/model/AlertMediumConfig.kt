@@ -44,3 +44,60 @@ sealed interface AlertMediumConfig {
         val toEmail: String,
     ) : AlertMediumConfig
 }
+
+/**
+ * Provides a preview text for the configuration.
+ */
+internal fun AlertMediumConfig.configPreviewText(): String =
+    when (this) {
+        is AlertMediumConfig.TelegramConfig -> {
+            val preview =
+                if (chatId.length > 15) {
+                    "${chatId.take(5)}...${chatId.takeLast(7)}"
+                } else {
+                    chatId
+                }
+            preview
+        }
+        is AlertMediumConfig.WebhookConfig -> {
+            val restUrl = url.removePrefix("https://").removePrefix("http://")
+            val preview =
+                if (restUrl.length > 20) {
+                    "${restUrl.take(12)}...${restUrl.takeLast(8)}"
+                } else {
+                    restUrl
+                }
+            preview
+        }
+        is AlertMediumConfig.TwilioConfig -> {
+            val preview =
+                if (toPhone.length > 12) {
+                    "${toPhone.take(3)}...${toPhone.takeLast(4)}"
+                } else {
+                    toPhone
+                }
+            preview
+        }
+        is AlertMediumConfig.EmailConfig -> {
+            val preview =
+                if (toEmail.length > 20) {
+                    val atIndex = toEmail.indexOf('@')
+                    if (atIndex > 0 && atIndex < toEmail.length - 1) {
+                        // Keep part of username, @ symbol, and part of domain
+                        val username = toEmail.substring(0, atIndex)
+                        val domain = toEmail.substring(atIndex + 1)
+
+                        val truncatedUsername = if (username.length > 10) "${username.take(5)}..." else username
+                        val truncatedDomain = if (domain.length > 10) "...${domain.takeLast(7)}" else domain
+
+                        "$truncatedUsername@$truncatedDomain"
+                    } else {
+                        // Fallback to simple truncation if @ not found in expected position
+                        "${toEmail.take(10)}...${toEmail.takeLast(7)}"
+                    }
+                } else {
+                    toEmail
+                }
+            preview
+        }
+    }
