@@ -13,7 +13,6 @@ import com.slack.circuit.foundation.CircuitCompositionLocals
 import com.slack.circuit.foundation.NavigableCircuitContent
 import com.slack.circuit.foundation.rememberCircuitNavigator
 import com.slack.circuit.overlay.ContentWithOverlays
-import com.slack.circuit.sharedelements.SharedElementTransitionLayout
 import com.slack.circuitx.gesturenavigation.GestureNavigationDecorationFactory
 import com.squareup.anvil.annotations.ContributesMultibinding
 import dev.hossain.remotenotify.di.ActivityKey
@@ -43,17 +42,16 @@ class MainActivity
                     // See https://slackhq.github.io/circuit/circuit-content/
                     CircuitCompositionLocals(circuit) {
                         // See https://slackhq.github.io/circuit/shared-elements/
-                        SharedElementTransitionLayout {
-                            ContentWithOverlays {
-                                NavigableCircuitContent(
-                                    navigator = navigator,
-                                    backStack = backStack,
-                                    decoratorFactory =
-                                        remember(navigator) {
-                                            GestureNavigationDecorationFactory(onBackInvoked = navigator::pop)
-                                        },
-                                )
-                            }
+
+                        ContentWithOverlays {
+                            NavigableCircuitContent(
+                                navigator = navigator,
+                                backStack = backStack,
+                                decoratorFactory =
+                                    remember(navigator) {
+                                        GestureNavigationDecorationFactory(onBackInvoked = navigator::pop)
+                                    },
+                            )
                         }
                     }
                 }
