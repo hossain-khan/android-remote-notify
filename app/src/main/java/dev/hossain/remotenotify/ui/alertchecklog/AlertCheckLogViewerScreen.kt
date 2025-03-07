@@ -10,8 +10,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,14 +24,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -47,11 +43,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -581,215 +575,6 @@ fun AlertCheckLogViewerUi(
 }
 
 @Composable
-private fun FilterBottomSheetContent(
-    currentState: AlertCheckLogViewerScreen.State,
-    onFilterByAlertType: (AlertType?) -> Unit,
-    onFilterByNotifierType: (NotifierType?) -> Unit,
-    onToggleTriggeredOnly: () -> Unit,
-    onSelectDateRange: (Boolean) -> Unit,
-    onClearFilters: () -> Unit,
-    onClose: () -> Unit,
-) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "Filter Logs",
-                style = MaterialTheme.typography.titleLarge,
-            )
-
-            TextButton(onClick = onClearFilters) {
-                Text("Clear All")
-            }
-        }
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-        Text(
-            text = "Alert Status",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(vertical = 8.dp),
-        )
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Checkbox(
-                checked = currentState.showTriggeredOnly,
-                onCheckedChange = { onToggleTriggeredOnly() },
-            )
-            Text("Show Triggered Alerts Only")
-        }
-
-        Text(
-            text = "Alert Type",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(vertical = 8.dp),
-        )
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(bottom = 16.dp),
-        ) {
-            FilterChip(
-                selected = currentState.selectedAlertType == null,
-                onClick = { onFilterByAlertType(null) },
-                label = { Text("All") },
-            )
-
-            FilterChip(
-                selected = currentState.selectedAlertType == AlertType.BATTERY,
-                onClick = { onFilterByAlertType(AlertType.BATTERY) },
-                leadingIcon = {
-                    if (currentState.selectedAlertType == AlertType.BATTERY) {
-                        Icon(
-                            painter = painterResource(R.drawable.battery_5_bar_24dp),
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                        )
-                    }
-                },
-                label = { Text("Battery") },
-            )
-
-            FilterChip(
-                selected = currentState.selectedAlertType == AlertType.STORAGE,
-                onClick = { onFilterByAlertType(AlertType.STORAGE) },
-                leadingIcon = {
-                    if (currentState.selectedAlertType == AlertType.STORAGE) {
-                        Icon(
-                            painter = painterResource(R.drawable.hard_disk_24dp),
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                        )
-                    }
-                },
-                label = { Text("Storage") },
-            )
-        }
-
-        Text(
-            text = "Notification Method",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(vertical = 8.dp),
-        )
-
-        NotifierTypeFilterChips(
-            currentState = currentState,
-            onFilterByNotifierType = onFilterByNotifierType,
-        )
-
-        Text(
-            text = "Date Range",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(vertical = 8.dp),
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            // Start date
-            OutlinedTextField(
-                value =
-                    if (currentState.dateRange.first != null) {
-                        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                            .format(Date(currentState.dateRange.first!!))
-                    } else {
-                        ""
-                    },
-                onValueChange = { },
-                readOnly = true,
-                label = { Text("Start Date") },
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .padding(end = 8.dp),
-                trailingIcon = {
-                    IconButton(onClick = { onSelectDateRange(true) }) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Select Start Date")
-                    }
-                },
-            )
-
-            // End date
-            OutlinedTextField(
-                value =
-                    if (currentState.dateRange.second != null) {
-                        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                            .format(Date(currentState.dateRange.second!!))
-                    } else {
-                        ""
-                    },
-                onValueChange = { },
-                readOnly = true,
-                label = { Text("End Date") },
-                modifier = Modifier.weight(1f),
-                trailingIcon = {
-                    IconButton(onClick = { onSelectDateRange(false) }) {
-                        Icon(Icons.Default.DateRange, contentDescription = "Select End Date")
-                    }
-                },
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            TextButton(onClick = onClose) {
-                Text("Apply Filters")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun NotifierTypeFilterChips(
-    currentState: AlertCheckLogViewerScreen.State,
-    onFilterByNotifierType: (NotifierType?) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-    ) {
-        FilterChip(
-            selected = currentState.selectedNotifierType == null,
-            onClick = { onFilterByNotifierType(null) },
-            label = { Text("All") },
-        )
-
-        // Create a chip for each notifier type
-        NotifierType.entries.forEach { notifierType ->
-            FilterChip(
-                selected = currentState.selectedNotifierType == notifierType,
-                onClick = { onFilterByNotifierType(notifierType) },
-                label = { Text(notifierType.displayName) },
-            )
-        }
-    }
-}
-
-@Composable
 private fun ActiveFiltersSection(
     showTriggeredOnly: Boolean,
     alertType: AlertType?,
@@ -1221,30 +1006,5 @@ private fun PreviewAlertCheckLogViewerUi() {
                     eventSink = {},
                 ),
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PreviewFilterBottomSheetContent_NoFilters() {
-    ComposeAppTheme {
-        Surface {
-            FilterBottomSheetContent(
-                currentState =
-                    AlertCheckLogViewerScreen.State(
-                        logs = emptyList(),
-                        filteredLogs = emptyList(),
-                        isLoading = false,
-                        checkIntervalMinutes = 60,
-                        eventSink = {},
-                    ),
-                onFilterByAlertType = {},
-                onFilterByNotifierType = {},
-                onToggleTriggeredOnly = {},
-                onSelectDateRange = {},
-                onClearFilters = {},
-                onClose = {},
-            )
-        }
     }
 }
