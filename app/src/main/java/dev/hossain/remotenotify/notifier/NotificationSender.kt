@@ -5,7 +5,9 @@ import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.RemoteAlert
 
 /**
- * Interface to send notification to remote destination.
+ * Interface to send notification to remote destinations like email, sms, telegram and so on.
+ *
+ * @see NotifierType
  */
 interface NotificationSender {
     val notifierType: NotifierType

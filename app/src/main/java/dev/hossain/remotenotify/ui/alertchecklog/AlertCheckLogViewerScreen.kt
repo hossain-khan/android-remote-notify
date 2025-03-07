@@ -91,6 +91,7 @@ import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
+import dev.hossain.remotenotify.utils.formatDuration
 import dev.hossain.remotenotify.utils.formatTimeDuration
 import dev.hossain.remotenotify.utils.toTitleCase
 import kotlinx.coroutines.launch
@@ -1056,7 +1057,7 @@ private fun LogsSummaryInfo(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Alerts checked every $checkIntervalMinutes minutes",
+                        text = "Alerts checked every ${formatDuration(checkIntervalMinutes.toInt())}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )

@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.utils
 
+import androidx.compose.runtime.Composable
 import java.util.Locale
 
 internal fun String.toTitleCase(): String =
@@ -73,3 +74,18 @@ internal fun formatTimeDuration(
         else -> timeString // Now
     }
 }
+
+internal fun formatDuration(minutes: Int): String =
+    when {
+        minutes < 60 -> "$minutes ${if (minutes == 1) "minute" else "minutes"}"
+        minutes % 60 == 0 -> {
+            val hours = minutes / 60
+            "$hours ${if (hours == 1) "hour" else "hours"}"
+        }
+        else -> {
+            val hours = minutes / 60
+            val remainingMinutes = minutes % 60
+            "$hours ${if (hours == 1) "hour" else "hours"} and " +
+                "$remainingMinutes ${if (remainingMinutes == 1) "minute" else "minutes"}"
+        }
+    }
