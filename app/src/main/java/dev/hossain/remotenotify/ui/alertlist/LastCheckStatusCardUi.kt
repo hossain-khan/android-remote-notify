@@ -30,7 +30,7 @@ import dev.hossain.remotenotify.model.WorkerStatus
 import dev.hossain.remotenotify.model.toIconResId
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
-import dev.hossain.remotenotify.utils.formatTimeDuration
+import dev.hossain.remotenotify.utils.formatTimeElapsed
 import dev.hossain.remotenotify.utils.toTitleCase
 
 @Composable
@@ -99,7 +99,7 @@ internal fun LastCheckStatusCardUi(
                             style = MaterialTheme.typography.bodyMedium,
                         )*/
                         Text(
-                            text = "Alert checked ${formatTimeDuration(lastCheckLog.checkedOn)}",
+                            text = "Alert checked ${formatTimeElapsed(lastCheckLog.checkedOn)}",
                             style = MaterialTheme.typography.bodySmall,
                         )
                         if (lastCheckLog.isAlertSent) {
@@ -132,7 +132,7 @@ internal fun LastCheckStatusCardUi(
                             buildString {
                                 append("Worker State: ${status.state.toTitleCase()}")
                                 status.nextRunTimeMs?.let {
-                                    append(", Next check: ${formatTimeDuration(it)}")
+                                    append(", Next check: ${formatTimeElapsed(it)}")
                                 }
                             },
                         style = MaterialTheme.typography.bodySmall,

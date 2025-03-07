@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.PreviewDynamicColors
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import dev.hossain.remotenotify.theme.ComposeAppTheme
+import dev.hossain.remotenotify.utils.formatDuration
 
 @Composable
 internal fun WorkerConfigCard(
@@ -117,22 +118,6 @@ internal fun WorkerConfigCard(
         }
     }
 }
-
-@Composable
-private fun formatDuration(minutes: Int): String =
-    when {
-        minutes < 60 -> "$minutes ${if (minutes == 1) "minute" else "minutes"}"
-        minutes % 60 == 0 -> {
-            val hours = minutes / 60
-            "$hours ${if (hours == 1) "hour" else "hours"}"
-        }
-        else -> {
-            val hours = minutes / 60
-            val remainingMinutes = minutes % 60
-            "$hours ${if (hours == 1) "hour" else "hours"} and " +
-                "$remainingMinutes ${if (remainingMinutes == 1) "minute" else "minutes"}"
-        }
-    }
 
 @PreviewLightDark
 @PreviewDynamicColors
