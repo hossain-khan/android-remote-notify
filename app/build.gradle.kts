@@ -77,7 +77,49 @@ android {
         // https://developer.android.com/jetpack/androidx/releases/room#gradle-plugin
         schemaDirectory("$projectDir/schemas")
     }
+
+    // Needed for Kover
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+    }
 }
+
+// Kotlin Code Coverage - https://github.com/Kotlin/kotlinx-kover
+kover {
+    // Configure reports for the debug build variant
+    // For now use default values, key tasks are
+    // - koverHtmlReportDebug - Task to generate HTML coverage report for 'debug' Android build variant
+    // - koverXmlReportDebug - Task to generate XML coverage report for 'debug' Android build variant
+    reports {
+        // filters for all report types of all build variants
+        filters {
+            excludes {
+                androidGeneratedClasses()
+                annotatedBy(
+                    "*Composable",
+                    "*Parcelize",
+                    "*Preview",
+                    // Generated classes by Dagger 🗡️
+                    "dagger.internal.DaggerGenerated",
+                    "javax.annotation.processing.Generated"
+                )
+            }
+        }
+
+        variant("release") {
+            // verification only for 'release' build variant
+            verify {
+                rule {
+                    minBound(50)
+                }
+            }
+        }
+    }
+}
+
 
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
@@ -170,6 +212,7 @@ dependencies {
     testImplementation(libs.google.truth)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
     testImplementation(libs.okhttp.mock.webserver)
     testImplementation(libs.retrofit.mock.server)
     testImplementation(libs.robolectric)

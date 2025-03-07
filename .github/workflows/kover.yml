@@ -1,0 +1,64 @@
+name: Kover Code Coverage
+
+on:
+  pull_request:
+    branches:
+      - main
+
+# https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs
+permissions:
+  pull-requests: write
+
+env:
+  EMAIL_API_KEY: 'FAKE_KEY_TO_PASS_CI'
+
+jobs:
+  kover-coverage:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      # Automatic gradle caching using `actions/cache@v4`
+      # https://github.com/gradle/actions/tree/main/setup-gradle
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # Generates reports in following location
+      # - app/build/reports/kover/htmlDebug/index.html
+      # - app/build/reports/kover/reportDebug.xml
+      - name: Build and run tests
+        run: ./gradlew koverHtmlReportDebug koverXmlReportDebug
+
+      # https://github.com/actions/upload-artifact
+      - name: Upload Kover report
+        uses: actions/upload-artifact@v4
+        with:
+          name: kover-report
+          path: app/build/reports/kover/htmlDebug
+
+      # Sticky Pull Request Comment
+      # https://github.com/marocchino/sticky-pull-request-comment
+      - name: Post coverage comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          message: |
+            ## Code Coverage Report
+            [View Coverage Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+      # GitHub Action that uploads coverage to Codecov ☂️
+      # https://github.com/codecov/codecov-action
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./app/build/reports/kover/reportDebug.xml
+          slug: hossain-khan/android-remote-notify
