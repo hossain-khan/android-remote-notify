@@ -26,7 +26,7 @@ android {
         targetSdk = 35
         versionCode = 12
         // 📣 Don't forget to update release notes! 🤓
-        versionName = "1.11"
+        versionName = "1.10.1"
 
         // Read key or other properties from local.properties
         val localProperties =
@@ -56,6 +56,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            firebaseCrashlytics {
+                // https://firebase.google.com/docs/crashlytics/get-deobfuscated-reports?platform=android
+                // https://developer.android.com/studio/debug/stacktraces
+                // https://developer.android.com/tools/retrace
+                // https://www.guardsquare.com/manual/tools/retrace
+                mappingFileUploadEnabled = true
+            }
         }
     }
 
