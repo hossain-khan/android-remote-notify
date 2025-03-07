@@ -78,7 +78,7 @@ data class DeviceAlert(
             }
 
         return buildString {
-            append("${getAlertEmoji()} Alert: ${alertType.name.toTitleCase()}\n\n")
+            append("${getAlertEmoji()} Alert: ${alertType.name.toTitleCase()} Low\n\n")
             append("📱 Device: ${deviceName()}\n")
             append("📍 System: Android $androidVersion\n")
             append("ℹ️ Status: $message\n")
@@ -114,7 +114,10 @@ data class DeviceAlert(
                     <p style="margin: 5px 0;"><strong>⚡ Action Required:</strong> $action</p>
                     <p style="margin: 5px 0; color: #666;"><strong>🕒 Reported on:</strong> $formattedTimestamp</p>
                 </div>
-                <p style="font-size: 12px; color: #666;">This is an automated alert from your Android device monitoring system.</p>
+                <p style="font-size: 12px; color: #666;">
+                    This is an automated remote alert from your Android device monitoring system.<br/>
+                    Sent by <a href="https://play.google.com/store/apps/details?id=dev.hossain.remotenotify&pcampaignid=web_share" style="color: #1976d2; text-decoration: none;">Remote Notify</a> app.
+                </p>
             </div>
             """.trimIndent()
     }
