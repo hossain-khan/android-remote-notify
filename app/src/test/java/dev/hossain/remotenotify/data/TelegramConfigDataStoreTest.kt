@@ -1,16 +1,11 @@
 package dev.hossain.remotenotify.data
 
 import android.content.Context
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -22,8 +17,6 @@ import java.io.File
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class TelegramConfigDataStoreTest {
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher + Job())
     private lateinit var context: Context
     private lateinit var telegramConfigDataStore: TelegramConfigDataStore
     private val testDataStoreName = "test_telegram_config"
@@ -32,25 +25,17 @@ class TelegramConfigDataStoreTest {
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
 
-        // Create a test-specific DataStore
-        val testDataStore =
-            PreferenceDataStoreFactory.create(
-                scope = testScope,
-                produceFile = { context.preferencesDataStoreFile(testDataStoreName) },
-            )
+        // Clean up any existing test files
+        File(context.filesDir, "$testDataStoreName.preferences").delete()
 
-        // Use reflection to replace the private DataStore instance
+        // Create test instance with our DataStore
         telegramConfigDataStore = TelegramConfigDataStore(context)
-        val field = TelegramConfigDataStore::class.java.getDeclaredField("context")
-        field.isAccessible = true
-
-        field.set(telegramConfigDataStore, context)
     }
 
     @After
     fun tearDown() {
         // Clean up the test DataStore file
-        File(context.filesDir, "$testDataStoreName.preferences_pb").delete()
+        File(context.filesDir, "$testDataStoreName.preferences").delete()
     }
 
     @Test

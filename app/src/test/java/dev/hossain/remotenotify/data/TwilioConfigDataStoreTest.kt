@@ -1,16 +1,11 @@
 package dev.hossain.remotenotify.data
 
 import android.content.Context
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -22,8 +17,6 @@ import java.io.File
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class TwilioConfigDataStoreTest {
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher + Job())
     private lateinit var context: Context
     private lateinit var twilioConfigDataStore: TwilioConfigDataStore
     private val testDataStoreName = "test_twilio_config"
@@ -34,13 +27,6 @@ class TwilioConfigDataStoreTest {
 
         // Clean up any existing test files
         File(context.filesDir, "$testDataStoreName.preferences").delete()
-
-        // Create a test-specific DataStore
-        val testDataStore =
-            PreferenceDataStoreFactory.create(
-                scope = testScope,
-                produceFile = { context.preferencesDataStoreFile(testDataStoreName) },
-            )
 
         // Create test instance with our DataStore
         twilioConfigDataStore = TwilioConfigDataStore(context)
