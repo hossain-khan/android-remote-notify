@@ -12,8 +12,12 @@ import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -51,6 +55,12 @@ class ObserveDeviceHealthWorkerTest {
         coEvery { notificationSender.hasValidConfig() } returns true
         every { notificationSender.notifierType } returns NotifierType.EMAIL
         coEvery { notificationSender.sendNotification(any()) } returns true
+
+        // Add this to suppress errors from worker params
+        every { workerParameters.runAttemptCount } returns 0
+        every { workerParameters.taskExecutor } returns mockk()
+        every { workerParameters.id } returns java.util.UUID.randomUUID()
+        every { workerParameters.tags } returns setOf()
 
         // Create worker with mocked dependencies
         worker =
@@ -141,7 +151,7 @@ class ObserveDeviceHealthWorkerTest {
 
             coEvery { repository.getAllRemoteAlert() } returns listOf(storageAlert)
             every { batteryMonitor.getBatteryLevel() } returns 80
-            every { storageMonitor.getAvailableStorageInGB() } returns 10L // Storage above threshold
+            every { storageMonitor.getAvailableStorageInGB() } returns 10L // above threshold
             coEvery { repository.getLatestCheckForAlert(2L) } returns flowOf(null)
 
             // When
@@ -165,7 +175,7 @@ class ObserveDeviceHealthWorkerTest {
 
             coEvery { repository.getAllRemoteAlert() } returns listOf(storageAlert)
             every { batteryMonitor.getBatteryLevel() } returns 80
-            every { storageMonitor.getAvailableStorageInGB() } returns 8L // Storage below threshold
+            every { storageMonitor.getAvailableStorageInGB() } returns 8L // below threshold
             coEvery { repository.getLatestCheckForAlert(2L) } returns flowOf(null)
 
             // When
