@@ -92,7 +92,9 @@ class TwilioConfigDataStore
                 if (!config.toPhone.matches(Regex("""^\+\d{10,}$"""))) {
                     errors[ValidationKeys.TO_PHONE] = "To phone must be in E.164 format (e.g., +1234567890)"
                 }
+                return ConfigValidationResult(isValid = errors.isEmpty(), errors = errors)
+            } else {
+                return ConfigValidationResult(isValid = false, errors = errors)
             }
-            return ConfigValidationResult(isValid = errors.isEmpty(), errors = errors)
         }
     }
