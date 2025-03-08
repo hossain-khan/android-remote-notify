@@ -1,6 +1,15 @@
 # What's New
 📝 Release notes 
 
+### Release Checklist
+- [ ] Update version code and name in `build.gradle`.
+- [ ] Update `release-notes.md` with release notes.
+- [ ] Check `local.properties` for correct keystore path and password.
+- [ ] Run release APK build and test.
+- [ ] Upload and test release APK via Firebase Test Lab.
+
+-----------------------------------------------------------------------------
+
 ## Release v1.10.1
 - Initial 1.x release of 'Remote Notify'! 🎉
 - Monitor battery 🔋 and storage 💾 levels of your remote Android devices.
