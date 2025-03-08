@@ -22,8 +22,6 @@ import java.io.File
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class TelegramConfigDataStoreTest {
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher + Job())
     private lateinit var context: Context
     private lateinit var telegramConfigDataStore: TelegramConfigDataStore
     private val testDataStoreName = "test_telegram_config"
@@ -31,13 +29,6 @@ class TelegramConfigDataStoreTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-
-        // Create a test-specific DataStore
-        val testDataStore =
-            PreferenceDataStoreFactory.create(
-                scope = testScope,
-                produceFile = { context.preferencesDataStoreFile(testDataStoreName) },
-            )
 
         // Use reflection to replace the private DataStore instance
         telegramConfigDataStore = TelegramConfigDataStore(context)

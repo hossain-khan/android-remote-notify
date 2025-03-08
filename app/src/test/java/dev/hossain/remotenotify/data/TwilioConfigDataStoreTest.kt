@@ -22,8 +22,6 @@ import java.io.File
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class TwilioConfigDataStoreTest {
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher + Job())
     private lateinit var context: Context
     private lateinit var twilioConfigDataStore: TwilioConfigDataStore
     private val testDataStoreName = "test_twilio_config"
@@ -34,13 +32,6 @@ class TwilioConfigDataStoreTest {
 
         // Clean up any existing test files
         File(context.filesDir, "$testDataStoreName.preferences").delete()
-
-        // Create a test-specific DataStore
-        val testDataStore =
-            PreferenceDataStoreFactory.create(
-                scope = testScope,
-                produceFile = { context.preferencesDataStoreFile(testDataStoreName) },
-            )
 
         // Create test instance with our DataStore
         twilioConfigDataStore = TwilioConfigDataStore(context)
