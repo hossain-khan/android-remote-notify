@@ -1,5 +1,7 @@
 package dev.hossain.remotenotify.data
 
+import dev.hossain.remotenotify.model.AlertMediumConfig
+
 data class ConfigValidationResult(
     /**
      * If the [AlertMediumConfig] is valid.
