@@ -87,7 +87,7 @@ class EmailQuotaManager
             }
         }
 
-        private suspend fun resetQuota() {
+        suspend fun resetQuota() {
             context.emailQuotaDataStore.edit { preferences ->
                 preferences[EMAIL_COUNT_TODAY] = 0
                 preferences[LAST_EMAIL_DATE] = Instant.now().toEpochMilli()
