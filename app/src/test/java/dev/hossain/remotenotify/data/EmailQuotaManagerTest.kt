@@ -12,6 +12,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import timber.log.Timber
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -26,6 +27,9 @@ class EmailQuotaManagerTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
+
+        // Clean up any existing Timber tree to avoid calling into crashlytics
+        Timber.uprootAll()
 
         // Clean up any existing test files
         File(context.filesDir, "$testDataStoreName.preferences_pb").delete()
