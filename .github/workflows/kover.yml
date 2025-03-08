@@ -1,9 +1,10 @@
 name: Kover Code Coverage
 
 on:
+  push:
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 # https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs
 permissions:
