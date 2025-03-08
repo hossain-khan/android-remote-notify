@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.google.firebase.FirebaseApp
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -31,6 +32,11 @@ class WebhookConfigDataStoreTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
+
+        // Avoid `./gradlew :app:testReleaseUnitTest` test failure
+        // - java.lang.IllegalStateException: Default FirebaseApp is not initialized in this process
+        // dev.hossain.remotenotify. Make sure to call FirebaseApp.initializeApp(Context) first.
+        FirebaseApp.initializeApp(context)
 
         // Clean up any existing test files
         File(context.filesDir, "$testDataStoreName.preferences").delete()

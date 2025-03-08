@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
+import com.google.firebase.FirebaseApp
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
@@ -54,6 +55,11 @@ class ObserveDeviceHealthWorkerTest {
     fun setUp() {
         MockKAnnotations.init(this)
         context = ApplicationProvider.getApplicationContext()
+
+        // Avoid `./gradlew :app:testReleaseUnitTest` test failure
+        // - java.lang.IllegalStateException: Default FirebaseApp is not initialized in this process
+        // dev.hossain.remotenotify. Make sure to call FirebaseApp.initializeApp(Context) first.
+        FirebaseApp.initializeApp(context)
 
         // Configure default behavior for notification sender
         coEvery { notificationSender.hasValidConfig() } returns true
