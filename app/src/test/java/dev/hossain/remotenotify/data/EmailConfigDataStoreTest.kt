@@ -50,7 +50,7 @@ class EmailConfigDataStoreTest {
     @After
     fun tearDown() {
         // Clean up the test DataStore file
-        File(context.filesDir, "$testDataStoreName.preferences_pb").delete()
+        File(context.filesDir, "$testDataStoreName.preferences").delete()
     }
 
     @Test
