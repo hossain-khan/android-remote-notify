@@ -90,8 +90,6 @@ internal fun formatDuration(minutes: Int): String =
     }
 
 internal fun formatDateTime(timestamp: Long): String =
-    SimpleDateFormat("EEE, d MMM yyyy h:mma", Locale.getDefault())
+    SimpleDateFormat("EEE, d MMM yyyy h:mm a", Locale.getDefault())
         .apply { isLenient = true }
         .format(Date(timestamp))
-        .replace("AM", "am")
-        .replace("PM", "pm")

@@ -2,6 +2,7 @@ package dev.hossain.remotenotify.utils
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 class DateTimeFormatterTest {
@@ -84,5 +85,53 @@ class DateTimeFormatterTest {
         // Test in 3 days
         assertThat(formatTimeElapsed(baseTime + TimeUnit.DAYS.toMillis(3), baseTime))
             .isEqualTo("in 3 days")
+    }
+
+    @Test
+    fun `formatDuration handles minutes properly`() {
+        assertThat(formatDuration(1)).isEqualTo("1 minute")
+        assertThat(formatDuration(5)).isEqualTo("5 minutes")
+        assertThat(formatDuration(59)).isEqualTo("59 minutes")
+    }
+
+    @Test
+    fun `formatDuration handles hours properly`() {
+        assertThat(formatDuration(60)).isEqualTo("1 hour")
+        assertThat(formatDuration(120)).isEqualTo("2 hours")
+        assertThat(formatDuration(180)).isEqualTo("3 hours")
+    }
+
+    @Test
+    fun `formatDuration handles hours and minutes properly`() {
+        assertThat(formatDuration(61)).isEqualTo("1 hour and 1 minute")
+        assertThat(formatDuration(122)).isEqualTo("2 hours and 2 minutes")
+        assertThat(formatDuration(150)).isEqualTo("2 hours and 30 minutes")
+    }
+
+    @Test
+    fun `formatDateTime formats timestamps correctly`() {
+        // January 1, 2023 at 10:30am
+        val calendar1 =
+            Calendar.getInstance().apply {
+                set(2023, Calendar.JANUARY, 1, 10, 30, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+        assertThat(formatDateTime(calendar1.timeInMillis)).matches("Sun, 1 Jan 2023 10:30 a.m.")
+
+        // December 31, 2023 at 11:59pm
+        val calendar2 =
+            Calendar.getInstance().apply {
+                set(2023, Calendar.DECEMBER, 31, 23, 59, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+        assertThat(formatDateTime(calendar2.timeInMillis)).matches("Sun, 31 Dec 2023 11:59 p.m.")
+
+        // February 29, 2024 (leap year) at 1:05pm
+        val calendar3 =
+            Calendar.getInstance().apply {
+                set(2024, Calendar.FEBRUARY, 29, 13, 5, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+        assertThat(formatDateTime(calendar3.timeInMillis)).matches("Thu, 29 Feb 2024 1:05 p.m.")
     }
 }
