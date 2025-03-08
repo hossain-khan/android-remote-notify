@@ -43,5 +43,5 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-report
-          path: build/reports/
+          name: build-report-${{ github.run_id }}
+          path: build/reports/**
