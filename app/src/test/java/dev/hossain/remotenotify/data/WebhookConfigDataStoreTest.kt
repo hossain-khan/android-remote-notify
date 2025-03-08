@@ -33,7 +33,7 @@ class WebhookConfigDataStoreTest {
         context = ApplicationProvider.getApplicationContext()
 
         // Clean up any existing test files
-        File(context.filesDir, "$testDataStoreName.preferences_pb").delete()
+        File(context.filesDir, "$testDataStoreName.preferences").delete()
 
         // Create a test-specific DataStore
         val testDataStore =
@@ -49,7 +49,7 @@ class WebhookConfigDataStoreTest {
     @After
     fun tearDown() {
         // Clean up the test DataStore file
-        File(context.filesDir, "$testDataStoreName.preferences_pb").delete()
+        File(context.filesDir, "$testDataStoreName.preferences").delete()
     }
 
     @Test

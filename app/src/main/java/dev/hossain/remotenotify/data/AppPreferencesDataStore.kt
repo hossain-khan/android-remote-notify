@@ -30,6 +30,12 @@ class AppPreferencesDataStore
             private val HIDE_BATTERY_OPTIMIZATION_REMINDER = booleanPreferencesKey("hide_battery_optimization_reminder")
         }
 
+        suspend fun resetAll() {
+            context.appPreferencesDataStore.edit { preferences ->
+                preferences.clear()
+            }
+        }
+
         suspend fun saveWorkerInterval(intervalMinutes: Long) {
             context.appPreferencesDataStore.edit { preferences ->
                 preferences[WORKER_INTERVAL_KEY] = intervalMinutes
