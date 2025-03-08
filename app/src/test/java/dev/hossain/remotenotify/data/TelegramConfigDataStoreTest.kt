@@ -1,16 +1,11 @@
 package dev.hossain.remotenotify.data
 
 import android.content.Context
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -30,18 +25,17 @@ class TelegramConfigDataStoreTest {
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
 
-        // Use reflection to replace the private DataStore instance
-        telegramConfigDataStore = TelegramConfigDataStore(context)
-        val field = TelegramConfigDataStore::class.java.getDeclaredField("context")
-        field.isAccessible = true
+        // Clean up any existing test files
+        File(context.filesDir, "$testDataStoreName.preferences").delete()
 
-        field.set(telegramConfigDataStore, context)
+        // Create test instance with our DataStore
+        telegramConfigDataStore = TelegramConfigDataStore(context)
     }
 
     @After
     fun tearDown() {
         // Clean up the test DataStore file
-        File(context.filesDir, "$testDataStoreName.preferences_pb").delete()
+        File(context.filesDir, "$testDataStoreName.preferences").delete()
     }
 
     @Test
