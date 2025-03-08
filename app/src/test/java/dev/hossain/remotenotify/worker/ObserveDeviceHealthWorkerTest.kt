@@ -24,6 +24,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.BeforeClass
@@ -31,6 +32,7 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import timber.log.Timber
 
 @RunWith(RobolectricTestRunner::class)
 class ObserveDeviceHealthWorkerTest {
@@ -74,6 +76,11 @@ class ObserveDeviceHealthWorkerTest {
         MockKAnnotations.init(this)
         context = ApplicationProvider.getApplicationContext()
 
+        // Mock Timber to prevent FirebaseCrashlytics errors
+        val timber = mockk<Timber.Tree>(relaxed = true)
+        Timber.uprootAll()
+        Timber.plant(timber)
+
         // Configure default behavior for notification sender
         coEvery { notificationSender.hasValidConfig() } returns true
         every { notificationSender.notifierType } returns NotifierType.EMAIL
@@ -99,6 +106,12 @@ class ObserveDeviceHealthWorkerTest {
         // Create a spy for the worker and mock setProgress
         worker = spyk(worker)
         coEvery { worker.setProgress(any()) } just Runs
+    }
+
+    @After
+    fun tearDown() {
+        // Remove all trees to clean up after test
+        Timber.uprootAll()
     }
 
     @Test

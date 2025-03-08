@@ -92,7 +92,7 @@ class TelegramConfigDataStore
             // Bot token format: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
             val isValidBotToken = botToken.matches(Regex("""\d+:[A-Za-z0-9_-]{35}"""))
             if (!isValidBotToken) {
-                Timber.e("Invalid bot token format")
+                Timber.w("Invalid bot token format")
                 errors[ValidationKeys.BOT_TOKEN] = "Invalid bot token format. Example format: 123456:ABCDEF1234ghIklzyx57W2v1u123ew11"
             }
 
@@ -101,7 +101,7 @@ class TelegramConfigDataStore
                 chatId.matches(Regex("""^-?\d+$""")) ||
                     (chatId.startsWith("@") && chatId.length > 1)
             if (!isValidChatId) {
-                Timber.e("Invalid chat ID format")
+                Timber.w("Invalid chat ID format")
                 errors[ValidationKeys.CHAT_ID] = "Invalid chat ID format. Chat ID should be numeric or @channelusername"
             }
 
