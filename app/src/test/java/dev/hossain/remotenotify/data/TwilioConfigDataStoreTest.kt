@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -22,14 +23,26 @@ class TwilioConfigDataStoreTest {
     private lateinit var twilioConfigDataStore: TwilioConfigDataStore
     private val testDataStoreName = "test_twilio_config"
 
+    companion object { // Use a companion object for static initialization
+        private var firebaseInitialized = false
+
+        @JvmStatic // Important for JUnit to recognize the @BeforeClass method
+        @BeforeClass
+        fun setup() {
+            // Avoid `./gradlew :app:testReleaseUnitTest` test failure
+            // - java.lang.IllegalStateException: Default FirebaseApp is not initialized in this process
+            // dev.hossain.remotenotify. Make sure to call FirebaseApp.initializeApp(Context) first.
+            if (!firebaseInitialized) {
+                val context = ApplicationProvider.getApplicationContext<Context>()
+                FirebaseApp.initializeApp(context)
+                firebaseInitialized = true
+            }
+        }
+    }
+
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-
-        // Avoid `./gradlew :app:testReleaseUnitTest` test failure
-        // - java.lang.IllegalStateException: Default FirebaseApp is not initialized in this process
-        // dev.hossain.remotenotify. Make sure to call FirebaseApp.initializeApp(Context) first.
-        FirebaseApp.initializeApp(context)
 
         // Clean up any existing test files
         File(context.filesDir, "$testDataStoreName.preferences").delete()

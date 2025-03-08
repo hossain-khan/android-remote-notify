@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,15 +52,27 @@ class ObserveDeviceHealthWorkerTest {
     private lateinit var worker: ObserveDeviceHealthWorker
     private lateinit var context: Context
 
+    companion object { // Use a companion object for static initialization
+        private var firebaseInitialized = false
+
+        @JvmStatic // Important for JUnit to recognize the @BeforeClass method
+        @BeforeClass
+        fun setup() {
+            // Avoid `./gradlew :app:testReleaseUnitTest` test failure
+            // - java.lang.IllegalStateException: Default FirebaseApp is not initialized in this process
+            // dev.hossain.remotenotify. Make sure to call FirebaseApp.initializeApp(Context) first.
+            if (!firebaseInitialized) {
+                val context = ApplicationProvider.getApplicationContext<Context>()
+                FirebaseApp.initializeApp(context)
+                firebaseInitialized = true
+            }
+        }
+    }
+
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
         context = ApplicationProvider.getApplicationContext()
-
-        // Avoid `./gradlew :app:testReleaseUnitTest` test failure
-        // - java.lang.IllegalStateException: Default FirebaseApp is not initialized in this process
-        // dev.hossain.remotenotify. Make sure to call FirebaseApp.initializeApp(Context) first.
-        FirebaseApp.initializeApp(context)
 
         // Configure default behavior for notification sender
         coEvery { notificationSender.hasValidConfig() } returns true
