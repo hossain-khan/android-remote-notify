@@ -78,6 +78,7 @@ class ObserveDeviceHealthWorkerTest {
 
         // Mock Timber to prevent FirebaseCrashlytics errors
         val timber = mockk<Timber.Tree>(relaxed = true)
+        Timber.uprootAll()
         Timber.plant(timber)
 
         // Configure default behavior for notification sender
