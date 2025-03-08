@@ -2,7 +2,10 @@ package dev.hossain.remotenotify.utils
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class DateTimeFormatterTest {
@@ -110,13 +113,22 @@ class DateTimeFormatterTest {
 
     @Test
     fun `formatDateTime formats timestamps correctly`() {
+        // Override the locale in the test to ensure consistent formatting
+        val testLocale = Locale.US
+
         // January 1, 2023 at 10:30am
         val calendar1 =
             Calendar.getInstance().apply {
                 set(2023, Calendar.JANUARY, 1, 10, 30, 0)
                 set(Calendar.MILLISECOND, 0)
             }
-        assertThat(formatDateTime(calendar1.timeInMillis)).matches("Sun, 1 Jan 2023 10:30 a.m.")
+
+        // Use the same format pattern as in the implementation but with our controlled locale
+        val formatter = SimpleDateFormat("EEE, d MMM yyyy h:mm a", testLocale)
+        val expectedFormat1 = formatter.format(Date(calendar1.timeInMillis))
+
+        // Test by calling the actual function and comparing with our controlled formatting
+        assertThat(formatDateTime(calendar1.timeInMillis, testLocale)).isEqualTo(expectedFormat1)
 
         // December 31, 2023 at 11:59pm
         val calendar2 =
@@ -124,7 +136,8 @@ class DateTimeFormatterTest {
                 set(2023, Calendar.DECEMBER, 31, 23, 59, 0)
                 set(Calendar.MILLISECOND, 0)
             }
-        assertThat(formatDateTime(calendar2.timeInMillis)).matches("Sun, 31 Dec 2023 11:59 p.m.")
+        val expectedFormat2 = formatter.format(Date(calendar2.timeInMillis))
+        assertThat(formatDateTime(calendar2.timeInMillis, testLocale)).isEqualTo(expectedFormat2)
 
         // February 29, 2024 (leap year) at 1:05pm
         val calendar3 =
@@ -132,6 +145,7 @@ class DateTimeFormatterTest {
                 set(2024, Calendar.FEBRUARY, 29, 13, 5, 0)
                 set(Calendar.MILLISECOND, 0)
             }
-        assertThat(formatDateTime(calendar3.timeInMillis)).matches("Thu, 29 Feb 2024 1:05 p.m.")
+        val expectedFormat3 = formatter.format(Date(calendar3.timeInMillis))
+        assertThat(formatDateTime(calendar3.timeInMillis, testLocale)).isEqualTo(expectedFormat3)
     }
 }

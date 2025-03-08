@@ -3,6 +3,7 @@ package dev.hossain.remotenotify.utils
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.text.format
 
 /**
  * Formats timestamp to human readable time in past or future.
@@ -89,7 +90,10 @@ internal fun formatDuration(minutes: Int): String =
         }
     }
 
-internal fun formatDateTime(timestamp: Long): String =
-    SimpleDateFormat("EEE, d MMM yyyy h:mm a", Locale.getDefault())
+internal fun formatDateTime(
+    timestamp: Long,
+    locale: Locale = Locale.getDefault(),
+): String =
+    SimpleDateFormat("EEE, d MMM yyyy h:mm a", locale)
         .apply { isLenient = true }
         .format(Date(timestamp))
