@@ -32,7 +32,7 @@ class EmailConfigDataStore
             }
         }
 
-        private val toEmail: Flow<String?> =
+        val toEmail: Flow<String?> =
             context.emailConfigDataStore.data
                 .map { it[TO_EMAIL] }
 
