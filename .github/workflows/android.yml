@@ -38,3 +38,10 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew assembleDebug --parallel --daemon
+
+      - name: Archive Problems Report
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-report
+          path: build/reports/
