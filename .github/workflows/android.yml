@@ -40,7 +40,7 @@ jobs:
         run: ./gradlew assembleDebug --parallel --daemon
 
       - name: Archive Problems Report
-        if: failure()
+        if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
           name: build-report-${{ github.run_id }}

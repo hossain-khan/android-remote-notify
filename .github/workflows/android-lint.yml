@@ -32,3 +32,10 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build
+
+      - name: Archive Problems Report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-report-${{ github.run_id }}
+          path: app/build/reports/**
