@@ -68,7 +68,7 @@ class WebhookConfigDataStore
             val url =
                 when (config) {
                     is AlertMediumConfig.WebhookConfig -> config.url
-                    else -> return ConfigValidationResult(false, emptyMap())
+                    else -> return ConfigValidationResult(isValid = false, errors = emptyMap())
                 }
 
             // Basic URL validation for HTTP/HTTPS
