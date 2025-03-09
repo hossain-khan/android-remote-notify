@@ -347,7 +347,7 @@ private fun NotifierConfigInputUi(state: ConfigureNotificationMediumScreen.State
                 )
 
             NotifierType.WEBHOOK_SLACK_WORKFLOW ->
-                WebhookConfigInputUi(
+                SlackWebhookConfigInputUi(
                     state.alertMediumConfig,
                     state.configValidationResult,
                     state.showValidationError,
