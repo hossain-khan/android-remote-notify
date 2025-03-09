@@ -47,6 +47,7 @@ internal fun SlackWebhookConfigInputUi(
                     append("Use a Slack workflow webhook to trigger automated workflows in Slack. ")
                     append("When an alert is triggered, a POST request will be sent to your Slack workflow URL, which can ")
                     append("start a workflow to notify your team, create tickets, or trigger other actions in Slack. ")
+                    @Suppress("ktlint:standard:max-line-length")
                     pushStringAnnotation(
                         tag = "URL",
                         annotation = "https://slack.com/help/articles/360041352714-Build-a-workflow--Create-a-workflow-that-starts-outside-of-Slack",
