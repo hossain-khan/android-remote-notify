@@ -25,11 +25,11 @@ Tired of your remote Android devices running out of juice 🔋 or storage 💾 w
 **Remote Notify** has got your back! This smart app keeps an eye on your remote device's battery and storage levels and alerts you when it's time to take action — no matter where you are!
 
 Stay in control with notifications via following notifiers:
-* <img src="project-resources/static-res/email-icon.svg" width="16" alt="email"> Email, 
-* <img src="project-resources/static-res/twilio-logo-icon.svg" width="16" alt="Twilio"> Twilio (SMS via API)
-* <img src="project-resources/static-res/slack-logo-icon.svg" width="16" alt="Slack"> Slack
-* <img src="project-resources/static-res/telegram-logo-icon.svg" width="16" alt="Telegram"> Telegram 
-* <img src="project-resources/static-res/webhooks-icon.svg" width="16" alt="Webhook"> REST Webhooks
+* <img src="project-resources/static-res/email-icon.svg" width="15" alt="email"> Email, 
+* <img src="project-resources/static-res/twilio-logo-icon.svg" width="15" alt="Twilio"> Twilio (SMS via API)
+* <img src="project-resources/static-res/slack-logo-icon.svg" width="15" alt="Slack"> Slack
+* <img src="project-resources/static-res/telegram-logo-icon.svg" width="15" alt="Telegram"> Telegram 
+* <img src="project-resources/static-res/webhooks-icon.svg" width="15" alt="Webhook"> REST Webhooks
 
 ### Demo 📽️
 Here is what you might expect when notification gets triggers. In this demo, I have used telegram bot to notify me! 📥
