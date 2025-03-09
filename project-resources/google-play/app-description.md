@@ -5,7 +5,7 @@
 Tired of your remote Android devices running out of juice 🔋 or storage 💾 when you're not around?
 **Remote Notify** has got your back! This smart app keeps an eye on your remote device's battery and storage levels and alerts you when it's time to take action — no matter where you are!
 
-Stay in control with notifications via Twilio (SMS via API) 📲, Telegram 📢, webhooks 🔗, and more!
+Stay in control with notifications via 📬 Email, Twilio (SMS via API) 📲, Slack 💬, Telegram 📢, Webhooks 🔗, and more!
 
 ---
 
