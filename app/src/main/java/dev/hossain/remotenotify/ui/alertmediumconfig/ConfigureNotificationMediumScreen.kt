@@ -391,7 +391,7 @@ private fun NotifierConfigSuffixUi(
     modifier: Modifier = Modifier,
 ) {
     when (state.notifierType) {
-        NotifierType.WEBHOOK_REST_API -> {
+        NotifierType.WEBHOOK_REST_API, NotifierType.WEBHOOK_SLACK_WORKFLOW -> {
             // For webhook, show preview of JSON payload
             Column(modifier = modifier.fillMaxWidth()) {
                 Spacer(modifier = Modifier.height(32.dp))
