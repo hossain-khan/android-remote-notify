@@ -17,10 +17,10 @@ import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-class WebhookConfigDataStoreTest {
+class SlackWebhookConfigDataStoreTest {
     private lateinit var context: Context
-    private lateinit var webhookConfigDataStore: WebhookConfigDataStore
-    private val testDataStoreName = "test_webhook_config"
+    private lateinit var slackWebhookConfigDataStore: SlackWebhookConfigDataStore
+    private val testDataStoreName = "test_slack_webhook_config"
 
     @Before
     fun setUp() {
@@ -32,8 +32,8 @@ class WebhookConfigDataStoreTest {
         // Clean up any existing test files
         File(context.filesDir, "$testDataStoreName.preferences").delete()
 
-        // Create test instance with our DataStore
-        webhookConfigDataStore = WebhookConfigDataStore(context)
+        // Create test instance
+        slackWebhookConfigDataStore = SlackWebhookConfigDataStore(context)
     }
 
     @After
@@ -43,16 +43,16 @@ class WebhookConfigDataStoreTest {
     }
 
     @Test
-    fun `saveWebhookUrl saves URL and can be retrieved`() =
+    fun `saveSlackWorkflowWebhookUrl saves URL and can be retrieved`() =
         runTest {
             // Given
-            val testUrl = "https://example.com/webhook"
+            val testUrl = "https://hooks.slack.com/triggers/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"
 
             // When
-            webhookConfigDataStore.saveWebhookUrl(testUrl)
+            slackWebhookConfigDataStore.saveSlackWorkflowWebhookUrl(testUrl)
 
             // Then
-            val result = webhookConfigDataStore.webhookUrl.first()
+            val result = slackWebhookConfigDataStore.slackWorkflowWebhookUrl.first()
             assertThat(result).isEqualTo(testUrl)
         }
 
@@ -60,11 +60,11 @@ class WebhookConfigDataStoreTest {
     fun `getConfig returns config with saved URL`() =
         runTest {
             // Given
-            val testUrl = "https://example.com/webhook"
-            webhookConfigDataStore.saveWebhookUrl(testUrl)
+            val testUrl = "https://hooks.slack.com/triggers/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"
+            slackWebhookConfigDataStore.saveSlackWorkflowWebhookUrl(testUrl)
 
             // When
-            val config = webhookConfigDataStore.getConfig()
+            val config = slackWebhookConfigDataStore.getConfig()
 
             // Then
             assertThat(config.url).isEqualTo(testUrl)
@@ -74,10 +74,10 @@ class WebhookConfigDataStoreTest {
     fun `getConfig returns empty string when no URL saved`() =
         runTest {
             // Given
-            webhookConfigDataStore.clearConfig()
+            slackWebhookConfigDataStore.clearConfig()
 
             // When
-            val config = webhookConfigDataStore.getConfig()
+            val config = slackWebhookConfigDataStore.getConfig()
 
             // Then
             assertThat(config.url).isEmpty()
@@ -87,15 +87,15 @@ class WebhookConfigDataStoreTest {
     fun `clearConfig removes saved URL`() =
         runTest {
             // Given
-            val testUrl = "https://example.com/webhook"
-            webhookConfigDataStore.saveWebhookUrl(testUrl)
-            assertThat(webhookConfigDataStore.webhookUrl.first()).isEqualTo(testUrl)
+            val testUrl = "https://hooks.slack.com/triggers/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"
+            slackWebhookConfigDataStore.saveSlackWorkflowWebhookUrl(testUrl)
+            assertThat(slackWebhookConfigDataStore.slackWorkflowWebhookUrl.first()).isEqualTo(testUrl)
 
             // When
-            webhookConfigDataStore.clearConfig()
+            slackWebhookConfigDataStore.clearConfig()
 
             // Then
-            val result = webhookConfigDataStore.webhookUrl.first()
+            val result = slackWebhookConfigDataStore.slackWorkflowWebhookUrl.first()
             assertThat(result).isNull()
         }
 
@@ -103,11 +103,11 @@ class WebhookConfigDataStoreTest {
     fun `hasValidConfig returns true when URL is valid`() =
         runTest {
             // Given
-            val validUrl = "https://example.com/webhook"
-            webhookConfigDataStore.saveWebhookUrl(validUrl)
+            val validUrl = "https://hooks.slack.com/triggers/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"
+            slackWebhookConfigDataStore.saveSlackWorkflowWebhookUrl(validUrl)
 
             // When
-            val result = webhookConfigDataStore.hasValidConfig()
+            val result = slackWebhookConfigDataStore.hasValidConfig()
 
             // Then
             assertThat(result).isTrue()
@@ -117,23 +117,26 @@ class WebhookConfigDataStoreTest {
     fun `hasValidConfig returns false when URL is missing`() =
         runTest {
             // Given
-            webhookConfigDataStore.clearConfig()
+            slackWebhookConfigDataStore.clearConfig()
 
             // When
-            val result = webhookConfigDataStore.hasValidConfig()
+            val result = slackWebhookConfigDataStore.hasValidConfig()
 
             // Then
             assertThat(result).isFalse()
         }
 
     @Test
-    fun `validateConfig returns valid result for valid URL`() =
+    fun `validateConfig returns valid result for valid triggers URL`() =
         runTest {
             // Given
-            val config = AlertMediumConfig.WebhookConfig(url = "https://example.com/webhook")
+            val config =
+                AlertMediumConfig.WebhookConfig(
+                    url = "https://hooks.slack.com/triggers/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",
+                )
 
             // When
-            val result = webhookConfigDataStore.validateConfig(config)
+            val result = slackWebhookConfigDataStore.validateConfig(config)
 
             // Then
             assertThat(result.isValid).isTrue()
@@ -141,13 +144,13 @@ class WebhookConfigDataStoreTest {
         }
 
     @Test
-    fun `validateConfig returns valid result for HTTP URL`() =
+    fun `validateConfig returns valid result for valid services URL`() =
         runTest {
             // Given
-            val config = AlertMediumConfig.WebhookConfig(url = "http://example.com/webhook")
+            val config = AlertMediumConfig.WebhookConfig(url = "https://hooks.slack.com/services/T12345ZX6/B12345678/abcdefgh123456789")
 
             // When
-            val result = webhookConfigDataStore.validateConfig(config)
+            val result = slackWebhookConfigDataStore.validateConfig(config)
 
             // Then
             assertThat(result.isValid).isTrue()
@@ -158,14 +161,14 @@ class WebhookConfigDataStoreTest {
     fun `validateConfig returns errors for invalid URL format`() =
         runTest {
             // Given
-            val config = AlertMediumConfig.WebhookConfig(url = "invalid-url")
+            val config = AlertMediumConfig.WebhookConfig(url = "https://slack.com/api/webhook")
 
             // When
-            val result = webhookConfigDataStore.validateConfig(config)
+            val result = slackWebhookConfigDataStore.validateConfig(config)
 
             // Then
             assertThat(result.isValid).isFalse()
-            assertThat(result.errors).containsKey(WebhookConfigDataStore.Companion.ValidationKeys.URL)
+            assertThat(result.errors).containsKey(SlackWebhookConfigDataStore.Companion.ValidationKeys.URL)
         }
 
     @Test
@@ -175,11 +178,11 @@ class WebhookConfigDataStoreTest {
             val config = AlertMediumConfig.WebhookConfig(url = "")
 
             // When
-            val result = webhookConfigDataStore.validateConfig(config)
+            val result = slackWebhookConfigDataStore.validateConfig(config)
 
             // Then
             assertThat(result.isValid).isFalse()
-            assertThat(result.errors).containsKey(WebhookConfigDataStore.Companion.ValidationKeys.URL)
+            assertThat(result.errors).containsKey(SlackWebhookConfigDataStore.Companion.ValidationKeys.URL)
         }
 
     @Test
@@ -195,7 +198,7 @@ class WebhookConfigDataStoreTest {
                 )
 
             // When
-            val result = webhookConfigDataStore.validateConfig(config)
+            val result = slackWebhookConfigDataStore.validateConfig(config)
 
             // Then
             assertThat(result.isValid).isFalse()
