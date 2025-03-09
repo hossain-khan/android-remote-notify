@@ -30,7 +30,7 @@ class SlackWebhookRequestSender
 
         override suspend fun sendNotification(remoteAlert: RemoteAlert): Boolean {
             val webhookUrl =
-                requireNotNull(slackWebhookConfigDataStore.webhookUrl.first()) {
+                requireNotNull(slackWebhookConfigDataStore.slackWorkflowWebhookUrl.first()) {
                     "Slack Webhook URL is required. Check `hasValidConfiguration` before using the notifier."
                 }
 
@@ -57,7 +57,7 @@ class SlackWebhookRequestSender
 
         override suspend fun saveConfig(alertMediumConfig: AlertMediumConfig) {
             when (alertMediumConfig) {
-                is AlertMediumConfig.WebhookConfig -> slackWebhookConfigDataStore.saveWebhookUrl(alertMediumConfig.url)
+                is AlertMediumConfig.WebhookConfig -> slackWebhookConfigDataStore.saveSlackWorkflowWebhookUrl(alertMediumConfig.url)
                 else -> throw IllegalArgumentException("Invalid configuration type: $alertMediumConfig")
             }
         }

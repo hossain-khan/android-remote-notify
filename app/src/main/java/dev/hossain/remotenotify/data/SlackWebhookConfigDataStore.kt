@@ -32,13 +32,13 @@ class SlackWebhookConfigDataStore
             }
         }
 
-        val webhookUrl: Flow<String?> =
+        val slackWorkflowWebhookUrl: Flow<String?> =
             context.slackWebhookConfigDataStore.data
                 .map { preferences ->
                     preferences[SLACK_WEBHOOK_URL_KEY]
                 }
 
-        suspend fun saveWebhookUrl(url: String) {
+        suspend fun saveSlackWorkflowWebhookUrl(url: String) {
             Timber.d("Saving Slack webhook URL: $url")
             context.slackWebhookConfigDataStore.edit { preferences ->
                 preferences[SLACK_WEBHOOK_URL_KEY] = url
@@ -53,7 +53,7 @@ class SlackWebhookConfigDataStore
         }
 
         override suspend fun hasValidConfig(): Boolean {
-            val url = webhookUrl.first()
+            val url = slackWorkflowWebhookUrl.first()
             if (url.isNullOrBlank()) {
                 Timber.e("Slack Webhook URL is not configured")
                 return false
@@ -71,17 +71,23 @@ class SlackWebhookConfigDataStore
                     else -> return ConfigValidationResult(isValid = false, errors = emptyMap())
                 }
 
-            // Specific validation for Slack webhook URLs
+            // Validation for Slack workflow webhook URLs
             val isValidUrl =
                 try {
-                    url.matches(Regex("""^https://hooks\.slack\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[a-zA-Z0-9]+$"""))
+                    // Updated regex to support both trigger-based workflow webhooks and traditional services webhooks
+                    url.matches(
+                        Regex(
+                            """^https://hooks\.slack\.com/(triggers/T[A-Z0-9]+/\d+/[a-zA-Z0-9]+|services/T[A-Z0-9]+/B[A-Z0-9]+/[a-zA-Z0-9]+)$""",
+                        ),
+                    )
                 } catch (e: Exception) {
                     Timber.e(e, "Invalid Slack webhook URL format")
                     false
                 }
 
             if (!isValidUrl) {
-                errors[ValidationKeys.URL] = "Invalid Slack webhook URL format. It should start with https://hooks.slack.com/services/"
+                errors[ValidationKeys.URL] =
+                    "Invalid Slack webhook URL format. It should start with https://hooks.slack.com/triggers/ or https://hooks.slack.com/services/"
                 Timber.e("Invalid Slack webhook URL format: $url")
             }
 
@@ -93,7 +99,7 @@ class SlackWebhookConfigDataStore
         }
 
         suspend fun getConfig(): AlertMediumConfig.WebhookConfig {
-            val url = webhookUrl.first() ?: ""
+            val url = slackWorkflowWebhookUrl.first() ?: ""
             return AlertMediumConfig.WebhookConfig(url)
         }
     }
