@@ -346,6 +346,14 @@ private fun NotifierConfigInputUi(state: ConfigureNotificationMediumScreen.State
                     onConfigUpdate,
                 )
 
+            NotifierType.SLACK ->
+                WebhookConfigInputUi(
+                    state.alertMediumConfig,
+                    state.configValidationResult,
+                    state.showValidationError,
+                    onConfigUpdate,
+                )
+
             NotifierType.TELEGRAM ->
                 TelegramConfigInputUi(
                     state.alertMediumConfig,
