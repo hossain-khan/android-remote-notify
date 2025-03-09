@@ -6,10 +6,13 @@ import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,6 +39,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewDynamicColors
@@ -62,6 +67,7 @@ import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMedium
 import dev.hossain.remotenotify.worker.DEFAULT_PERIODIC_INTERVAL_MINUTES
 import dev.hossain.remotenotify.worker.sendPeriodicWorkRequest
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
@@ -243,12 +249,29 @@ fun NotificationMediumListUi(
             )
         },
     ) { padding ->
-
         LazyColumn(
             modifier = Modifier.padding(padding),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            // Add a focus requester to the first item
+            // This is a workaround to focus on the first item when screen is loaded
+            // Otherwise the check frequency slider and share feedback was staling focus, resulting in scrolling to bottom
+            item(key = "top-focus") {
+                val focusRequester = remember { FocusRequester() }
+                Box(
+                    modifier =
+                        Modifier
+                            .focusRequester(focusRequester)
+                            .focusable()
+                            .height(1.dp),
+                ) {}
+
+                LaunchedEffect(Unit) {
+                    delay(100)
+                    focusRequester.requestFocus()
+                }
+            }
             items(
                 items = state.notifiers,
                 key = { it.notifierType },
@@ -378,6 +401,11 @@ private fun PreviewNotificationMediumListUi() {
                                 name = "Email",
                                 isConfigured = true,
                                 configPreviewText = "user@example.com",
+                            ),
+                            NotificationMediumListScreen.NotifierMediumInfo(
+                                notifierType = NotifierType.WEBHOOK_SLACK_WORKFLOW,
+                                name = "Slack",
+                                isConfigured = false,
                             ),
                             NotificationMediumListScreen.NotifierMediumInfo(
                                 notifierType = NotifierType.TELEGRAM,
