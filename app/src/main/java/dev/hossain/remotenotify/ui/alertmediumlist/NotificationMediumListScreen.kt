@@ -356,7 +356,7 @@ private fun NotifierCard(
 private fun NotifierType.iconResId(): Int =
     when (this) {
         NotifierType.EMAIL -> R.drawable.mail_24dp
-        NotifierType.SLACK -> R.drawable.slack_logo_outline
+        NotifierType.WEBHOOK_SLACK_WORKFLOW -> R.drawable.slack_logo_outline
         NotifierType.TELEGRAM -> R.drawable.telegram_logo_outline
         NotifierType.TWILIO -> R.drawable.twilio_logo_outline
         NotifierType.WEBHOOK_REST_API -> R.drawable.webhook_24dp

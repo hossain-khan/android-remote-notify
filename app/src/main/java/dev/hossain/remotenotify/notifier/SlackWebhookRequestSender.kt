@@ -26,7 +26,7 @@ class SlackWebhookRequestSender
         private val okHttpClient: OkHttpClient,
         private val alertFormatter: AlertFormatter,
     ) : NotificationSender {
-        override val notifierType: NotifierType = NotifierType.SLACK
+        override val notifierType: NotifierType = NotifierType.WEBHOOK_SLACK_WORKFLOW
 
         override suspend fun sendNotification(remoteAlert: RemoteAlert): Boolean {
             val webhookUrl =

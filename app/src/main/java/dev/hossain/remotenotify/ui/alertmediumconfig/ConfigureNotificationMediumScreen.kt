@@ -346,7 +346,7 @@ private fun NotifierConfigInputUi(state: ConfigureNotificationMediumScreen.State
                     onConfigUpdate,
                 )
 
-            NotifierType.SLACK ->
+            NotifierType.WEBHOOK_SLACK_WORKFLOW ->
                 WebhookConfigInputUi(
                     state.alertMediumConfig,
                     state.configValidationResult,
