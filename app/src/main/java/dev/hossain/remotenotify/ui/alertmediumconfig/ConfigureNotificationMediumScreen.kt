@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -81,7 +83,7 @@ data class ConfigureNotificationMediumScreen constructor(
         /**
          * Sample JSON payload preview, only shown for webhook notifier.
          */
-        val sampleJsonPayload: String,
+        val sampleJsonPayload: List<String>,
         val snackbarMessage: String?,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
@@ -130,11 +132,19 @@ class ConfigureNotificationMediumPresenter
             var shouldShowValidationError by remember { mutableStateOf(false) }
             val sampleJsonPayload by remember {
                 mutableStateOf(
-                    alertFormatter.format(
-                        RemoteAlert.StorageAlert(
-                            storageMinSpaceGb = 5,
+                    listOf(
+                        alertFormatter.format(
+                            RemoteAlert.StorageAlert(
+                                storageMinSpaceGb = 5,
+                            ),
+                            DeviceAlert.FormatType.JSON,
                         ),
-                        DeviceAlert.FormatType.JSON,
+                        alertFormatter.format(
+                            RemoteAlert.BatteryAlert(
+                                batteryPercentage = 12,
+                            ),
+                            DeviceAlert.FormatType.JSON,
+                        ),
                     ),
                 )
             }
@@ -295,6 +305,7 @@ fun ConfigureNotificationMediumUi(
             modifier =
                 Modifier
                     .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
                     .padding(16.dp),
         ) {
             NotifierConfigInputUi(state)
@@ -397,7 +408,9 @@ private fun NotifierConfigSuffixUi(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Text("Sample JSON Payload", style = MaterialTheme.typography.titleSmall)
-                PreformattedCodeBlock(codeBlock = state.sampleJsonPayload, modifier = Modifier.fillMaxWidth())
+                state.sampleJsonPayload.forEach { jsonText ->
+                    PreformattedCodeBlock(codeBlock = jsonText, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
+                }
             }
         }
         else -> {
@@ -419,7 +432,7 @@ private fun PreviewTelegramConfigurationUi() {
                     alertMediumConfig = AlertMediumConfig.TelegramConfig("bot-token", "chat-id"),
                     showValidationError = false,
                     snackbarMessage = null,
-                    sampleJsonPayload = "",
+                    sampleJsonPayload = emptyList(),
                     eventSink = {},
                 ),
         )
@@ -440,7 +453,7 @@ private fun PreviewWebhookConfigurationUi() {
                     alertMediumConfig = AlertMediumConfig.WebhookConfig("https://example.com"),
                     showValidationError = false,
                     snackbarMessage = null,
-                    sampleJsonPayload = SAMPLE_JSON,
+                    sampleJsonPayload = listOf(SAMPLE_JSON),
                     eventSink = {},
                 ),
         )
