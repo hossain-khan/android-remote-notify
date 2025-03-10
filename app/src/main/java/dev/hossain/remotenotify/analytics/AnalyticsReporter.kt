@@ -113,10 +113,19 @@ interface Analytics {
      */
     suspend fun logViewTutorial(isComplete: Boolean)
 
+    /**
+     * Logs event when battery optimization info is shown.
+     */
     suspend fun logOptimizeBatteryInfoShown()
 
+    /**
+     * Logs event when user goes to battery optimization settings.
+     */
     suspend fun logOptimizeBatteryGoToSettings()
 
+    /**
+     * Logs event when user ignores battery optimization.
+     */
     suspend fun logOptimizeBatteryIgnore()
 }
 
