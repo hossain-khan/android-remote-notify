@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
@@ -15,6 +16,7 @@ import dev.hossain.remotenotify.notifier.NotifierType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
+import kotlin.text.toLong
 
 /**
  * Worker to observe device health for supported [AlertType] and send notification if thresholds are met.
@@ -26,6 +28,7 @@ class ObserveDeviceHealthWorker(
     private val storageMonitor: StorageMonitor,
     private val repository: RemoteAlertRepository,
     private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
+    private val analytics: Analytics,
 ) : CoroutineWorker(context, workerParams) {
     companion object {
         private const val WORKER_LOG_TAG = "RA-Worker"
@@ -43,6 +46,12 @@ class ObserveDeviceHealthWorker(
             // Load all alerts from the repository
             val alerts = repository.getAllRemoteAlert()
             Timber.tag(WORKER_LOG_TAG).d("Loaded alerts: $alerts")
+
+            // Log worker job started with alerts count
+            analytics.logWorkerJob(
+                interval = 0, // You might want to pass the actual interval if available
+                alertsCount = alerts.size.toLong(),
+            )
 
             // Check battery and storage levels
             val deviceCurrentBatteryLevel = batteryMonitor.getBatteryLevel()
@@ -91,9 +100,16 @@ class ObserveDeviceHealthWorker(
             // Add tag to track this work
             setProgress(workDataOf(WORK_DATA_KEY_LAST_RUN_TIMESTAMP_MS to System.currentTimeMillis()))
 
+            // Log successful completion
+            analytics.logWorkSuccess()
+
             return Result.success()
         } catch (e: Exception) {
             Timber.tag(WORKER_LOG_TAG).e(e, "Failed to observe device health")
+
+            // Log failure
+            analytics.logWorkFailed(notifierType = null, exception = e)
+
             return Result.failure()
         }
     }
@@ -131,17 +147,24 @@ class ObserveDeviceHealthWorker(
                     Timber.tag(WORKER_LOG_TAG).i("Sending notification with ${notifier.notifierType}")
                     kotlin
                         .runCatching { notifier.sendNotification(remoteAlert) }
-                        .onFailure {
-                            Timber.tag(WORKER_LOG_TAG).e(it)
+                        .onFailure { error: Throwable ->
+                            Timber.tag(WORKER_LOG_TAG).e(error)
+
+                            // Log when alert is failed to send
+                            analytics.logWorkFailed(notifier.notifierType, error)
                         }.onSuccess {
                             saveAlertCheckLog(remoteAlert.alertId, alertType, stateValue, true, notifier.notifierType)
                             Timber.tag(WORKER_LOG_TAG).d("Notifier status: $it")
+
+                            // Log when alert is successfully sent
+                            analytics.logAlertSent(alertType, notifier.notifierType)
                         }
 
                     // Add some delay to avoid spamming the notification
                     delay(10_000)
                 } catch (e: Exception) {
                     Timber.tag(WORKER_LOG_TAG).e(e, "Failed to send notification with ${notifier.notifierType}")
+                    analytics.logWorkFailed(notifier.notifierType, e)
                 }
             }
     }

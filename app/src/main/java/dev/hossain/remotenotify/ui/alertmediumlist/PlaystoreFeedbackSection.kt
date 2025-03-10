@@ -26,7 +26,10 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @Composable
-fun FeedbackAndRequestMediumUi(modifier: Modifier = Modifier) {
+fun FeedbackAndRequestMediumUi(
+    modifier: Modifier = Modifier,
+    onShareFeedback: () -> Unit = {},
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val activity = context as? Activity
@@ -42,6 +45,7 @@ fun FeedbackAndRequestMediumUi(modifier: Modifier = Modifier) {
         OutlinedButton(
             onClick = {
                 activity?.let {
+                    onShareFeedback()
                     scope.launch {
                         InAppReviewManager(it).requestReview()
                     }

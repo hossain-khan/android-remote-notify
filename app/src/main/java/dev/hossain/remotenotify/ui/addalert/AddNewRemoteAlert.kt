@@ -53,15 +53,18 @@ import com.slack.circuit.runtime.CircuitUiState
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
+import com.slack.circuitx.effects.LaunchedImpressionEffect
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
+import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
+import dev.hossain.remotenotify.model.toAlertType
 import dev.hossain.remotenotify.model.toIconResId
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.theme.ComposeAppTheme
@@ -115,6 +118,7 @@ class AddNewRemoteAlertPresenter
         private val remoteAlertRepository: RemoteAlertRepository,
         private val storageMonitor: StorageMonitor,
         private val appPreferencesDataStore: AppPreferencesDataStore,
+        private val analytics: Analytics,
     ) : Presenter<AddNewRemoteAlertScreen.State> {
         @Composable
         override fun present(): AddNewRemoteAlertScreen.State {
@@ -130,10 +134,18 @@ class AddNewRemoteAlertPresenter
             var threshold by remember { mutableIntStateOf(10) }
 
             val availableStorage = remember { storageMonitor.getAvailableStorageInGB().toInt() }
+
+            /**
+             * Round up to nearest 10 for slider max value.
+             */
             val storageSliderMax =
                 remember(availableStorage) {
                     ((availableStorage + 9) / 10) * 10
                 }
+
+            LaunchedImpressionEffect {
+                analytics.logScreenView(AddNewRemoteAlertScreen::class)
+            }
 
             // Update threshold if needed when switching types
             LaunchedEffect(selectedType) {
@@ -176,6 +188,7 @@ class AddNewRemoteAlertPresenter
                 when (event) {
                     is AddNewRemoteAlertScreen.Event.SaveNotification -> {
                         scope.launch {
+                            analytics.logAlertAdded(event.notification.toAlertType())
                             remoteAlertRepository.saveRemoteAlert(event.notification)
                         }
                         navigator.pop()
@@ -185,11 +198,17 @@ class AddNewRemoteAlertPresenter
                     }
                     AddNewRemoteAlertScreen.Event.ShowBatteryOptimizationSheet -> {
                         showBatteryOptimizeSheet = true
+                        scope.launch {
+                            analytics.logOptimizeBatteryInfoShown()
+                        }
                     }
                     AddNewRemoteAlertScreen.Event.DismissBatteryOptimizationSheet -> {
                         showBatteryOptimizeSheet = false
                     }
                     AddNewRemoteAlertScreen.Event.OpenBatterySettings -> {
+                        scope.launch {
+                            analytics.logOptimizeBatteryGoToSettings()
+                        }
                         showBatteryOptimizeSheet = false
                         val intent =
                             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -205,6 +224,7 @@ class AddNewRemoteAlertPresenter
                     }
                     AddNewRemoteAlertScreen.Event.HideBatteryOptimizationReminder -> {
                         scope.launch {
+                            analytics.logOptimizeBatteryIgnore()
                             appPreferencesDataStore.setHideBatteryOptReminder(true)
                         }
                     }

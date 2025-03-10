@@ -37,6 +37,12 @@ internal fun RemoteAlert.toAlertConfigEntity(): AlertConfigEntity =
             )
     }
 
+internal fun RemoteAlert.toAlertType(): AlertType =
+    when (this) {
+        is RemoteAlert.BatteryAlert -> AlertType.BATTERY
+        is RemoteAlert.StorageAlert -> AlertType.STORAGE
+    }
+
 internal fun AlertConfigEntity.toRemoteAlert(): RemoteAlert =
     when (type) {
         AlertType.BATTERY -> RemoteAlert.BatteryAlert(id, batteryPercentage)

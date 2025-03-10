@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.notifier
 
+import androidx.annotation.Keep
 import dev.hossain.remotenotify.di.NotificationSenderModule
 
 /**
@@ -10,6 +11,7 @@ import dev.hossain.remotenotify.di.NotificationSenderModule
  * 2. Create a new class that implements [NotificationSender] interface.
  * 3. Add new class to [NotificationSenderModule] Dagger module.
  */
+@Keep
 enum class NotifierType(
     val displayName: String,
 ) {

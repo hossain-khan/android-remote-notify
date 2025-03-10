@@ -53,10 +53,12 @@ import com.slack.circuit.runtime.CircuitUiState
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
+import com.slack.circuitx.effects.LaunchedImpressionEffect
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
+import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.configPreviewText
@@ -108,6 +110,8 @@ data object NotificationMediumListScreen : Screen {
             val minutes: Long,
         ) : Event()
 
+        data object ShareFeedback : Event()
+
         data object NavigateBack : Event()
     }
 }
@@ -118,6 +122,7 @@ class NotificationMediumListPresenter
         @Assisted private val navigator: Navigator,
         private val appPreferencesDataStore: AppPreferencesDataStore,
         private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
+        private val analytics: Analytics,
     ) : Presenter<NotificationMediumListScreen.State> {
         private val workerIntervalFlow = MutableStateFlow(DEFAULT_PERIODIC_INTERVAL_MINUTES)
 
@@ -128,6 +133,10 @@ class NotificationMediumListPresenter
             val context = LocalContext.current
             // Use remember and mutableStateOf to make the list observable
             var notifierMediumInfoList by remember { mutableStateOf(emptyList<NotificationMediumListScreen.NotifierMediumInfo>()) }
+
+            LaunchedImpressionEffect {
+                analytics.logScreenView(NotificationMediumListScreen::class)
+            }
 
             // Collect worker interval directly from DataStore preferences
             val workerIntervalMinutes by appPreferencesDataStore.workerIntervalFlow
@@ -212,6 +221,12 @@ class NotificationMediumListPresenter
 
                     is NotificationMediumListScreen.Event.OnWorkerIntervalUpdated -> {
                         workerIntervalFlow.value = event.minutes // Trigger debounced update
+                    }
+
+                    NotificationMediumListScreen.Event.ShareFeedback -> {
+                        scope.launch {
+                            analytics.logSendFeedback()
+                        }
                     }
                 }
             }
@@ -301,7 +316,9 @@ fun NotificationMediumListUi(
                 )
             }
             item(key = "bottom-feedback") {
-                FeedbackAndRequestMediumUi()
+                FeedbackAndRequestMediumUi {
+                    state.eventSink(NotificationMediumListScreen.Event.ShareFeedback)
+                }
             }
         }
     }
