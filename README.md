@@ -27,7 +27,7 @@ Tired of your remote Android devices running out of juice 🔋 or storage 💾 w
 Stay in control with notifications via following notifiers:
 * <img src="project-resources/static-res/email-icon.svg" width="15" alt="email"> Email, 
 * <img src="project-resources/static-res/twilio-logo-icon.svg" width="15" alt="Twilio"> Twilio (SMS via API)
-* <img src="project-resources/static-res/slack-logo-icon.svg" width="15" alt="Slack"> Slack
+* <img src="project-resources/static-res/slack-logo-icon.svg" width="15" alt="Slack"> Slack (via Workflow Webhook)
 * <img src="project-resources/static-res/telegram-logo-icon.svg" width="15" alt="Telegram"> Telegram 
 * <img src="project-resources/static-res/webhooks-icon.svg" width="15" alt="Webhook"> REST Webhooks
 
