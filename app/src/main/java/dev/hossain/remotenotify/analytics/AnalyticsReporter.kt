@@ -66,8 +66,8 @@ interface Analytics {
     suspend fun logWorkSuccess()
 
     suspend fun logWorkFailed(
-        notifierType: NotifierType,
-        errorCode: Long = 0L,
+        notifierType: NotifierType?,
+        exception: Throwable? = null,
     )
 
     /**
@@ -127,14 +127,19 @@ class AnalyticsImpl
         }
 
         override suspend fun logWorkFailed(
-            notifierType: NotifierType,
-            errorCode: Long,
+            notifierType: NotifierType?,
+            exception: Throwable?,
         ) {
             firebaseAnalytics.logEvent(EVENT_WORKER_JOB_FAILED) {
                 // The result of an operation (long). Specify 1 to indicate success and 0 to indicate failure.
                 param(FirebaseAnalytics.Param.SUCCESS, 0L)
-                param(FirebaseAnalytics.Param.METHOD, notifierType.name)
-                param("error_code", errorCode)
+                notifierType?.let {
+                    param(FirebaseAnalytics.Param.METHOD, it.name)
+                }
+                exception?.let {
+                    // Max Length of event parameter value: 100 characters
+                    param(FirebaseAnalytics.Param.VALUE, it.message?.take(100) ?: "Unknown error")
+                }
             }
         }
 
