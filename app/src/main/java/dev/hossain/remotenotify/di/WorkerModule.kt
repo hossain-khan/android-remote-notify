@@ -7,6 +7,7 @@ import androidx.work.WorkerParameters
 import com.squareup.anvil.annotations.ContributesTo
 import dagger.Module
 import dagger.Provides
+import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
@@ -23,6 +24,7 @@ object WorkerModule {
         storageMonitor: StorageMonitor,
         repository: RemoteAlertRepository,
         notifiers: Set<@JvmSuppressWildcards NotificationSender>,
+        analytics: Analytics,
     ): WorkerFactory =
         object : WorkerFactory() {
             override fun createWorker(
@@ -43,6 +45,7 @@ object WorkerModule {
                             storageMonitor = storageMonitor,
                             repository = repository,
                             notifiers = notifiers,
+                            analytics = analytics,
                         )
                     else -> null
                 }
