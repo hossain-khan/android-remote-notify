@@ -85,10 +85,12 @@ import com.slack.circuit.runtime.CircuitUiState
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
+import com.slack.circuitx.effects.LaunchedImpressionEffect
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
+import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
@@ -156,6 +158,7 @@ class AlertCheckLogViewerPresenter
         @Assisted private val navigator: Navigator,
         private val appPreferencesDataStore: AppPreferencesDataStore,
         private val remoteAlertRepository: RemoteAlertRepository,
+        private val analytics: Analytics,
     ) : Presenter<AlertCheckLogViewerScreen.State> {
         @Composable
         override fun present(): AlertCheckLogViewerScreen.State {
@@ -165,6 +168,10 @@ class AlertCheckLogViewerPresenter
             var selectedNotifierType by rememberSaveable { mutableStateOf<NotifierType?>(null) }
             var startDate by rememberSaveable { mutableStateOf<Long?>(null) }
             var endDate by rememberSaveable { mutableStateOf<Long?>(null) }
+
+            LaunchedImpressionEffect {
+                analytics.logScreenView(AlertCheckLogViewerScreen::class)
+            }
 
             val checkIntervalMinutes by produceState(0L) {
                 appPreferencesDataStore.workerIntervalFlow.collect {

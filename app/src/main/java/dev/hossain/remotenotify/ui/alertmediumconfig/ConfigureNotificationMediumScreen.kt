@@ -46,9 +46,11 @@ import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.PopResult
 import com.slack.circuit.runtime.screen.Screen
+import com.slack.circuitx.effects.LaunchedImpressionEffect
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.EmailQuotaManager
@@ -122,6 +124,7 @@ class ConfigureNotificationMediumPresenter
         private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
         private val emailQuotaManager: EmailQuotaManager,
         private val alertFormatter: AlertFormatter,
+        private val analytics: Analytics,
     ) : Presenter<ConfigureNotificationMediumScreen.State> {
         @Composable
         override fun present(): ConfigureNotificationMediumScreen.State {
@@ -147,6 +150,10 @@ class ConfigureNotificationMediumPresenter
                         ),
                     ),
                 )
+            }
+
+            LaunchedImpressionEffect {
+                analytics.logScreenView(ConfigureNotificationMediumScreen::class)
             }
 
             val notificationSender = notifiers.of(senderNotifierType = screen.notifierType)

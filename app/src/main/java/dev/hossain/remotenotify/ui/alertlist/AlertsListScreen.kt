@@ -52,10 +52,12 @@ import com.slack.circuit.runtime.CircuitUiState
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
+import com.slack.circuitx.effects.LaunchedImpressionEffect
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
+import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
@@ -119,6 +121,7 @@ class AlertsListPresenter
         private val storageMonitor: StorageMonitor,
         private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
         private val appPreferencesDataStore: AppPreferencesDataStore,
+        private val analytics: Analytics,
     ) : Presenter<AlertsListScreen.State> {
         @Composable
         override fun present(): AlertsListScreen.State {
@@ -128,6 +131,10 @@ class AlertsListPresenter
             val deviceAvailableStorage = remember { storageMonitor.getAvailableStorageInGB() }
             val deviceTotalStorage = remember { storageMonitor.getTotalStorageInGB() }
             var showEducationSheet by remember { mutableStateOf(false) }
+
+            LaunchedImpressionEffect {
+                analytics.logScreenView(AlertsListScreen::class)
+            }
 
             val notifications by produceState<List<RemoteAlert>>(emptyList()) {
                 remoteAlertRepository
