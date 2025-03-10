@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
-import com.google.firebase.FirebaseApp
+import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
@@ -27,7 +27,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,10 +50,14 @@ class ObserveDeviceHealthWorkerTest {
     @MockK
     private lateinit var notificationSender: NotificationSender
 
+    @MockK
+    private lateinit var analytics: Analytics
+
     private lateinit var worker: ObserveDeviceHealthWorker
     private lateinit var context: Context
 
-    companion object { // Use a companion object for static initialization
+    // No longer necessary now that we are using `Timber.uprootAll()`
+    /*companion object { // Use a companion object for static initialization
         private var firebaseInitialized = false
 
         @JvmStatic // Important for JUnit to recognize the @BeforeClass method
@@ -69,7 +72,7 @@ class ObserveDeviceHealthWorkerTest {
                 firebaseInitialized = true
             }
         }
-    }
+    }*/
 
     @Before
     fun setUp() {
@@ -86,13 +89,18 @@ class ObserveDeviceHealthWorkerTest {
         every { notificationSender.notifierType } returns NotifierType.EMAIL
         coEvery { notificationSender.sendNotification(any()) } returns true
 
+        // Mock analytics methods
+        coEvery { analytics.logWorkerJob(any(), any()) } just Runs
+        coEvery { analytics.logWorkSuccess() } just Runs
+        coEvery { analytics.logWorkFailed(any(), any()) } just Runs
+        coEvery { analytics.logAlertSent(any(), any()) } just Runs
+
         // Add this to suppress errors from worker params
         every { workerParameters.runAttemptCount } returns 0
         every { workerParameters.taskExecutor } returns mockk()
         every { workerParameters.id } returns java.util.UUID.randomUUID()
         every { workerParameters.tags } returns setOf()
 
-        // Create worker with mocked dependencies
         worker =
             ObserveDeviceHealthWorker(
                 context = context,
@@ -101,6 +109,7 @@ class ObserveDeviceHealthWorkerTest {
                 storageMonitor = storageMonitor,
                 repository = repository,
                 notifiers = setOf(notificationSender),
+                analytics = analytics,
             )
 
         // Create a spy for the worker and mock setProgress
@@ -316,5 +325,145 @@ class ObserveDeviceHealthWorkerTest {
 
             // Then
             assertEquals(ListenableWorker.Result.failure(), result)
+        }
+
+    @Test
+    fun `doWork logs worker job started`() =
+        runTest {
+            // Given
+            coEvery { repository.getAllRemoteAlert() } returns emptyList()
+            every { batteryMonitor.getBatteryLevel() } returns 80
+            every { storageMonitor.getAvailableStorageInGB() } returns 20L
+
+            // When
+            worker.doWork()
+
+            // Then
+            coVerify { analytics.logWorkerJob(any(), 0L) }
+        }
+
+    @Test
+    fun `doWork logs work success on successful completion`() =
+        runTest {
+            // Given
+            coEvery { repository.getAllRemoteAlert() } returns emptyList()
+            every { batteryMonitor.getBatteryLevel() } returns 80
+            every { storageMonitor.getAvailableStorageInGB() } returns 20L
+
+            // When
+            worker.doWork()
+
+            // Then
+            coVerify { analytics.logWorkSuccess() }
+        }
+
+    @Test
+    fun `doWork logs work failed when exception occurs`() =
+        runTest {
+            // Given
+            coEvery { repository.getAllRemoteAlert() } throws RuntimeException("Test exception")
+
+            // When
+            worker.doWork()
+
+            // Then
+            coVerify { analytics.logWorkFailed(null, any()) }
+        }
+
+    @Test
+    fun `sendNotification logs alert sent when notification successful`() =
+        runTest {
+            // Given
+            val batteryAlert =
+                RemoteAlert.BatteryAlert(
+                    alertId = 1L,
+                    batteryPercentage = 20,
+                )
+
+            // Create a mock notifier that will return success
+            val mockNotifier =
+                mockk<NotificationSender> {
+                    every { notifierType } returns NotifierType.EMAIL
+                    coEvery { hasValidConfig() } returns true
+                    coEvery { sendNotification(any()) } returns true // Ensure it returns success
+                }
+
+            worker =
+                ObserveDeviceHealthWorker(
+                    context = context,
+                    workerParams = workerParameters,
+                    batteryMonitor = batteryMonitor,
+                    storageMonitor = storageMonitor,
+                    repository = repository,
+                    notifiers = setOf(mockNotifier),
+                    analytics = analytics,
+                )
+
+            coEvery { repository.getAllRemoteAlert() } returns listOf(batteryAlert)
+            every { batteryMonitor.getBatteryLevel() } returns 15 // Below threshold
+            every { storageMonitor.getAvailableStorageInGB() } returns 20L
+            coEvery { repository.getLatestCheckForAlert(1L) } returns flowOf(null)
+
+            // Mock the saveAlertCheckLog method since it's referenced in the success path
+            coEvery { repository.insertAlertCheckLog(any(), any(), any(), any(), any()) } returns Unit
+
+            // When
+            worker.doWork()
+
+            // Then
+            coVerify { analytics.logAlertSent(AlertType.BATTERY, NotifierType.EMAIL) }
+        }
+
+    @Test
+    fun `sendNotification logs work failed when notification fails`() =
+        runTest {
+            // Given
+            val batteryAlert =
+                RemoteAlert.BatteryAlert(
+                    alertId = 1L,
+                    batteryPercentage = 20,
+                )
+
+            coEvery { repository.getAllRemoteAlert() } returns listOf(batteryAlert)
+            every { batteryMonitor.getBatteryLevel() } returns 15 // Below threshold
+            every { storageMonitor.getAvailableStorageInGB() } returns 20L
+            coEvery { repository.getLatestCheckForAlert(1L) } returns flowOf(null)
+
+            // Make the notification fail
+            val exception = RuntimeException("Notification failed")
+            coEvery { notificationSender.sendNotification(any()) } throws exception
+
+            // When
+            worker.doWork()
+
+            // Then
+            coVerify { analytics.logWorkFailed(NotifierType.EMAIL, any()) }
+        }
+
+    @Test
+    fun `doWork logs correct alert count in analytics`() =
+        runTest {
+            // Given
+            val batteryAlert =
+                RemoteAlert.BatteryAlert(
+                    alertId = 1L,
+                    batteryPercentage = 20,
+                )
+            val storageAlert =
+                RemoteAlert.StorageAlert(
+                    alertId = 2L,
+                    storageMinSpaceGb = 10,
+                )
+
+            coEvery { repository.getAllRemoteAlert() } returns listOf(batteryAlert, storageAlert)
+            every { batteryMonitor.getBatteryLevel() } returns 80
+            every { storageMonitor.getAvailableStorageInGB() } returns 20L
+            coEvery { repository.getLatestCheckForAlert(any()) } returns flowOf(null)
+
+            // When
+            worker.doWork()
+
+            // Then
+            coVerify { analytics.logWorkerJob(any(), 2L) }
         }
 }
