@@ -199,7 +199,7 @@ class AddNewRemoteAlertPresenter
                     AddNewRemoteAlertScreen.Event.ShowBatteryOptimizationSheet -> {
                         showBatteryOptimizeSheet = true
                         scope.launch {
-                            analytics.logOptimizeBatteryInfoSnown()
+                            analytics.logOptimizeBatteryInfoShown()
                         }
                     }
                     AddNewRemoteAlertScreen.Event.DismissBatteryOptimizationSheet -> {

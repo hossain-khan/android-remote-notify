@@ -42,7 +42,7 @@ interface Analytics {
         internal const val EVENT_CONFIGURE_NOTIFIER_PREFIX = "rn_configure_"
         internal const val EVENT_ALERT_ADDED_PREFIX = "rn_alert_added_"
         internal const val EVENT_ALERT_SENT_USING_PREFIX = "rn_alert_sent_"
-        internal const val EVENT_OPTIMIZE_BATTERY_INFO = "rn_battery_optimize_info"
+        internal const val EVENT_OPTIMIZE_BATTERY_INFO = "rn_battery_optimize_show_info"
         internal const val EVENT_OPTIMIZE_BATTERY_GOTO_SETTINGS = "rn_battery_optimize_go_settings"
         internal const val EVENT_OPTIMIZE_BATTERY_IGNORE = "rn_battery_optimize_ignore"
 
@@ -113,7 +113,7 @@ interface Analytics {
      */
     suspend fun logViewTutorial(isComplete: Boolean)
 
-    suspend fun logOptimizeBatteryInfoSnown()
+    suspend fun logOptimizeBatteryInfoShown()
 
     suspend fun logOptimizeBatteryGoToSettings()
 
@@ -211,7 +211,7 @@ class AnalyticsImpl
             }
         }
 
-        override suspend fun logOptimizeBatteryInfoSnown() {
+        override suspend fun logOptimizeBatteryInfoShown() {
             firebaseAnalytics.logEvent(EVENT_OPTIMIZE_BATTERY_INFO) {}
         }
 

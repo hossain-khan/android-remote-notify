@@ -192,10 +192,12 @@ class ConfigureNotificationMediumPresenter
                             alertMediumConfig?.let { config ->
                                 runCatching {
                                     notificationSender.saveConfig(config)
-                                    navigator.pop(ConfigurationResult.Configured(screen.notifierType))
                                 }.onFailure {
                                     Timber.e(it, "Error saving config: $it")
                                     snackbarMessage = "Unable to save configuration: ${it.message}"
+                                }.onSuccess {
+                                    analytics.logNotifierConfigured(screen.notifierType)
+                                    navigator.pop(ConfigurationResult.Configured(screen.notifierType))
                                 }
                             }
                         }
