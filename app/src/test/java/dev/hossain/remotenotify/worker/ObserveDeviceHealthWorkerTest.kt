@@ -57,6 +57,7 @@ class ObserveDeviceHealthWorkerTest {
     private lateinit var context: Context
 
     // No longer necessary now that we are using `Timber.uprootAll()`
+
     /*companion object { // Use a companion object for static initialization
         private var firebaseInitialized = false
 
