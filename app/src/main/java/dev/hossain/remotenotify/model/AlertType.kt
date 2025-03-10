@@ -1,11 +1,13 @@
 package dev.hossain.remotenotify.model
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.Keep
 import dev.hossain.remotenotify.R
 
 /**
  * Enum class representing the types of device metrics that can trigger an alert.
  */
+@Keep
 enum class AlertType {
     /**
      * Notification type for battery-related alerts.
