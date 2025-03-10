@@ -64,6 +64,7 @@ import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
+import dev.hossain.remotenotify.model.toAlertType
 import dev.hossain.remotenotify.model.toIconResId
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.theme.ComposeAppTheme
@@ -187,6 +188,7 @@ class AddNewRemoteAlertPresenter
                 when (event) {
                     is AddNewRemoteAlertScreen.Event.SaveNotification -> {
                         scope.launch {
+                            analytics.logAlertAdded(event.notification.toAlertType())
                             remoteAlertRepository.saveRemoteAlert(event.notification)
                         }
                         navigator.pop()
@@ -196,11 +198,17 @@ class AddNewRemoteAlertPresenter
                     }
                     AddNewRemoteAlertScreen.Event.ShowBatteryOptimizationSheet -> {
                         showBatteryOptimizeSheet = true
+                        scope.launch {
+                            analytics.logOptimizeBatteryInfoSnown()
+                        }
                     }
                     AddNewRemoteAlertScreen.Event.DismissBatteryOptimizationSheet -> {
                         showBatteryOptimizeSheet = false
                     }
                     AddNewRemoteAlertScreen.Event.OpenBatterySettings -> {
+                        scope.launch {
+                            analytics.logOptimizeBatteryGoToSettings()
+                        }
                         showBatteryOptimizeSheet = false
                         val intent =
                             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -216,6 +224,7 @@ class AddNewRemoteAlertPresenter
                     }
                     AddNewRemoteAlertScreen.Event.HideBatteryOptimizationReminder -> {
                         scope.launch {
+                            analytics.logOptimizeBatteryIgnore()
                             appPreferencesDataStore.setHideBatteryOptReminder(true)
                         }
                     }

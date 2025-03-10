@@ -110,6 +110,8 @@ data object NotificationMediumListScreen : Screen {
             val minutes: Long,
         ) : Event()
 
+        data object ShareFeedback : Event()
+
         data object NavigateBack : Event()
     }
 }
@@ -220,6 +222,12 @@ class NotificationMediumListPresenter
                     is NotificationMediumListScreen.Event.OnWorkerIntervalUpdated -> {
                         workerIntervalFlow.value = event.minutes // Trigger debounced update
                     }
+
+                    NotificationMediumListScreen.Event.ShareFeedback -> {
+                        scope.launch {
+                            analytics.logSendFeedback()
+                        }
+                    }
                 }
             }
         }
@@ -308,7 +316,9 @@ fun NotificationMediumListUi(
                 )
             }
             item(key = "bottom-feedback") {
-                FeedbackAndRequestMediumUi()
+                FeedbackAndRequestMediumUi {
+                    state.eventSink(NotificationMediumListScreen.Event.ShareFeedback)
+                }
             }
         }
     }

@@ -206,6 +206,7 @@ class AlertsListPresenter
                         Timber.d("Dismiss the first time user education dialog shown")
                         scope.launch {
                             showEducationSheet = false
+                            analytics.logViewTutorial(isComplete = true)
                             appPreferencesDataStore.markEducationDialogShown()
                         }
                     }
@@ -214,6 +215,7 @@ class AlertsListPresenter
                         Timber.d("Showing the first time user education dialog shown")
                         scope.launch {
                             showEducationSheet = true
+                            analytics.logViewTutorial(isComplete = false)
                             appPreferencesDataStore.markEducationDialogShown()
                         }
                     }

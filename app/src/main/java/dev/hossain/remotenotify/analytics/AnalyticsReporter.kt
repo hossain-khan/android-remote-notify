@@ -7,6 +7,9 @@ import com.google.firebase.analytics.logEvent
 import com.slack.circuit.runtime.screen.Screen
 import com.squareup.anvil.annotations.ContributesBinding
 import com.squareup.anvil.annotations.optional.SingleIn
+import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_GOTO_SETTINGS
+import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_IGNORE
+import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_INFO
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_SEND_APP_FEEDBACK
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_WORKER_JOB_COMPLETED
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_WORKER_JOB_FAILED
@@ -39,6 +42,9 @@ interface Analytics {
         internal const val EVENT_CONFIGURE_NOTIFIER_PREFIX = "rn_configure_"
         internal const val EVENT_ALERT_ADDED_PREFIX = "rn_alert_added_"
         internal const val EVENT_ALERT_SENT_USING_PREFIX = "rn_alert_sent_"
+        internal const val EVENT_OPTIMIZE_BATTERY_INFO = "rn_battery_optimize_info"
+        internal const val EVENT_OPTIMIZE_BATTERY_GOTO_SETTINGS = "rn_battery_optimize_go_settings"
+        internal const val EVENT_OPTIMIZE_BATTERY_IGNORE = "rn_battery_optimize_ignore"
 
         // NOTE: Instead of event property, I am using unique event name for each notifier and alert type.
         internal fun NotifierType.eventConfigureNotifier() = "$EVENT_CONFIGURE_NOTIFIER_PREFIX${name.lowercase(locale = Locale.US)}"
@@ -75,16 +81,43 @@ interface Analytics {
      */
     suspend fun logSendFeedback()
 
+    /**
+     * Logs event when a new notifier/sender is configured.
+     *
+     * @param notifierType The type of notifier that was configured.
+     */
     suspend fun logNotifierConfigured(notifierType: NotifierType)
 
+    /**
+     * Logs event when an alert is added.
+     *
+     * @param alertType The type of alert that was added.
+     */
     suspend fun logAlertAdded(alertType: AlertType)
 
+    /**
+     * Logs event when an alert is sent.
+     *
+     * @param alertType The type of alert that was sent.
+     * @param notifierType The type of notifier used to send the alert.
+     */
     suspend fun logAlertSent(
         alertType: AlertType,
         notifierType: NotifierType,
     )
 
+    /**
+     * Logs event when a tutorial is viewed.
+     *
+     * @param isComplete Indicates whether the tutorial was completed.
+     */
     suspend fun logViewTutorial(isComplete: Boolean)
+
+    suspend fun logOptimizeBatteryInfoSnown()
+
+    suspend fun logOptimizeBatteryGoToSettings()
+
+    suspend fun logOptimizeBatteryIgnore()
 }
 
 /**
@@ -176,5 +209,17 @@ class AnalyticsImpl
             } else {
                 firebaseAnalytics.logEvent(FirebaseAnalytics.Event.TUTORIAL_BEGIN) {}
             }
+        }
+
+        override suspend fun logOptimizeBatteryInfoSnown() {
+            firebaseAnalytics.logEvent(EVENT_OPTIMIZE_BATTERY_INFO) {}
+        }
+
+        override suspend fun logOptimizeBatteryGoToSettings() {
+            firebaseAnalytics.logEvent(EVENT_OPTIMIZE_BATTERY_GOTO_SETTINGS) {}
+        }
+
+        override suspend fun logOptimizeBatteryIgnore() {
+            firebaseAnalytics.logEvent(EVENT_OPTIMIZE_BATTERY_IGNORE) {}
         }
     }
