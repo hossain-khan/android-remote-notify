@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,14 +48,17 @@ import com.slack.circuit.runtime.CircuitUiState
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
+import com.slack.circuitx.effects.LaunchedImpressionEffect
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.BuildConfig
 import dev.hossain.remotenotify.R
+import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertlist.AppUsageEducationSheetUi
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -80,11 +84,17 @@ class AboutAppPresenter
     @AssistedInject
     constructor(
         @Assisted private val navigator: Navigator,
+        private val analytics: Analytics,
     ) : Presenter<AboutAppScreen.State> {
         @Composable
         override fun present(): AboutAppScreen.State {
             val uriHandler = LocalUriHandler.current
+            val scope = rememberCoroutineScope()
             var showEducationSheet by remember { mutableStateOf(false) }
+
+            LaunchedImpressionEffect {
+                analytics.logScreenView(AboutAppScreen::class)
+            }
 
             val appVersion =
                 buildString {
@@ -110,10 +120,16 @@ class AboutAppPresenter
 
                     AboutAppScreen.Event.OpenLearnMoreSheet -> {
                         showEducationSheet = true
+                        scope.launch {
+                            analytics.logViewTutorial(isComplete = false)
+                        }
                     }
 
                     AboutAppScreen.Event.DismissLearnMoreSheet -> {
                         showEducationSheet = false
+                        scope.launch {
+                            analytics.logViewTutorial(isComplete = true)
+                        }
                     }
                 }
             }

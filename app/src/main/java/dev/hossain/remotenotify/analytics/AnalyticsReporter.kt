@@ -83,6 +83,8 @@ interface Analytics {
         alertType: AlertType,
         notifierType: NotifierType,
     )
+
+    suspend fun logViewTutorial(isComplete: Boolean)
 }
 
 /**
@@ -157,5 +159,17 @@ class AnalyticsImpl
 
         override suspend fun logSendFeedback() {
             firebaseAnalytics.logEvent(EVENT_SEND_APP_FEEDBACK) {}
+        }
+
+        /**
+         * - https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics.Event#TUTORIAL_BEGIN()
+         * - https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics.Event#TUTORIAL_COMPLETE()
+         */
+        override suspend fun logViewTutorial(isComplete: Boolean) {
+            if (isComplete) {
+                firebaseAnalytics.logEvent(FirebaseAnalytics.Event.TUTORIAL_COMPLETE) {}
+            } else {
+                firebaseAnalytics.logEvent(FirebaseAnalytics.Event.TUTORIAL_BEGIN) {}
+            }
         }
     }
