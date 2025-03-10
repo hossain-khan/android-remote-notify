@@ -3,7 +3,7 @@ package dev.hossain.remotenotify.utils
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import timber.log.Timber
 
 object PlayStoreUtils {
@@ -18,7 +18,7 @@ object PlayStoreUtils {
             context.startActivity(
                 Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse("market://details?id=$packageName"),
+                    "market://details?id=$packageName".toUri(),
                 ).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 },
@@ -29,7 +29,7 @@ object PlayStoreUtils {
             context.startActivity(
                 Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse("https://play.google.com/store/apps/details?id=$packageName"),
+                    "https://play.google.com/store/apps/details?id=$packageName".toUri(),
                 ).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 },

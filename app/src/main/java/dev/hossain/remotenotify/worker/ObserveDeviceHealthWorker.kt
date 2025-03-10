@@ -29,6 +29,12 @@ class ObserveDeviceHealthWorker(
 ) : CoroutineWorker(context, workerParams) {
     companion object {
         private const val WORKER_LOG_TAG = "RA-Worker"
+
+        /**
+         * Key to store last run timestamp in work data that is shown in the work info.
+         * @see dev.hossain.remotenotify.model.WorkerStatus
+         */
+        internal const val WORK_DATA_KEY_LAST_RUN_TIMESTAMP_MS = "last_run_timestamp_ms"
     }
 
     override suspend fun doWork(): Result {
@@ -83,7 +89,7 @@ class ObserveDeviceHealthWorker(
             }
 
             // Add tag to track this work
-            setProgress(workDataOf("last_run_timestamp_ms" to System.currentTimeMillis()))
+            setProgress(workDataOf(WORK_DATA_KEY_LAST_RUN_TIMESTAMP_MS to System.currentTimeMillis()))
 
             return Result.success()
         } catch (e: Exception) {
@@ -99,6 +105,7 @@ class ObserveDeviceHealthWorker(
         stateValue: Int,
     ) {
         if (triggered) {
+            Timber.tag(WORKER_LOG_TAG).d("Notification threshold met. Sending: $alert for $alertType")
             sendNotification(alert, alertType, stateValue)
         } else {
             Timber.tag(WORKER_LOG_TAG).d("Notification threshold not met. Not sending: $alert for $alertType")
