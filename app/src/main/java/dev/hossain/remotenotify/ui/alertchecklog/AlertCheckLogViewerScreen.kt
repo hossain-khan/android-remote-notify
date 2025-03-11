@@ -101,7 +101,6 @@ import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.formatDateTime
 import dev.hossain.remotenotify.utils.formatDuration
 import dev.hossain.remotenotify.utils.formatTimeElapsed
-import dev.hossain.remotenotify.utils.toTitleCase
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.text.SimpleDateFormat
@@ -795,7 +794,7 @@ private fun LogItemCard(
                         Text(
                             text =
                                 if (log.isAlertSent) {
-                                    "Alert triggered & sent via ${log.notifierType?.name?.toTitleCase() ?: "N/A"}"
+                                    "Alert triggered & sent via ${log.notifierType?.displayName ?: "N/A"}"
                                 } else {
                                     "Alert not triggered"
                                 },
