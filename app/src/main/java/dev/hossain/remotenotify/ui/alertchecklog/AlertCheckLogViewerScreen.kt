@@ -101,7 +101,6 @@ import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.formatDateTime
 import dev.hossain.remotenotify.utils.formatDuration
 import dev.hossain.remotenotify.utils.formatTimeElapsed
-import dev.hossain.remotenotify.utils.toTitleCase
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.text.SimpleDateFormat
