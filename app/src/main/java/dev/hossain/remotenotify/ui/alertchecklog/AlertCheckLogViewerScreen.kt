@@ -795,7 +795,7 @@ private fun LogItemCard(
                         Text(
                             text =
                                 if (log.isAlertSent) {
-                                    "Alert triggered & sent via ${log.notifierType?.name?.toTitleCase() ?: "N/A"}"
+                                    "Alert triggered & sent via ${log.notifierType?.displayName ?: "N/A"}"
                                 } else {
                                     "Alert not triggered"
                                 },
