@@ -16,7 +16,6 @@ import dev.hossain.remotenotify.notifier.NotifierType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
-import kotlin.text.toLong
 
 /**
  * Worker to observe device health for supported [AlertType] and send notification if thresholds are met.
@@ -44,13 +43,13 @@ class ObserveDeviceHealthWorker(
         Timber.tag(WORKER_LOG_TAG).i("Schedule worker has started the job.")
         try {
             // Load all alerts from the repository
-            val alerts = repository.getAllRemoteAlert()
-            Timber.tag(WORKER_LOG_TAG).d("Loaded alerts: $alerts")
+            val userConfiguredAlerts = repository.getAllRemoteAlert()
+            Timber.tag(WORKER_LOG_TAG).d("Loaded alerts: $userConfiguredAlerts")
 
             // Log worker job started with alerts count
             analytics.logWorkerJob(
                 interval = 0, // You might want to pass the actual interval if available
-                alertsCount = alerts.size.toLong(),
+                alertsCount = userConfiguredAlerts.size.toLong(),
             )
 
             // Check battery and storage levels
@@ -61,8 +60,8 @@ class ObserveDeviceHealthWorker(
             Timber.tag(WORKER_LOG_TAG).d("Available storage: $deviceCurrentAvailableStorage")
 
             // Send notifications if thresholds are met
-            alerts.forEach { alert: RemoteAlert ->
-                val lastAlertLog: AlertCheckLog? = repository.getLatestCheckForAlert(alert.alertId).first()
+            userConfiguredAlerts.forEach { userConfiguredAlert: RemoteAlert ->
+                val lastAlertLog: AlertCheckLog? = repository.getLatestCheckForAlert(userConfiguredAlert.alertId).first()
 
                 // Skip if last alert was triggered within 24 hours
                 if (lastAlertLog?.isAlertSent == true) {
@@ -75,20 +74,20 @@ class ObserveDeviceHealthWorker(
                     }
                 }
 
-                when (alert) {
+                when (userConfiguredAlert) {
                     is RemoteAlert.BatteryAlert -> {
-                        val triggered = deviceCurrentBatteryLevel <= alert.batteryPercentage
+                        val triggered = deviceCurrentBatteryLevel <= userConfiguredAlert.batteryPercentage
                         checkAndProcessAlert(
-                            alert = alert,
+                            userConfiguredAlert = userConfiguredAlert,
                             triggered = triggered,
                             alertType = AlertType.BATTERY,
                             stateValue = deviceCurrentBatteryLevel,
                         )
                     }
                     is RemoteAlert.StorageAlert -> {
-                        val triggered = deviceCurrentAvailableStorage <= alert.storageMinSpaceGb
+                        val triggered = deviceCurrentAvailableStorage <= userConfiguredAlert.storageMinSpaceGb
                         checkAndProcessAlert(
-                            alert = alert,
+                            userConfiguredAlert = userConfiguredAlert,
                             triggered = triggered,
                             alertType = AlertType.STORAGE,
                             stateValue = deviceCurrentAvailableStorage.toInt(),
@@ -115,17 +114,17 @@ class ObserveDeviceHealthWorker(
     }
 
     private suspend fun checkAndProcessAlert(
-        alert: RemoteAlert,
+        userConfiguredAlert: RemoteAlert,
         triggered: Boolean,
         alertType: AlertType,
         stateValue: Int,
     ) {
         if (triggered) {
-            Timber.tag(WORKER_LOG_TAG).d("Notification threshold met. Sending: $alert for $alertType")
-            sendNotification(alert, alertType, stateValue)
+            Timber.tag(WORKER_LOG_TAG).d("Notification threshold met. Sending: $userConfiguredAlert for $alertType")
+            sendNotification(userConfiguredAlert, alertType, stateValue)
         } else {
-            Timber.tag(WORKER_LOG_TAG).d("Notification threshold not met. Not sending: $alert for $alertType")
-            saveAlertCheckLog(alert.alertId, alertType, stateValue, false, null)
+            Timber.tag(WORKER_LOG_TAG).d("Notification threshold not met. Not sending: $userConfiguredAlert for $alertType")
+            saveAlertCheckLog(userConfiguredAlert.alertId, alertType, stateValue, false, null)
         }
     }
 
@@ -145,8 +144,24 @@ class ObserveDeviceHealthWorker(
             .forEach { notifier ->
                 try {
                     Timber.tag(WORKER_LOG_TAG).i("Sending notification with ${notifier.notifierType}")
+
+                    // Update the alert with the current state value for the user notification
+                    val triggeredRemoteAlert =
+                        when (remoteAlert) {
+                            is RemoteAlert.BatteryAlert ->
+                                RemoteAlert.BatteryAlert(
+                                    alertId = remoteAlert.alertId,
+                                    batteryPercentage = stateValue,
+                                )
+                            is RemoteAlert.StorageAlert ->
+                                RemoteAlert.StorageAlert(
+                                    alertId = remoteAlert.alertId,
+                                    storageMinSpaceGb = stateValue,
+                                )
+                        }
+
                     kotlin
-                        .runCatching { notifier.sendNotification(remoteAlert) }
+                        .runCatching { notifier.sendNotification(triggeredRemoteAlert) }
                         .onFailure { error: Throwable ->
                             Timber.tag(WORKER_LOG_TAG).e(error)
 
