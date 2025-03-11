@@ -10,6 +10,15 @@
 
 -----------------------------------------------------------------------------
 
+## Release v1.12.1
+- Initial 1.x release of 'Remote Notify'! 🎉
+- Monitor battery 🔋 and storage 💾 levels of your remote Android devices.
+- Set up custom alerts and receive notifications via Email, Twilio SMS, Slack, Telegram, and REST webhooks.
+- Added alert check log viewer with filtering to diagnose issues.
+- 🆕 Added Slack 💬 workflow webhook integration for notifications.
+- 🆕 Added some basic analytics 📊 to track user engagement and app usage.
+- 💥 Minor bug fixes and UI/UX improvements.
+
 ## Release v1.12
 - Initial 1.x release of 'Remote Notify'! 🎉
 - Monitor battery 🔋 and storage 💾 levels of your remote Android devices.

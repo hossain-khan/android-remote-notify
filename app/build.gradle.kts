@@ -26,7 +26,7 @@ android {
         targetSdk = 35
         versionCode = 15
         // 📣 Don't forget to update release notes! 🤓
-        versionName = "1.13"
+        versionName = "1.12.1"
 
         // Read key or other properties from local.properties
         val localProperties =
