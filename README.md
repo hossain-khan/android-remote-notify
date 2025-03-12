@@ -32,7 +32,7 @@ Stay in control with notifications via following notifiers:
 * <img src="project-resources/static-res/webhooks-icon.svg" width="15" alt="Webhook"> REST Webhooks
 
 ### Demo 📽️
-Here is what you might expect when notification gets triggers. In this demo, I have used telegram bot to notify me! 📥
+Here is what you might expect when notification gets triggers. In this demo, I have used Telegram, Email and Slack notify me! 📥
 
 <img src="https://github.com/user-attachments/assets/0ad9c4d1-94ca-42e0-a81f-fed56bcbe959#gh-light-mode-only" width="260" alt="Telegram Screenshot with Notification"> 
 <img src="https://github.com/user-attachments/assets/ae35b0f7-2c3c-4026-86f4-10c08054eb10#gh-dark-mode-only" width="260" alt="Telegram Screenshot with Notification"> 
