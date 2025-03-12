@@ -32,9 +32,12 @@ Stay in control with notifications via following notifiers:
 * <img src="project-resources/static-res/webhooks-icon.svg" width="15" alt="Webhook"> REST Webhooks
 
 ### Demo 📽️
-Here is what you might expect when notification gets triggers. In this demo, I have used telegram bot to notify me! 📥
+Here is what you might expect when notification gets triggers. In this demo, I have used Telegram, Email and Slack notify me! 📥
 
-<img src="https://github.com/user-attachments/assets/0ad9c4d1-94ca-42e0-a81f-fed56bcbe959#gh-light-mode-only" width="300" alt="Telegram Screenshot with Notification"> 
-<img src="https://github.com/user-attachments/assets/ae35b0f7-2c3c-4026-86f4-10c08054eb10#gh-dark-mode-only" width="300" alt="Telegram Screenshot with Notification"> 
-<img src="https://github.com/user-attachments/assets/ce7dce0f-92bb-4375-8585-8a84646774a0#gh-light-mode-only" width="300" alt="Email Screenshot with Notification"> 
-<img src="https://github.com/user-attachments/assets/221579a5-7078-43ef-8d59-f1c0ae2be06b#gh-dark-mode-only" width="300" alt="Email Screenshot with Notification"> 
+<img src="https://github.com/user-attachments/assets/0ad9c4d1-94ca-42e0-a81f-fed56bcbe959#gh-light-mode-only" width="260" alt="Telegram Screenshot with Notification"> 
+<img src="https://github.com/user-attachments/assets/ae35b0f7-2c3c-4026-86f4-10c08054eb10#gh-dark-mode-only" width="260" alt="Telegram Screenshot with Notification"> 
+<img src="https://github.com/user-attachments/assets/ce7dce0f-92bb-4375-8585-8a84646774a0#gh-light-mode-only" width="260" alt="Email Screenshot with Notification"> 
+<img src="https://github.com/user-attachments/assets/221579a5-7078-43ef-8d59-f1c0ae2be06b#gh-dark-mode-only" width="260" alt="Email Screenshot with Notification"> 
+<img src="https://github.com/user-attachments/assets/d78fc6ef-c91a-4fb7-866a-3df2c3c6ff7b#gh-light-mode-only" width="260" alt="Slack Screenshot with Notification"> 
+<img src="https://github.com/user-attachments/assets/e498e751-29b5-4ac5-9472-c123f33d8cc2#gh-dark-mode-only" width="260" alt="Slack Screenshot with Notification">
+
