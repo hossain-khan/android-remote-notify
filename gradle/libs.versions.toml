@@ -74,7 +74,7 @@ moshi = "1.15.2"
 
 # Navigation for Jetpack Compose
 # https://developer.android.com/develop/ui/compose/navigation
-navigationCompose = "2.8.8"
+navigationCompose = "2.8.9"
 
 # Http client for Android
 # https://square.github.io/okhttp/
