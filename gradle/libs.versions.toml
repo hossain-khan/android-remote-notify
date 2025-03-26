@@ -24,7 +24,7 @@ coroutinesTest = "1.10.1"
 # https://dagger.dev/dev-guide/ksp
 dagger = "2.55"
 
-dataStore = "1.1.3"
+dataStore = "1.1.4"
 
 # API result type for modeling network API responses.
 # https://github.com/slackhq/EitherNet
