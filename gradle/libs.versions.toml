@@ -59,7 +59,7 @@ mockk = "1.13.17"
 kotlinter = "5.0.1"
 
 kotlinxSerializationJson = "1.8.0"
-kotlinxSerializationProperties = "1.8.0"
+kotlinxSerializationProperties = "1.8.1"
 
 # Kotlin Symbol Processing API
 # https://kotlinlang.org/docs/ksp-overview.html
