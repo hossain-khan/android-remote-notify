@@ -5,7 +5,9 @@ activityCompose = "1.10.1"
 # https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive
 adaptiveAndroid = "1.1.0"
 
-agp = "8.9.1"
+# Android Studio version and AGP version compatibility
+# https://developer.android.com/studio/releases#android_gradle_plugin_and_android_studio_compatibility
+agp = "8.8.2"
 
 # Forked Anvil
 # https://github.com/ZacSweers/anvil
