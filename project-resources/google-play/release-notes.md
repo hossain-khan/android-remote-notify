@@ -16,7 +16,6 @@
 - Set up custom alerts and receive notifications via Email, Twilio SMS, Slack, Telegram, and REST webhooks.
 - Added alert check log viewer with filtering to diagnose issues.
 - 🆕 Added Slack 💬 workflow webhook integration for notifications.
-- 🆕 Added some basic analytics 📊 to track user engagement and app usage.
 - ⚒️ Maintenance - updated libraries.
 
 ## Release v1.12.1
