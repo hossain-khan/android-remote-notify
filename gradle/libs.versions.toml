@@ -58,7 +58,7 @@ mockk = "1.13.17"
 # https://github.com/pinterest/ktlint
 kotlinter = "5.0.1"
 
-kotlinxSerializationJson = "1.8.0"
+kotlinxSerializationJson = "1.8.1"
 kotlinxSerializationProperties = "1.8.1"
 
 # Kotlin Symbol Processing API
