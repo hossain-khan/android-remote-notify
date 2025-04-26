@@ -93,7 +93,7 @@ testCore = "1.6.1"
 timber = "5.0.1"
 
 # https://developer.android.com/jetpack/androidx/releases/work
-workManager = "2.10.0"
+workManager = "2.10.1"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
