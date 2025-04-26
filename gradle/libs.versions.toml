@@ -85,7 +85,7 @@ retrofit = "2.11.0"
 
 # Room Database
 # https://developer.android.com/training/data-storage/room
-roomDb = "2.6.1"
+roomDb = "2.7.1"
 
 testCore = "1.6.1"
 
