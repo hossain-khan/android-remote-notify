@@ -35,7 +35,7 @@ espressoCore = "3.6.1"
 firebaseBom = "33.12.0"
 
 # https://developer.android.com/develop/ui/compose/text/fonts
-googleFonts = "1.7.8"
+googleFonts = "1.8.0"
 
 googlePlayReview = "2.0.2"
 
