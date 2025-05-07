@@ -68,7 +68,7 @@ kotlinxSerializationProperties = "1.8.1"
 # https://github.com/google/ksp/releases
 ksp = "2.1.10-1.0.31"
 
-lifecycleRuntimeKtx = "2.8.7"
+lifecycleRuntimeKtx = "2.9.0"
 
 # A modern JSON library for Kotlin and Java.
 # https://github.com/square/moshi
