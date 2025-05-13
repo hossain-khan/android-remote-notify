@@ -49,7 +49,7 @@ junitKtx = "1.2.1"
 # https://developer.android.com/jetpack/androidx/releases/test
 junitVersion = "1.2.1"
 
-kotlin = "2.1.10"
+kotlin = "2.1.21"
 
 # MockK mocking library for Kotlin
 # https://mockk.io
