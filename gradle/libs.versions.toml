@@ -81,7 +81,7 @@ navigationCompose = "2.9.0"
 # Http client for Android
 # https://square.github.io/okhttp/
 okhttp = "4.12.0"
-retrofit = "2.12.0"
+retrofit = "3.0.0"
 
 # Room Database
 # https://developer.android.com/training/data-storage/room
