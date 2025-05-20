@@ -32,7 +32,7 @@ dataStore = "1.1.6"
 # https://github.com/slackhq/EitherNet
 eithernet = "2.0.0"
 espressoCore = "3.6.1"
-firebaseBom = "33.13.0"
+firebaseBom = "33.14.0"
 
 # https://developer.android.com/develop/ui/compose/text/fonts
 googleFonts = "1.8.1"
