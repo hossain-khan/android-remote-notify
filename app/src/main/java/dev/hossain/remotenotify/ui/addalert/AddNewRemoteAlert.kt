@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.ui.addalert
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -62,6 +63,7 @@ import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.di.AppScope
+import dev.hossain.remotenotify.di.ApplicationContext
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.toAlertType
@@ -115,6 +117,7 @@ class AddNewRemoteAlertPresenter
     @AssistedInject
     constructor(
         @Assisted private val navigator: Navigator,
+        @ApplicationContext private val context: Context,
         private val remoteAlertRepository: RemoteAlertRepository,
         private val storageMonitor: StorageMonitor,
         private val appPreferencesDataStore: AppPreferencesDataStore,
@@ -123,7 +126,7 @@ class AddNewRemoteAlertPresenter
         @Composable
         override fun present(): AddNewRemoteAlertScreen.State {
             val scope = rememberCoroutineScope()
-            val context = LocalContext.current
+            //val context = LocalContext.current
             var showBatteryOptimizeSheet by remember { mutableStateOf(false) }
             var isBatteryOptimized by remember {
                 mutableStateOf(BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context))

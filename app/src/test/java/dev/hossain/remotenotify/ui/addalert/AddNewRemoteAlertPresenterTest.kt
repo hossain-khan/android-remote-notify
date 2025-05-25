@@ -11,18 +11,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import app.cash.molecule.RecompositionClock
+import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.slack.circuit.runtime.Navigator
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
-import dev.hossain.remotenotify.data.RemoteAlert
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.model.AlertType
-import dev.hossain.remotenotify.platform.BatteryOptimizationHelper
-import dev.hossain.remotenotify.platform.StorageMonitor
+import dev.hossain.remotenotify.model.RemoteAlert
+import dev.hossain.remotenotify.monitor.StorageMonitor
+import dev.hossain.remotenotify.utils.BatteryOptimizationHelper
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -76,7 +77,7 @@ class AddNewRemoteAlertPresenterTest {
         // Mock static LocalContext.current to return our mockContext
         // This is needed because the presenter uses LocalContext.current
         mockkStatic(LocalContext::class)
-        every { LocalContext.current } returns mockContext
+        //every { LocalContext.current } returns mockContext
 
         // Mock Android's Settings class for intent actions
         mockkStatic(Settings::class)
@@ -91,8 +92,8 @@ class AddNewRemoteAlertPresenterTest {
         // Mock PowerManager service
         every { mockContext.getSystemService(Context.POWER_SERVICE) } returns mockPowerManager
 
-        // Default mock for appPreferencesDataStore.hideBatteryOptReminder()
-        coEvery { appPreferencesDataStore.hideBatteryOptReminder() } returns flowOf(false)
+        // Default mock for appPreferencesDataStore.hideBatteryOptReminder
+        coEvery { appPreferencesDataStore.hideBatteryOptReminder } returns flowOf(false)
 
         // Setup lifecycle for DisposableEffect testing
         lifecycleOwner = mockk()
@@ -105,30 +106,30 @@ class AddNewRemoteAlertPresenterTest {
         unmockkAll() // Unmock all static and regular mocks
     }
 
-    private fun createPresenter(testLifecycleOwner: LifecycleOwner = lifecycleOwner): @Composable () -> AddNewRemoteAlertState {
+    private fun createPresenter(testLifecycleOwner: LifecycleOwner = lifecycleOwner): @Composable () -> AddNewRemoteAlertScreen.State {
         return {
             AddNewRemoteAlertPresenter(
+                context = mockContext,
                 navigator = navigator,
-                repository = remoteAlertRepository,
+                remoteAlertRepository = remoteAlertRepository,
                 storageMonitor = storageMonitor,
-                appPreferences = appPreferencesDataStore,
+                appPreferencesDataStore = appPreferencesDataStore,
                 analytics = analytics,
-                lifecycleOwner = testLifecycleOwner
-            )
+            ).present()
         }
     }
 
     @Test
     fun `initial state is correctly set when battery is NOT optimized`() = runTest {
-        val availableStorageGb = 25
+        val availableStorageGb = 25L
         coEvery { storageMonitor.getAvailableStorageInGB() } returns availableStorageGb
-        coEvery { appPreferencesDataStore.hideBatteryOptReminder() } returns flowOf(false)
+        coEvery { appPreferencesDataStore.hideBatteryOptReminder } returns flowOf(false)
         every { BatteryOptimizationHelper.isIgnoringBatteryOptimizations(mockContext) } returns false
 
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
-            val state = awaitItem()
+            val state: AddNewRemoteAlertScreen.State = awaitItem()
             assertThat(state.showBatteryOptSheet).isFalse()
             assertThat(state.isBatteryOptimized).isFalse()
             assertThat(state.selectedAlertType).isEqualTo(AlertType.BATTERY)
@@ -138,19 +139,19 @@ class AddNewRemoteAlertPresenterTest {
             assertThat(state.hideBatteryOptReminder).isFalse()
 
             coVerify { storageMonitor.getAvailableStorageInGB() }
-            coVerify { appPreferencesDataStore.hideBatteryOptReminder() }
+            coVerify { appPreferencesDataStore.hideBatteryOptReminder }
             verify { BatteryOptimizationHelper.isIgnoringBatteryOptimizations(mockContext) }
         }
     }
 
     @Test
     fun `initial state is correctly set when battery IS optimized`() = runTest {
-        val availableStorageGb = 30
+        val availableStorageGb = 30L
         coEvery { storageMonitor.getAvailableStorageInGB() } returns availableStorageGb
-        coEvery { appPreferencesDataStore.hideBatteryOptReminder() } returns flowOf(true) // Different value
+        coEvery { appPreferencesDataStore.hideBatteryOptReminder } returns flowOf(true) // Different value
         every { BatteryOptimizationHelper.isIgnoringBatteryOptimizations(mockContext) } returns true
 
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
             val state = awaitItem()
@@ -166,17 +167,17 @@ class AddNewRemoteAlertPresenterTest {
 
     @Test
     fun `event SaveNotification for BatteryAlert saves alert, logs analytics, and navigates back`() = runTest {
-        val batteryAlert = RemoteAlert.BatteryAlert(conditionId = "battery_low", threshold = 15, isEnabled = true)
+        val batteryAlert = RemoteAlert.BatteryAlert(alertId = 1L, batteryPercentage = 12)
         coEvery { storageMonitor.getAvailableStorageInGB() } returns 100 // Needs to be mocked for initial state
 
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
-            val state = awaitItem() // Consume initial state
+            val state: AddNewRemoteAlertScreen.State = awaitItem() // Consume initial state
 
-            state.eventSink(AddNewRemoteAlertScreenEvent.SaveNotification(batteryAlert))
+            state.eventSink(AddNewRemoteAlertScreen.Event.SaveNotification(batteryAlert))
 
-            coVerify { analytics.logAlertAdded(batteryAlert.type, batteryAlert.threshold) }
+            coVerify { analytics.logAlertAdded(AlertType.BATTERY) }
             coVerify { remoteAlertRepository.saveRemoteAlert(batteryAlert) }
             coVerify { navigator.pop() }
         }
@@ -184,17 +185,17 @@ class AddNewRemoteAlertPresenterTest {
 
     @Test
     fun `event SaveNotification for StorageAlert saves alert, logs analytics, and navigates back`() = runTest {
-        val storageAlert = RemoteAlert.StorageAlert(conditionId = "storage_low", threshold = 5, isEnabled = true)
+        val storageAlert = RemoteAlert.StorageAlert(alertId = 1, storageMinSpaceGb = 10)
         coEvery { storageMonitor.getAvailableStorageInGB() } returns 100
 
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
             val state = awaitItem()
 
-            state.eventSink(AddNewRemoteAlertScreenEvent.SaveNotification(storageAlert))
+            state.eventSink(AddNewRemoteAlertScreen.Event.SaveNotification(storageAlert))
 
-            coVerify { analytics.logAlertAdded(storageAlert.type, storageAlert.threshold) }
+            coVerify { analytics.logAlertAdded(AlertType.STORAGE) }
             coVerify { remoteAlertRepository.saveRemoteAlert(storageAlert) }
             coVerify { navigator.pop() }
         }
@@ -203,11 +204,11 @@ class AddNewRemoteAlertPresenterTest {
     @Test
     fun `event NavigateBack invokes navigator pop`() = runTest {
         coEvery { storageMonitor.getAvailableStorageInGB() } returns 100
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
             val state = awaitItem()
-            state.eventSink(AddNewRemoteAlertScreenEvent.NavigateBack)
+            state.eventSink(AddNewRemoteAlertScreen.Event.NavigateBack)
             coVerify { navigator.pop() }
         }
     }
@@ -217,13 +218,13 @@ class AddNewRemoteAlertPresenterTest {
         coEvery { storageMonitor.getAvailableStorageInGB() } returns 100
         every { BatteryOptimizationHelper.isIgnoringBatteryOptimizations(mockContext) } returns false // Ensure sheet can be shown
 
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
             val initialState = awaitItem()
             assertThat(initialState.showBatteryOptSheet).isFalse()
 
-            initialState.eventSink(AddNewRemoteAlertScreenEvent.ShowBatteryOptimizationSheet)
+            initialState.eventSink(AddNewRemoteAlertScreen.Event.ShowBatteryOptimizationSheet)
 
             val updatedState = awaitItem()
             assertThat(updatedState.showBatteryOptSheet).isTrue()
@@ -237,15 +238,15 @@ class AddNewRemoteAlertPresenterTest {
         every { BatteryOptimizationHelper.isIgnoringBatteryOptimizations(mockContext) } returns false
 
 
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
             val state = awaitItem()
-            state.eventSink(AddNewRemoteAlertScreenEvent.ShowBatteryOptimizationSheet) // Show first
+            state.eventSink(AddNewRemoteAlertScreen.Event.ShowBatteryOptimizationSheet) // Show first
             val stateAfterShow = awaitItem()
             assertThat(stateAfterShow.showBatteryOptSheet).isTrue()
 
-            stateAfterShow.eventSink(AddNewRemoteAlertScreenEvent.DismissBatteryOptimizationSheet)
+            stateAfterShow.eventSink(AddNewRemoteAlertScreen.Event.DismissBatteryOptimizationSheet)
             val stateAfterDismiss = awaitItem()
             assertThat(stateAfterDismiss.showBatteryOptSheet).isFalse()
         }
@@ -259,14 +260,14 @@ class AddNewRemoteAlertPresenterTest {
         val intentSlot = slot<Intent>()
         every { mockContext.startActivity(capture(intentSlot)) } just Runs // Needed for void functions
 
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
             val state = awaitItem()
-            state.eventSink(AddNewRemoteAlertScreenEvent.ShowBatteryOptimizationSheet) // Show first
+            state.eventSink(AddNewRemoteAlertScreen.Event.ShowBatteryOptimizationSheet) // Show first
             awaitItem() // consume state update
 
-            state.eventSink(AddNewRemoteAlertScreenEvent.OpenBatterySettings)
+            state.eventSink(AddNewRemoteAlertScreen.Event.OpenBatterySettings)
 
             val updatedState = awaitItem()
             assertThat(updatedState.showBatteryOptSheet).isFalse()
@@ -280,12 +281,12 @@ class AddNewRemoteAlertPresenterTest {
 
     @Test
     fun `event UpdateAlertType to STORAGE adjusts threshold if current threshold is higher than max storage`() = runTest {
-        val initialAvailableStorage = 8 // Results in storageSliderMax = 7
+        val initialAvailableStorage = 8L // Results in storageSliderMax = 7
         coEvery { storageMonitor.getAvailableStorageInGB() } returns initialAvailableStorage
         every { BatteryOptimizationHelper.isIgnoringBatteryOptimizations(mockContext) } returns true
 
 
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
             val initialState = awaitItem()
@@ -293,7 +294,7 @@ class AddNewRemoteAlertPresenterTest {
             // Initial threshold for BATTERY is 10, which is > initialAvailableStorage - 1 (7)
             assertThat(initialState.threshold).isEqualTo(10)
 
-            initialState.eventSink(AddNewRemoteAlertScreenEvent.UpdateAlertType(AlertType.STORAGE))
+            initialState.eventSink(AddNewRemoteAlertScreen.Event.UpdateAlertType(AlertType.STORAGE))
 
             val finalState = awaitItem()
             assertThat(finalState.selectedAlertType).isEqualTo(AlertType.STORAGE)
@@ -304,21 +305,21 @@ class AddNewRemoteAlertPresenterTest {
 
     @Test
     fun `event UpdateAlertType to STORAGE keeps threshold if current threshold is within max storage`() = runTest {
-        val initialAvailableStorage = 20 // Results in storageSliderMax = 19
+        val initialAvailableStorage = 20L // Results in storageSliderMax = 19
         val initialThreshold = 15
         coEvery { storageMonitor.getAvailableStorageInGB() } returns initialAvailableStorage
         every { BatteryOptimizationHelper.isIgnoringBatteryOptimizations(mockContext) } returns true
 
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
             var state = awaitItem()
             // Set initial threshold for BATTERY to be within the new storage max
-            state.eventSink(AddNewRemoteAlertScreenEvent.UpdateThreshold(initialThreshold))
+            state.eventSink(AddNewRemoteAlertScreen.Event.UpdateThreshold(initialThreshold))
             state = awaitItem()
             assertThat(state.threshold).isEqualTo(initialThreshold)
 
-            state.eventSink(AddNewRemoteAlertScreenEvent.UpdateAlertType(AlertType.STORAGE))
+            state.eventSink(AddNewRemoteAlertScreen.Event.UpdateAlertType(AlertType.STORAGE))
 
             val finalState = awaitItem()
             assertThat(finalState.selectedAlertType).isEqualTo(AlertType.STORAGE)
@@ -332,11 +333,11 @@ class AddNewRemoteAlertPresenterTest {
         coEvery { storageMonitor.getAvailableStorageInGB() } returns 100
         val newThreshold = 25
 
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
             val state = awaitItem()
-            state.eventSink(AddNewRemoteAlertScreenEvent.UpdateThreshold(newThreshold))
+            state.eventSink(AddNewRemoteAlertScreen.Event.UpdateThreshold(newThreshold))
 
             val updatedState = awaitItem()
             assertThat(updatedState.threshold).isEqualTo(newThreshold)
@@ -346,11 +347,11 @@ class AddNewRemoteAlertPresenterTest {
     @Test
     fun `event HideBatteryOptimizationReminder logs analytics and updates datastore`() = runTest {
         coEvery { storageMonitor.getAvailableStorageInGB() } returns 100
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
             val state = awaitItem()
-            state.eventSink(AddNewRemoteAlertScreenEvent.HideBatteryOptimizationReminder)
+            state.eventSink(AddNewRemoteAlertScreen.Event.HideBatteryOptimizationReminder)
 
             // awaitItem() // Recomposition might happen
             val finalState = expectMostRecentItem()
@@ -366,7 +367,7 @@ class AddNewRemoteAlertPresenterTest {
     @Test
     fun `impression effect logs screen view`() = runTest {
         coEvery { storageMonitor.getAvailableStorageInGB() } returns 100
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
             awaitItem() // Trigger LaunchedEffect for impression
@@ -377,10 +378,10 @@ class AddNewRemoteAlertPresenterTest {
     @Test
     fun `hideBatteryOptReminder state updates when datastore flow emits new value`() = runTest {
         val hideReminderFlow = MutableSharedFlow<Boolean>()
-        coEvery { appPreferencesDataStore.hideBatteryOptReminder() } returns hideReminderFlow
+        coEvery { appPreferencesDataStore.hideBatteryOptReminder } returns hideReminderFlow
         coEvery { storageMonitor.getAvailableStorageInGB() } returns 100
 
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter().invoke()
         }.test {
             hideReminderFlow.emit(false) // Initial emission
@@ -404,7 +405,7 @@ class AddNewRemoteAlertPresenterTest {
         val testLifecycleRegistry = LifecycleRegistry(testLifecycleOwner)
         every { testLifecycleOwner.lifecycle } returns testLifecycleRegistry
 
-        moleculeFlow(RecompositionClock.Immediate) {
+        moleculeFlow(RecompositionMode.Immediate) {
             createPresenter(testLifecycleOwner).invoke()
         }.test {
             // Initial state
