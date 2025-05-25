@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.ui.alertchecklog
 
+import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -70,10 +71,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.Clipboard
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -259,8 +259,7 @@ fun AlertCheckLogViewerUi(
     state: AlertCheckLogViewerScreen.State,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -476,7 +475,7 @@ fun AlertCheckLogViewerUi(
                                             append("Notification sent via: ${log.notifierType.displayName}\n")
                                         }
                                     }
-                                clipboardManager.setText(AnnotatedString(logDetails))
+                                clipboard.nativeClipboard.setPrimaryClip(ClipData.newPlainText("Log Details", logDetails))
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar("Log details copied to clipboard")
                                 }
