@@ -10,6 +10,8 @@ import dagger.Module
 import dagger.Provides
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
+import dev.hossain.remotenotify.platform.AppVersionProvider
+import dev.hossain.remotenotify.platform.DefaultAppVersionProvider
 import java.time.Clock
 
 @ContributesTo(AppScope::class)
@@ -34,5 +36,10 @@ class AppModule {
     ): FirebaseAnalytics {
         FirebaseApp.initializeApp(context)
         return Firebase.analytics
+    }
+
+    @Provides
+    fun provideAppVersionProvider(): AppVersionProvider {
+        return DefaultAppVersionProvider()
     }
 }

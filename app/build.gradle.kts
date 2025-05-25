@@ -217,7 +217,9 @@ dependencies {
     testImplementation(libs.androidx.test.core.ktx)
     testImplementation(libs.androidx.work.testing)
     testImplementation("app.cash.molecule:molecule-runtime:2.1.0")
+    // testImplementation("app.cash.molecule:molecule-testing:2.1.0") // Not available in the repository
     testImplementation("app.cash.turbine:turbine:1.2.0")
+    testImplementation(libs.androidx.ui.test.junit4)
     testImplementation(libs.google.truth)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

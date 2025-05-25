@@ -23,6 +23,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +57,7 @@ import dev.hossain.remotenotify.BuildConfig
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.di.AppScope
+import dev.hossain.remotenotify.platform.AppVersionProvider
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertlist.AppUsageEducationSheetUi
 import kotlinx.coroutines.launch
@@ -85,6 +87,7 @@ class AboutAppPresenter
     constructor(
         @Assisted private val navigator: Navigator,
         private val analytics: Analytics,
+        private val appVersionProvider: AppVersionProvider,
     ) : Presenter<AboutAppScreen.State> {
         @Composable
         override fun present(): AboutAppScreen.State {
@@ -96,14 +99,10 @@ class AboutAppPresenter
                 analytics.logScreenView(AboutAppScreen::class)
             }
 
-            val appVersion =
-                buildString {
-                    append("v")
-                    append(BuildConfig.VERSION_NAME)
-                    append(" (")
-                    append(BuildConfig.GIT_COMMIT_HASH)
-                    append(")")
-                }
+            var appVersion by remember { mutableStateOf("") }
+            LaunchedEffect(Unit) {
+                appVersion = appVersionProvider.getAppVersion()
+            }
 
             return AboutAppScreen.State(
                 appVersion,

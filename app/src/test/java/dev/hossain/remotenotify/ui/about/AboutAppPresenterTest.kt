@@ -2,7 +2,6 @@ package dev.hossain.remotenotify.ui.about
 
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.test.junit4.createComposeRule
-import app.cash.molecule.RecompositionClock
 import app.cash.molecule.moleculeFlow
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
