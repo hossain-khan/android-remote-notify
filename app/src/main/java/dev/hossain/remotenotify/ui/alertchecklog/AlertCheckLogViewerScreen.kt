@@ -259,7 +259,7 @@ fun AlertCheckLogViewerUi(
     state: AlertCheckLogViewerScreen.State,
     modifier: Modifier = Modifier,
 ) {
-    val clipboardManager: Clipboard = LocalClipboard.current
+    val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -475,7 +475,7 @@ fun AlertCheckLogViewerUi(
                                             append("Notification sent via: ${log.notifierType.displayName}\n")
                                         }
                                     }
-                                clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText("Log Details", logDetails))
+                                clipboard.nativeClipboard.setPrimaryClip(ClipData.newPlainText("Log Details", logDetails))
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar("Log details copied to clipboard")
                                 }
