@@ -4,11 +4,14 @@ import com.google.common.truth.Truth.assertThat
 import dev.hossain.remotenotify.db.AlertConfigEntity
 import org.junit.Test
 
+/**
+ * Unit tests for the [RemoteAlert] model and its related conversion functions.
+ */
 class RemoteAlertTest {
     @Test
     fun `given battery alert, when toAlertConfigEntity, then returns correct entity`() {
         val batteryAlert = RemoteAlert.BatteryAlert(alertId = 1L, batteryPercentage = 20)
-        val entity = batteryAlert.toAlertConfigEntity()
+        val entity: AlertConfigEntity = batteryAlert.toAlertConfigEntity()
 
         assertThat(entity.id).isEqualTo(1L)
         assertThat(entity.batteryPercentage).isEqualTo(20)
@@ -19,7 +22,7 @@ class RemoteAlertTest {
     @Test
     fun `given storage alert, when toAlertConfigEntity, then returns correct entity`() {
         val storageAlert = RemoteAlert.StorageAlert(alertId = 2L, storageMinSpaceGb = 5)
-        val entity = storageAlert.toAlertConfigEntity()
+        val entity: AlertConfigEntity = storageAlert.toAlertConfigEntity()
 
         assertThat(entity.id).isEqualTo(2L)
         assertThat(entity.storageMinSpaceGb).isEqualTo(5)
