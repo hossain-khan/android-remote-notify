@@ -5,7 +5,6 @@ import dev.hossain.remotenotify.db.AlertConfigEntity
 import org.junit.Test
 
 class RemoteAlertTest {
-
     @Test
     fun `given battery alert, when toAlertConfigEntity, then returns correct entity`() {
         val batteryAlert = RemoteAlert.BatteryAlert(alertId = 1L, batteryPercentage = 20)
@@ -62,12 +61,13 @@ class RemoteAlertTest {
 
     @Test
     fun `given battery alert config entity, when toRemoteAlert, then returns correct BatteryAlert`() {
-        val entity = AlertConfigEntity(
-            id = 1L,
-            batteryPercentage = 20,
-            type = AlertType.BATTERY,
-            storageMinSpaceGb = 0
-        )
+        val entity =
+            AlertConfigEntity(
+                id = 1L,
+                batteryPercentage = 20,
+                type = AlertType.BATTERY,
+                storageMinSpaceGb = 0,
+            )
         val remoteAlert = entity.toRemoteAlert()
 
         assertThat(remoteAlert).isInstanceOf(RemoteAlert.BatteryAlert::class.java)
@@ -78,12 +78,13 @@ class RemoteAlertTest {
 
     @Test
     fun `given storage alert config entity, when toRemoteAlert, then returns correct StorageAlert`() {
-        val entity = AlertConfigEntity(
-            id = 2L,
-            storageMinSpaceGb = 5,
-            type = AlertType.STORAGE,
-            batteryPercentage = 0
-        )
+        val entity =
+            AlertConfigEntity(
+                id = 2L,
+                storageMinSpaceGb = 5,
+                type = AlertType.STORAGE,
+                batteryPercentage = 0,
+            )
         val remoteAlert = entity.toRemoteAlert()
 
         assertThat(remoteAlert).isInstanceOf(RemoteAlert.StorageAlert::class.java)
