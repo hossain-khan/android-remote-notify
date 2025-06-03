@@ -45,10 +45,13 @@ data class DeviceAlert(
     enum class FormatType {
         /** Provides a detailed, human-readable text format with more context. */
         EXTENDED_TEXT,
+
         /** Formats the alert as an HTML document, suitable for display in web views or email clients. */
         HTML,
+
         /** Formats the alert as a JSON string, suitable for machine processing or API communication. */
         JSON,
+
         /** Provides a concise, human-readable plain text format. */
         TEXT,
     }
