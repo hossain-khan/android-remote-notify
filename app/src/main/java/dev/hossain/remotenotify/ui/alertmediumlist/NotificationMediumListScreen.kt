@@ -84,38 +84,80 @@ import timber.log.Timber
  */
 @Parcelize
 data object NotificationMediumListScreen : Screen {
+    /**
+     * Represents the state of the [NotificationMediumListScreen].
+     */
     data class State(
+        /** The interval in minutes for the background worker. */
         val workerIntervalMinutes: Long,
+        /** A list of [NotifierMediumInfo] objects representing the available notification mediums. */
         val notifiers: List<NotifierMediumInfo>,
+        /** A function to send events from the UI to the presenter. */
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
+    /**
+     * Represents information about a notification medium.
+     */
     data class NotifierMediumInfo(
+        /** The type of the notifier (e.g., Email, Slack). */
         val notifierType: NotifierType,
+        /** The display name of the notification medium. */
         val name: String,
+        /** A boolean indicating whether the notification medium is configured. */
         val isConfigured: Boolean,
+        /** A preview text of the configuration, if available. */
         val configPreviewText: String? = null,
     )
 
+    /**
+     * Represents events that can occur on the [NotificationMediumListScreen].
+     */
     sealed class Event : CircuitUiEvent {
+        /**
+         * Event triggered when the user wants to edit the configuration of a notification medium.
+         * @property notifierType The type of the notifier to edit.
+         */
         data class EditMediumConfig(
             val notifierType: NotifierType,
         ) : Event()
 
+        /**
+         * Event triggered when the user wants to reset the configuration of a notification medium.
+         * @property notifierType The type of the notifier to reset.
+         */
         data class ResetMediumConfig(
             val notifierType: NotifierType,
         ) : Event()
 
+        /**
+         * Event triggered when the worker interval is updated.
+         * @property minutes The new worker interval in minutes.
+         */
         data class OnWorkerIntervalUpdated(
             val minutes: Long,
         ) : Event()
 
+        /**
+         * Event triggered when the user wants to share feedback.
+         */
         data object ShareFeedback : Event()
 
+        /**
+         * Event triggered when the user wants to navigate back.
+         */
         data object NavigateBack : Event()
     }
 }
 
+/**
+ * Presenter for the [NotificationMediumListScreen].
+ *
+ * @param navigator The navigator for navigating to other screens.
+ * @param appPreferencesDataStore The data store for application preferences.
+ * @param notifiers A set of available [NotificationSender] implementations.
+ * @param analytics The analytics tracker.
+ */
 class NotificationMediumListPresenter
     @AssistedInject
     constructor(
@@ -232,13 +274,27 @@ class NotificationMediumListPresenter
             }
         }
 
+        /**
+         * Factory for creating instances of [NotificationMediumListPresenter].
+         */
         @CircuitInject(NotificationMediumListScreen::class, AppScope::class)
         @AssistedFactory
         fun interface Factory {
+            /**
+             * Creates an instance of [NotificationMediumListPresenter].
+             * @param navigator The navigator for navigating to other screens.
+             * @return An instance of [NotificationMediumListPresenter].
+             */
             fun create(navigator: Navigator): NotificationMediumListPresenter
         }
     }
 
+/**
+ * Composable function for the notification medium list UI.
+ *
+ * @param state The current state of the UI.
+ * @param modifier The modifier to apply to the UI.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @CircuitInject(NotificationMediumListScreen::class, AppScope::class)
 @Composable
@@ -324,6 +380,14 @@ fun NotificationMediumListUi(
     }
 }
 
+/**
+ * Private composable function to display a card for a notifier medium.
+ *
+ * @param notifier The [NotificationMediumListScreen.NotifierMediumInfo] to display.
+ * @param onEditConfiguration Callback invoked when the edit configuration action is triggered.
+ * @param onResetConfiguration Callback invoked when the reset configuration action is triggered.
+ * @param modifier The modifier to apply to the card.
+ */
 @Composable
 private fun NotifierCard(
     notifier: NotificationMediumListScreen.NotifierMediumInfo,
@@ -392,6 +456,11 @@ private fun NotifierCard(
     }
 }
 
+/**
+ * Private extension function to get the icon resource ID for a [NotifierType].
+ *
+ * @return The drawable resource ID for the icon.
+ */
 @DrawableRes
 private fun NotifierType.iconResId(): Int =
     when (this) {
