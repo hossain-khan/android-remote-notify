@@ -32,6 +32,17 @@ import androidx.compose.ui.unit.dp
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.formatDuration
 
+/**
+ * Internal composable function that displays a card for configuring the worker check interval.
+ *
+ * This card allows the user to adjust a slider to set the frequency at which the background worker
+ * checks for new alerts. The selected interval is displayed in a human-readable format (e.g., "1h 30m").
+ * When the slider value changes, it triggers an event to update the worker interval in the application's state.
+ *
+ * @param state The current [NotificationMediumListScreen.State] which contains the `workerIntervalMinutes`
+ *              and the `eventSink` for dispatching update events.
+ * @param modifier Optional [Modifier] to be applied to the card.
+ */
 @Composable
 internal fun WorkerConfigCard(
     state: NotificationMediumListScreen.State,

@@ -25,6 +25,18 @@ import dev.hossain.remotenotify.utils.InAppReviewManager
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+/**
+ * Composable function that provides a UI section for users to share feedback.
+ *
+ * This function displays a button that, when clicked, triggers the `onShareFeedback` callback
+ * and then attempts to launch an in-app review flow using [InAppReviewManager].
+ * It also includes a text prompt encouraging users to share feedback or suggest new mediums.
+ *
+ * @param modifier Optional [Modifier] to be applied to the composable.
+ * @param onShareFeedback A callback function that is invoked when the feedback button is clicked.
+ *                       This can be used to log analytics events or perform other actions
+ *                       before the in-app review flow is initiated.
+ */
 @Composable
 fun FeedbackAndRequestMediumUi(
     modifier: Modifier = Modifier,
