@@ -86,27 +86,27 @@ import timber.log.Timber
 data object NotificationMediumListScreen : Screen {
     /**
      * Represents the state of the [NotificationMediumListScreen].
-     * @property workerIntervalMinutes The interval in minutes for the background worker.
-     * @property notifiers A list of [NotifierMediumInfo] objects representing the available notification mediums.
-     * @property eventSink A function to send events from the UI to the presenter.
      */
     data class State(
+        /** The interval in minutes for the background worker. */
         val workerIntervalMinutes: Long,
+        /** A list of [NotifierMediumInfo] objects representing the available notification mediums. */
         val notifiers: List<NotifierMediumInfo>,
+        /** A function to send events from the UI to the presenter. */
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
     /**
      * Represents information about a notification medium.
-     * @property notifierType The type of the notifier (e.g., Email, Slack).
-     * @property name The display name of the notification medium.
-     * @property isConfigured A boolean indicating whether the notification medium is configured.
-     * @property configPreviewText A preview text of the configuration, if available.
      */
     data class NotifierMediumInfo(
+        /** The type of the notifier (e.g., Email, Slack). */
         val notifierType: NotifierType,
+        /** The display name of the notification medium. */
         val name: String,
+        /** A boolean indicating whether the notification medium is configured. */
         val isConfigured: Boolean,
+        /** A preview text of the configuration, if available. */
         val configPreviewText: String? = null,
     )
 
