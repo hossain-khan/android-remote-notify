@@ -252,7 +252,7 @@ kotlinter = { id = "org.jmailen.kotlinter", version.ref = "kotlinter" }
 # Google Services plugin
 google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
 # https://firebase.google.com/docs/crashlytics/get-started?platform=android#add-sdk
-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.3" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.4" }
 
 # Kover is a set of solutions for collecting test coverage of Kotlin code compiled for JVM and Android platforms.
 # https://github.com/Kotlin/kotlinx-kover?tab=readme-ov-file#kover-gradle-plugin
