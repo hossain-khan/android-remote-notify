@@ -58,7 +58,7 @@ mockk = "1.14.2"
 # Kotlin linter with built-in formatter
 # https://github.com/jeremymailen/kotlinter-gradle
 # https://github.com/pinterest/ktlint
-kotlinter = "5.1.0"
+kotlinter = "5.1.1"
 
 kotlinxSerializationJson = "1.8.1"
 kotlinxSerializationProperties = "1.8.1"
