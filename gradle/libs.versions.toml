@@ -66,7 +66,7 @@ kotlinxSerializationProperties = "1.8.1"
 # Kotlin Symbol Processing API
 # https://kotlinlang.org/docs/ksp-overview.html
 # https://github.com/google/ksp/releases
-ksp = "2.1.10-1.0.31"
+ksp = "2.1.21-2.0.2"
 
 lifecycleRuntimeKtx = "2.9.1"
 
