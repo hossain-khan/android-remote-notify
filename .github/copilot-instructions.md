@@ -1,5 +1,7 @@
 # GitHub Copilot Instructions for Android Remote Notify
 
+> **Note**: These instructions provide context and guidelines to help GitHub Copilot assist with code generation, suggestions, and understanding of this Android project's architecture, conventions, and best practices.
+
 ## Project Overview
 
 **Android Remote Notify** is a specialized Android application that monitors battery and storage levels on remote Android devices and sends notifications when thresholds are exceeded. The app supports multiple notification channels including Email, Twilio SMS, Slack webhooks, Telegram, and REST webhooks.
