@@ -1,0 +1,40 @@
+name: Setup Environment for Copilot
+on:
+  workflow_dispatch:
+  
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+            
+      - name: Download Android dependencies
+        env:
+          EMAIL_API_KEY: 'SETUP_KEY'
+        run: |
+          # Pre-download Gradle wrapper and plugins
+          ./gradlew help --parallel --daemon --stacktrace
+          
+          # Pre-download project dependencies  
+          ./gradlew dependencies --configuration debugCompileClasspath --parallel --daemon
+          ./gradlew dependencies --configuration debugRuntimeClasspath --parallel --daemon
