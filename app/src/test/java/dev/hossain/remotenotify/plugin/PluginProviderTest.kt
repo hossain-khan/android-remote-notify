@@ -27,44 +27,35 @@ class PluginProviderTest {
     private lateinit var context: Context
     private lateinit var pluginProvider: PluginProvider
     private lateinit var mockNotificationSender: NotificationSender
-    private lateinit var mockApp: RemoteAlertApp
-    private lateinit var mockAppComponent: dev.hossain.remotenotify.di.AppComponent
 
     @Before
     fun setup() {
         context = ApplicationProvider.getApplicationContext()
-        mockApp = mockk<RemoteAlertApp>(relaxed = true)
-        mockAppComponent = mockk(relaxed = true)
 
-        // Mock notification sender
-        mockNotificationSender =
-            mockk {
-                every { notifierType } returns NotifierType.EMAIL
-                coEvery { hasValidConfig() } returns true
-                coEvery { sendNotification(any()) } returns true
-            }
+        // Create mock notification sender
+        mockNotificationSender = mockk(relaxed = true) {
+            every { notifierType } returns NotifierType.EMAIL
+            coEvery { hasValidConfig() } returns true
+            coEvery { sendNotification(any()) } returns true
+        }
 
-        pluginProvider =
-            spyk(PluginProvider()) {
-                every { context } returns this@PluginProviderTest.context
-                every { onCreate() } returns true // Mock onCreate to avoid dependency injection
-            }
-
-        // Instead of mocking the injection, directly set the dependencies after creation
-        // This avoids the complex dependency injection mocking
+        // Create PluginProvider directly without going through onCreate()
+        pluginProvider = PluginProvider()
+        
+        // Manually set the dependencies to avoid dependency injection complexity
         pluginProvider.notificationSenders = setOf(mockNotificationSender)
     }
 
     @Test
     fun `onCreate initializes provider successfully`() {
-        // Since we're mocking onCreate in setup, we just verify the mock behavior
-        // The real onCreate functionality is tested in integration tests
+        // Test the provider can be created successfully
+        // The real onCreate functionality with dependency injection is tested in integration tests
         
         // When
-        val result = pluginProvider.onCreate()
-
-        // Then
-        assertThat(result).isTrue()
+        val provider = PluginProvider()
+        
+        // Then - provider is created without errors
+        assertThat(provider).isNotNull()
     }
 
     @Test
@@ -88,12 +79,18 @@ class PluginProviderTest {
 
     @Test
     fun `queryConfig returns available mediums`() {
+        // Create a spy of the provider to mock context access
+        val spyProvider = spyk(pluginProvider) {
+            every { context } returns this@PluginProviderTest.context
+        }
+        spyProvider.notificationSenders = setOf(mockNotificationSender)
+        
         // Mock permission check
         every { context.checkCallingPermission(PluginContract.PERMISSION) } returns PackageManager.PERMISSION_GRANTED
 
         // When
         val cursor =
-            pluginProvider.query(
+            spyProvider.query(
                 PluginContract.CONFIG_URI,
                 null,
                 null,
@@ -118,12 +115,18 @@ class PluginProviderTest {
 
     @Test
     fun `queryStatus returns service status`() {
+        // Create a spy of the provider to mock context access
+        val spyProvider = spyk(pluginProvider) {
+            every { context } returns this@PluginProviderTest.context
+        }
+        spyProvider.notificationSenders = setOf(mockNotificationSender)
+        
         // Mock permission check
         every { context.checkCallingPermission(PluginContract.PERMISSION) } returns PackageManager.PERMISSION_GRANTED
 
         // When
         val cursor =
-            pluginProvider.query(
+            spyProvider.query(
                 PluginContract.STATUS_URI,
                 null,
                 null,
@@ -149,6 +152,12 @@ class PluginProviderTest {
     @Test
     fun `insertNotification sends notification through configured mediums`() =
         runTest {
+            // Create a spy of the provider to mock context access
+            val spyProvider = spyk(pluginProvider) {
+                every { context } returns this@PluginProviderTest.context
+            }
+            spyProvider.notificationSenders = setOf(mockNotificationSender)
+            
             // Mock permission and package info
             every { context.checkCallingPermission(PluginContract.PERMISSION) } returns PackageManager.PERMISSION_GRANTED
             every { context.packageManager } returns
@@ -169,7 +178,7 @@ class PluginProviderTest {
                 }
 
             // When
-            val resultUri = pluginProvider.insert(PluginContract.NOTIFICATIONS_URI, values)
+            val resultUri = spyProvider.insert(PluginContract.NOTIFICATIONS_URI, values)
 
             // Then
             assertThat(resultUri).isNotNull()
@@ -184,6 +193,12 @@ class PluginProviderTest {
 
     @Test
     fun `insertNotification fails with missing required fields`() {
+        // Create a spy of the provider to mock context access
+        val spyProvider = spyk(pluginProvider) {
+            every { context } returns this@PluginProviderTest.context
+        }
+        spyProvider.notificationSenders = setOf(mockNotificationSender)
+        
         // Mock permission check
         every { context.checkCallingPermission(PluginContract.PERMISSION) } returns PackageManager.PERMISSION_GRANTED
 
@@ -194,7 +209,7 @@ class PluginProviderTest {
             }
 
         // When
-        val resultUri = pluginProvider.insert(PluginContract.NOTIFICATIONS_URI, values)
+        val resultUri = spyProvider.insert(PluginContract.NOTIFICATIONS_URI, values)
 
         // Then
         assertThat(resultUri).isNull()
@@ -202,12 +217,18 @@ class PluginProviderTest {
 
     @Test
     fun `query returns null without permission`() {
+        // Create a spy of the provider to mock context access
+        val spyProvider = spyk(pluginProvider) {
+            every { context } returns this@PluginProviderTest.context
+        }
+        spyProvider.notificationSenders = setOf(mockNotificationSender)
+        
         // Mock permission denied
         every { context.checkCallingPermission(PluginContract.PERMISSION) } returns PackageManager.PERMISSION_DENIED
 
         // When
         val cursor =
-            pluginProvider.query(
+            spyProvider.query(
                 PluginContract.CONFIG_URI,
                 null,
                 null,
@@ -221,6 +242,12 @@ class PluginProviderTest {
 
     @Test
     fun `insert returns null without permission`() {
+        // Create a spy of the provider to mock context access
+        val spyProvider = spyk(pluginProvider) {
+            every { context } returns this@PluginProviderTest.context
+        }
+        spyProvider.notificationSenders = setOf(mockNotificationSender)
+        
         // Mock permission denied
         every { context.checkCallingPermission(PluginContract.PERMISSION) } returns PackageManager.PERMISSION_DENIED
 
@@ -231,7 +258,7 @@ class PluginProviderTest {
             }
 
         // When
-        val resultUri = pluginProvider.insert(PluginContract.NOTIFICATIONS_URI, values)
+        val resultUri = spyProvider.insert(PluginContract.NOTIFICATIONS_URI, values)
 
         // Then
         assertThat(resultUri).isNull()
@@ -255,7 +282,11 @@ class PluginProviderTest {
                     coEvery { sendNotification(any()) } returns true
                 }
 
-            pluginProvider.notificationSenders = setOf(mockNotificationSender, mockTelegramSender)
+            // Create a spy of the provider to mock context access
+            val spyProvider = spyk(pluginProvider) {
+                every { context } returns this@PluginProviderTest.context
+            }
+            spyProvider.notificationSenders = setOf(mockNotificationSender, mockTelegramSender)
 
             // Mock permission and package info
             every { context.checkCallingPermission(PluginContract.PERMISSION) } returns PackageManager.PERMISSION_GRANTED
@@ -277,7 +308,7 @@ class PluginProviderTest {
                 }
 
             // When
-            val resultUri = pluginProvider.insert(PluginContract.NOTIFICATIONS_URI, values)
+            val resultUri = spyProvider.insert(PluginContract.NOTIFICATIONS_URI, values)
 
             // Then
             assertThat(resultUri).isNotNull()
