@@ -1,7 +1,12 @@
 name: Setup Environment for Copilot
 on:
   workflow_dispatch:
-  
+
+env:
+  EMAIL_API_KEY: 'FAKE_KEY_TO_PASS_CI'
+  # https://docs.github.com/en/copilot/customizing-copilot/customizing-or-disabling-the-firewall-for-copilot-coding-agent#disabling-the-firewall
+  COPILOT_AGENT_FIREWALL_ENABLED: false
+
 jobs:
   setup:
     runs-on: ubuntu-latest
