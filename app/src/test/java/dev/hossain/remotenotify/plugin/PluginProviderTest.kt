@@ -14,8 +14,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.CoroutineScope
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -27,6 +30,8 @@ class PluginProviderTest {
     private lateinit var context: Context
     private lateinit var pluginProvider: PluginProvider
     private lateinit var mockNotificationSender: NotificationSender
+    private val testDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     @Before
     fun setup() {
@@ -155,10 +160,9 @@ class PluginProviderTest {
         cursor.close()
     }
 
-    @Ignore("Verification failed: call 1 of 1: NotificationSender(#25).sendNotification(any(), any())) was not called (timeout = 1000 ms)")
     @Test
     fun `insertNotification sends notification through configured mediums`() =
-        runTest {
+        testScope.runTest {
             // Create a spy of the provider to mock context access
             val spyProvider =
                 spyk(pluginProvider) {
@@ -166,6 +170,7 @@ class PluginProviderTest {
                     every { getCallingPackage() } returns "com.example.test"
                 }
             spyProvider.notificationSenders = setOf(mockNotificationSender)
+            spyProvider.setCoroutineScope(testScope)
 
             // Mock permission and package info
             every { context.checkCallingPermission(PluginContract.PERMISSION) } returns PackageManager.PERMISSION_GRANTED
@@ -193,11 +198,11 @@ class PluginProviderTest {
             assertThat(resultUri).isNotNull()
             assertThat(resultUri.toString()).contains("notifications")
 
-            // Wait a bit for async processing
-            Thread.sleep(100)
+            // Advance coroutines until all work is complete
+            advanceUntilIdle()
 
             // Verify notification sender was called
-            coVerify(timeout = 1000) { mockNotificationSender.sendNotification(any()) }
+            coVerify(exactly = 1) { mockNotificationSender.sendNotification(any()) }
         }
 
     @Test
@@ -286,10 +291,9 @@ class PluginProviderTest {
         assertThat(pluginProvider.update(PluginContract.NOTIFICATIONS_URI, null, null, null)).isEqualTo(0)
     }
 
-    @Ignore("Verification failed: call 1 of 1: NotificationSender(#12).sendNotification(any(), any())) was not called.")
     @Test
     fun `insertNotification with preferred mediums filters senders`() =
-        runTest {
+        testScope.runTest {
             // Setup additional mock sender with proper equals/hashCode for set operations
             val mockTelegramSender =
                 mockk<NotificationSender>(relaxed = true) {
@@ -305,6 +309,7 @@ class PluginProviderTest {
                     every { getCallingPackage() } returns "com.example.test"
                 }
             spyProvider.notificationSenders = setOf(mockNotificationSender, mockTelegramSender)
+            spyProvider.setCoroutineScope(testScope)
 
             // Mock permission and package info
             every { context.checkCallingPermission(PluginContract.PERMISSION) } returns PackageManager.PERMISSION_GRANTED
@@ -331,11 +336,11 @@ class PluginProviderTest {
             // Then
             assertThat(resultUri).isNotNull()
 
-            // Wait for async processing
-            Thread.sleep(100)
+            // Advance coroutines until all work is complete
+            advanceUntilIdle()
 
             // Verify only telegram sender was called
-            coVerify(timeout = 1000) { mockTelegramSender.sendNotification(any()) }
+            coVerify(exactly = 1) { mockTelegramSender.sendNotification(any()) }
             coVerify(exactly = 0) { mockNotificationSender.sendNotification(any()) }
         }
 }

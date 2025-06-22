@@ -35,7 +35,8 @@ class PluginProvider : ContentProvider() {
     @Inject
     lateinit var notificationSenders: Set<@JvmSuppressWildcards NotificationSender>
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    // Make coroutineScope configurable for testing
+    private var coroutineScope = CoroutineScope(Dispatchers.Main)
     private val serviceStartTime = System.currentTimeMillis()
     private var notificationsSentToday = 0
     private var lastNotificationTimestamp = 0L
@@ -386,5 +387,13 @@ class PluginProvider : ContentProvider() {
         } catch (e: Exception) {
             packageName
         }
+    }
+
+    /**
+     * For testing: allows setting a custom coroutine scope
+     */
+    @JvmName("setCoroutineScopeForTesting")
+    internal fun setCoroutineScope(scope: CoroutineScope) {
+        coroutineScope = scope
     }
 }

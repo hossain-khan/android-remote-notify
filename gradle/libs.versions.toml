@@ -7,7 +7,7 @@ adaptiveAndroid = "1.1.0"
 
 # Android Studio version and AGP version compatibility
 # https://developer.android.com/studio/releases#android_gradle_plugin_and_android_studio_compatibility
-agp = "8.10.1"
+agp = "8.10.0"
 
 # Forked Anvil
 # https://github.com/ZacSweers/anvil
