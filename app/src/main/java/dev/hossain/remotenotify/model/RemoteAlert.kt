@@ -35,10 +35,12 @@ sealed interface RemoteAlert {
      *
      * @property alertId Unique ID for the alert.
      * @property storageMinSpaceGb The minimum available storage space in Gigabytes (GB) to trigger the alert.
+     * @property currentStorageGb The current available storage space in GB when the alert was triggered. Used for notification display.
      */
     data class StorageAlert(
         override val alertId: Long = 0,
         val storageMinSpaceGb: Int,
+        val currentStorageGb: Double? = null,
     ) : RemoteAlert
 }
 

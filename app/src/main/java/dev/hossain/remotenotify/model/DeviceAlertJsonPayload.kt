@@ -25,6 +25,7 @@ import kotlinx.serialization.json.Json
  *   "deviceModel": "Samsung SM-S911W",
  *   "androidVersion": "14",
  *   "availableStorageGb": 4,
+ *   "storageThresholdGb": 10,
  *   "isoDateTime": "2025-02-19T19:05:28.837761"
  * }
  * ```
@@ -41,6 +42,8 @@ data class DeviceAlertJsonPayload constructor(
     val batteryLevel: Int? = null,
     @SerialName("availableStorageGb")
     val availableStorageGb: Double? = null,
+    @SerialName("storageThresholdGb")
+    val storageThresholdGb: Double? = null,
     @SerialName("isoDateTime")
     val isoDateTime: String,
 ) {

@@ -22,6 +22,8 @@ data class DeviceAlert(
     val batteryLevel: Int? = null,
     /** The available storage space on the device in Gigabytes (GB) at the time of the alert. Null if not applicable. */
     val availableStorageGb: Double? = null,
+    /** The storage threshold in Gigabytes (GB) that triggered this alert. Null if not applicable to storage alerts. */
+    val storageThresholdGb: Double? = null,
     /** The timestamp when the alert was generated. Defaults to the current time. */
     val timestamp: LocalDateTime = LocalDateTime.now(),
 ) {
@@ -64,6 +66,7 @@ data class DeviceAlert(
                 androidVersion = androidVersion,
                 batteryLevel = batteryLevel,
                 availableStorageGb = availableStorageGb,
+                storageThresholdGb = storageThresholdGb,
                 isoDateTime = timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             )
         return payload.toJson()
@@ -75,7 +78,14 @@ data class DeviceAlert(
         val alertMessage =
             when (alertType) {
                 AlertType.BATTERY -> "Battery Level is at $batteryLevel%"
-                AlertType.STORAGE -> "Storage Space Available: $availableStorageGb GB"
+                AlertType.STORAGE -> when {
+                    storageThresholdGb != null && availableStorageGb != null ->
+                        "Storage Space Critical: Current $availableStorageGb GB (Threshold: $storageThresholdGb GB)"
+                    availableStorageGb != null ->
+                        "Storage Space Available: $availableStorageGb GB"
+                    else ->
+                        "Storage Space is low"
+                }
             }
 
         return buildString {
@@ -99,7 +109,14 @@ data class DeviceAlert(
                     )
                 AlertType.STORAGE ->
                     Pair(
-                        "Available storage space is low ($availableStorageGb GB)",
+                        when {
+                            storageThresholdGb != null && availableStorageGb != null ->
+                                "Available storage space is critically low (Current: $availableStorageGb GB, Threshold: $storageThresholdGb GB)"
+                            availableStorageGb != null ->
+                                "Available storage space is low ($availableStorageGb GB)"
+                            else ->
+                                "Available storage space is low"
+                        },
                         "Consider removing unused apps or media files to free up space.",
                     )
             }
@@ -126,7 +143,14 @@ data class DeviceAlert(
                     )
                 AlertType.STORAGE ->
                     Pair(
-                        "Available storage space is low ($availableStorageGb GB)",
+                        when {
+                            storageThresholdGb != null && availableStorageGb != null ->
+                                "Available storage space is critically low (Current: $availableStorageGb GB, Threshold: $storageThresholdGb GB)"
+                            availableStorageGb != null ->
+                                "Available storage space is low ($availableStorageGb GB)"
+                            else ->
+                                "Available storage space is low"
+                        },
                         "Consider removing unused apps or media files to free up space.",
                     )
             }
@@ -184,7 +208,8 @@ fun main() {
             deviceBrand = "Samsung",
             deviceModel = "Galaxy S23",
             androidVersion = "Android 13",
-            availableStorageGb = 3.2,
+            availableStorageGb = 8.5,
+            storageThresholdGb = 10.0,
         )
 
     println("Battery Alert (JSON):")

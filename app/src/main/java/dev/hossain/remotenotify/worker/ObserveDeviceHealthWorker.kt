@@ -156,7 +156,8 @@ class ObserveDeviceHealthWorker(
                             is RemoteAlert.StorageAlert ->
                                 RemoteAlert.StorageAlert(
                                     alertId = remoteAlert.alertId,
-                                    storageMinSpaceGb = stateValue,
+                                    storageMinSpaceGb = remoteAlert.storageMinSpaceGb,
+                                    currentStorageGb = stateValue.toDouble(),
                                 )
                         }
 
