@@ -8,6 +8,7 @@ on:
 
 env:
   EMAIL_API_KEY: 'FAKE_KEY_TO_PASS_CI'
+  COPILOT_AGENT_FIREWALL_ENABLED: true
 
 jobs:
   android-build:
