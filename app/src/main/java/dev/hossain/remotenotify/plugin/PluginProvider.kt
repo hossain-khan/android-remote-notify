@@ -13,6 +13,7 @@ import androidx.annotation.VisibleForTesting
 import dev.hossain.remotenotify.RemoteAlertApp
 import dev.hossain.remotenotify.di.AppComponent
 import dev.hossain.remotenotify.model.RemoteAlert
+import dev.hossain.remotenotify.model.RemoteAlert.PluginAlert
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.plugin.model.PluginMediumConfig
@@ -151,7 +152,7 @@ class PluginProvider : ContentProvider() {
             ?.split(",")?.map { it.trim() }
         
         val requestId = UUID.randomUUID().toString()
-        val callingPackage = getCallingPackage()
+        val callingPackage = getCallingPackage() ?: "unknown"
         val appName = getCallingAppName(callingPackage)
         
         val request = PluginNotificationRequest(
@@ -356,18 +357,7 @@ class PluginProvider : ContentProvider() {
         val context = context ?: return false
         return context.checkCallingPermission(PluginContract.PERMISSION) == PackageManager.PERMISSION_GRANTED
     }
-    
-    /**
-     * Gets the package name of the calling app.
-     */
-    private fun getCallingPackage(): String {
-        val context = context ?: return "unknown"
-        val callingUid = android.os.Binder.getCallingUid()
-        val packageManager = context.packageManager
-        val packages = packageManager.getPackagesForUid(callingUid)
-        return packages?.firstOrNull() ?: "unknown"
-    }
-    
+
     /**
      * Gets the human-readable name of the calling app.
      */

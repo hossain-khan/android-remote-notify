@@ -17,7 +17,7 @@ import javax.inject.Inject
 class RemoteAlertApp :
     Application(),
     Configuration.Provider {
-    private val appComponent: AppComponent by lazy { AppComponent.create(this) }
+    internal val appComponent: AppComponent by lazy { AppComponent.create(this) }
 
     fun appComponent(): AppComponent = appComponent
 
