@@ -40,7 +40,7 @@ sealed interface RemoteAlert {
         override val alertId: Long = 0,
         val storageMinSpaceGb: Int,
     ) : RemoteAlert
-    
+
     /**
      * Represents a plugin notification request from an external app.
      * This allows other apps to send notifications through the configured mediums.
@@ -84,7 +84,7 @@ internal fun RemoteAlert.toAlertConfigEntity(): AlertConfigEntity =
                 type = AlertType.STORAGE,
                 batteryPercentage = 0,
             )
-        is RemoteAlert.PluginAlert -> 
+        is RemoteAlert.PluginAlert ->
             // Plugin alerts are not persisted to database, return default
             AlertConfigEntity(
                 id = alertId,

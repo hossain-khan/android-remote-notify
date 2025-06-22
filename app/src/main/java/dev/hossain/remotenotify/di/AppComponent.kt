@@ -26,7 +26,7 @@ interface AppComponent {
      * Injects dependencies into [RemoteAlertApp].
      */
     fun inject(app: RemoteAlertApp)
-    
+
     /**
      * Injects dependencies into [PluginProvider].
      */
