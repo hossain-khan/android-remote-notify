@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Remote Notify</string>
+    
+    <!-- Plugin permission strings -->
+    <string name="plugin_permission_label">Access Remote Notify Plugin</string>
+    <string name="plugin_permission_description">Allows the app to send notifications through Remote Notify\'s configured notification mediums (Email, Telegram, SMS, etc.)</string>
 </resources>
