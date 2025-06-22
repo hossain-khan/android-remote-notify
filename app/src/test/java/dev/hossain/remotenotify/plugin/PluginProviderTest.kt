@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import dev.hossain.remotenotify.RemoteAlertApp
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
@@ -19,10 +20,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = RemoteAlertApp::class)
@@ -65,26 +62,26 @@ class PluginProviderTest {
         val result = pluginProvider.onCreate()
 
         // Then
-        assertTrue(result)
+        assertThat(result).isTrue()
     }
 
     @Test
     fun `getType returns correct MIME types`() {
         // Test notifications URI
         val notificationsType = pluginProvider.getType(PluginContract.NOTIFICATIONS_URI)
-        assertEquals(PluginContract.CONTENT_TYPE_NOTIFICATION, notificationsType)
+        assertThat(notificationsType).isEqualTo(PluginContract.CONTENT_TYPE_NOTIFICATION)
 
         // Test config URI
         val configType = pluginProvider.getType(PluginContract.CONFIG_URI)
-        assertEquals(PluginContract.CONTENT_TYPE_CONFIG, configType)
+        assertThat(configType).isEqualTo(PluginContract.CONTENT_TYPE_CONFIG)
 
         // Test status URI
         val statusType = pluginProvider.getType(PluginContract.STATUS_URI)
-        assertEquals(PluginContract.CONTENT_TYPE_STATUS, statusType)
+        assertThat(statusType).isEqualTo(PluginContract.CONTENT_TYPE_STATUS)
 
         // Test invalid URI
         val invalidType = pluginProvider.getType(Uri.parse("content://invalid/path"))
-        assertNull(invalidType)
+        assertThat(invalidType).isNull()
     }
 
     @Test
@@ -103,16 +100,16 @@ class PluginProviderTest {
             )
 
         // Then
-        assertNotNull(cursor)
-        assertTrue(cursor.moveToFirst())
+        assertThat(cursor).isNotNull()
+        assertThat(cursor!!.moveToFirst()).isTrue()
 
         val mediumName = cursor.getString(cursor.getColumnIndex(PluginContract.ConfigColumns.MEDIUM_NAME))
         val displayName = cursor.getString(cursor.getColumnIndex(PluginContract.ConfigColumns.MEDIUM_DISPLAY_NAME))
         val isConfigured = cursor.getInt(cursor.getColumnIndex(PluginContract.ConfigColumns.IS_CONFIGURED))
 
-        assertEquals("email", mediumName)
-        assertEquals("Email", displayName)
-        assertEquals(1, isConfigured) // true as int
+        assertThat(mediumName).isEqualTo("email")
+        assertThat(displayName).isEqualTo("Email")
+        assertThat(isConfigured).isEqualTo(1) // true as int
 
         cursor.close()
     }
@@ -133,16 +130,16 @@ class PluginProviderTest {
             )
 
         // Then
-        assertNotNull(cursor)
-        assertTrue(cursor.moveToFirst())
+        assertThat(cursor).isNotNull()
+        assertThat(cursor!!.moveToFirst()).isTrue()
 
         val serviceStatus = cursor.getString(cursor.getColumnIndex(PluginContract.StatusColumns.SERVICE_STATUS))
         val apiVersion = cursor.getInt(cursor.getColumnIndex(PluginContract.StatusColumns.API_VERSION))
         val configuredCount = cursor.getInt(cursor.getColumnIndex(PluginContract.StatusColumns.CONFIGURED_MEDIUMS_COUNT))
 
-        assertEquals(PluginContract.ServiceStatus.ACTIVE, serviceStatus)
-        assertEquals(PluginContract.API_VERSION, apiVersion)
-        assertEquals(1, configuredCount) // One mock sender
+        assertThat(serviceStatus).isEqualTo(PluginContract.ServiceStatus.ACTIVE)
+        assertThat(apiVersion).isEqualTo(PluginContract.API_VERSION)
+        assertThat(configuredCount).isEqualTo(1) // One mock sender
 
         cursor.close()
     }
@@ -173,8 +170,8 @@ class PluginProviderTest {
             val resultUri = pluginProvider.insert(PluginContract.NOTIFICATIONS_URI, values)
 
             // Then
-            assertNotNull(resultUri)
-            assertTrue(resultUri.toString().contains("notifications"))
+            assertThat(resultUri).isNotNull()
+            assertThat(resultUri.toString()).contains("notifications")
 
             // Wait a bit for async processing
             Thread.sleep(100)
@@ -198,7 +195,7 @@ class PluginProviderTest {
         val resultUri = pluginProvider.insert(PluginContract.NOTIFICATIONS_URI, values)
 
         // Then
-        assertNull(resultUri)
+        assertThat(resultUri).isNull()
     }
 
     @Test
@@ -217,7 +214,7 @@ class PluginProviderTest {
             )
 
         // Then
-        assertNull(cursor)
+        assertThat(cursor).isNull()
     }
 
     @Test
@@ -235,14 +232,14 @@ class PluginProviderTest {
         val resultUri = pluginProvider.insert(PluginContract.NOTIFICATIONS_URI, values)
 
         // Then
-        assertNull(resultUri)
+        assertThat(resultUri).isNull()
     }
 
     @Test
     fun `delete and update return zero`() {
         // These operations are not supported
-        assertEquals(0, pluginProvider.delete(PluginContract.NOTIFICATIONS_URI, null, null))
-        assertEquals(0, pluginProvider.update(PluginContract.NOTIFICATIONS_URI, null, null, null))
+        assertThat(pluginProvider.delete(PluginContract.NOTIFICATIONS_URI, null, null)).isEqualTo(0)
+        assertThat(pluginProvider.update(PluginContract.NOTIFICATIONS_URI, null, null, null)).isEqualTo(0)
     }
 
     @Test
@@ -281,7 +278,7 @@ class PluginProviderTest {
             val resultUri = pluginProvider.insert(PluginContract.NOTIFICATIONS_URI, values)
 
             // Then
-            assertNotNull(resultUri)
+            assertThat(resultUri).isNotNull()
 
             // Wait for async processing
             Thread.sleep(100)
