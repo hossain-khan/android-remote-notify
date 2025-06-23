@@ -21,12 +21,26 @@ class AlertFormatter
                     is RemoteAlert.BatteryAlert ->
                         DeviceAlert(
                             alertType = AlertType.BATTERY,
-                            batteryLevel = remoteAlert.batteryPercentage,
+                            batteryLevel = remoteAlert.currentBatteryLevel ?: remoteAlert.batteryPercentage,
+                            batteryThresholdPercent =
+                                if (remoteAlert.currentBatteryLevel != null) {
+                                    remoteAlert.batteryPercentage
+                                } else {
+                                    null
+                                },
                         )
                     is RemoteAlert.StorageAlert ->
                         DeviceAlert(
                             alertType = AlertType.STORAGE,
-                            availableStorageGb = remoteAlert.storageMinSpaceGb.toDouble(),
+                            availableStorageGb = remoteAlert.currentStorageGb ?: remoteAlert.storageMinSpaceGb.toDouble(),
+                            storageThresholdGb =
+                                if (remoteAlert.currentStorageGb !=
+                                    null
+                                ) {
+                                    remoteAlert.storageMinSpaceGb.toDouble()
+                                } else {
+                                    null
+                                },
                         )
                 }
             return when (formatType) {

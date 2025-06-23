@@ -14,6 +14,7 @@ import kotlinx.serialization.json.Json
  *   "deviceModel": "Google Pixel 7",
  *   "androidVersion": "12",
  *   "batteryLevel": 8,
+ *   "batteryThresholdPercent": 15,
  *   "isoDateTime": "2025-02-15T17:12:25.982"
  * }
  * ```
@@ -25,6 +26,7 @@ import kotlinx.serialization.json.Json
  *   "deviceModel": "Samsung SM-S911W",
  *   "androidVersion": "14",
  *   "availableStorageGb": 4,
+ *   "storageThresholdGb": 10,
  *   "isoDateTime": "2025-02-19T19:05:28.837761"
  * }
  * ```
@@ -39,8 +41,12 @@ data class DeviceAlertJsonPayload constructor(
     val androidVersion: String,
     @SerialName("batteryLevel")
     val batteryLevel: Int? = null,
+    @SerialName("batteryThresholdPercent")
+    val batteryThresholdPercent: Int? = null,
     @SerialName("availableStorageGb")
     val availableStorageGb: Double? = null,
+    @SerialName("storageThresholdGb")
+    val storageThresholdGb: Double? = null,
     @SerialName("isoDateTime")
     val isoDateTime: String,
 ) {
