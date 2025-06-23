@@ -21,7 +21,13 @@ class AlertFormatter
                     val deviceAlert =
                         DeviceAlert(
                             alertType = AlertType.BATTERY,
-                            batteryLevel = remoteAlert.batteryPercentage,
+                            batteryLevel = remoteAlert.currentBatteryLevel ?: remoteAlert.batteryPercentage,
+                            batteryThresholdPercent =
+                                if (remoteAlert.currentBatteryLevel != null) {
+                                    remoteAlert.batteryPercentage
+                                } else {
+                                    null
+                                },
                         )
                     formatDeviceAlert(deviceAlert, formatType)
                 }
@@ -29,7 +35,15 @@ class AlertFormatter
                     val deviceAlert =
                         DeviceAlert(
                             alertType = AlertType.STORAGE,
-                            availableStorageGb = remoteAlert.storageMinSpaceGb.toDouble(),
+                            availableStorageGb = remoteAlert.currentStorageGb ?: remoteAlert.storageMinSpaceGb.toDouble(),
+                            storageThresholdGb =
+                                if (remoteAlert.currentStorageGb !=
+                                    null
+                                ) {
+                                    remoteAlert.storageMinSpaceGb.toDouble()
+                                } else {
+                                    null
+                                },
                         )
                     formatDeviceAlert(deviceAlert, formatType)
                 }

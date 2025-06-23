@@ -185,7 +185,7 @@ class ObserveDeviceHealthWorkerTest {
             val result = worker.doWork()
 
             // Then
-            val triggeredAlert = batteryAlert.copy(batteryPercentage = 15)
+            val triggeredAlert = batteryAlert.copy(currentBatteryLevel = 15)
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify { notificationSender.sendNotification(triggeredAlert) }
             coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 15, true, NotifierType.EMAIL) }
@@ -235,10 +235,18 @@ class ObserveDeviceHealthWorkerTest {
             val result = worker.doWork()
 
             // Then
-            val triggeredAlert = storageAlert.copy(storageMinSpaceGb = 8)
+            val triggeredAlert = storageAlert.copy(currentStorageGb = 8.0)
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify { notificationSender.sendNotification(triggeredAlert) }
-            coVerify { repository.insertAlertCheckLog(2L, AlertType.STORAGE, 8, true, NotifierType.EMAIL) }
+            coVerify {
+                repository.insertAlertCheckLog(
+                    alertId = 2L,
+                    alertType = AlertType.STORAGE,
+                    alertStateValue = 8,
+                    alertTriggered = true,
+                    notifierType = NotifierType.EMAIL,
+                )
+            }
         }
 
     @Test
@@ -312,7 +320,7 @@ class ObserveDeviceHealthWorkerTest {
             val result = worker.doWork()
 
             // Then
-            val triggeredAlert = batteryAlert.copy(batteryPercentage = 15)
+            val triggeredAlert = batteryAlert.copy(currentBatteryLevel = 15)
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify { notificationSender.sendNotification(triggeredAlert) }
             coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 15, true, NotifierType.EMAIL) }

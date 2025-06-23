@@ -20,8 +20,12 @@ data class DeviceAlert(
     val androidVersion: String = android.os.Build.VERSION.RELEASE,
     /** The battery level of the device at the time of the alert, as a percentage (0-100). Null if not applicable. */
     val batteryLevel: Int? = null,
+    /** The battery threshold percentage that triggered this alert. Null if not applicable to battery alerts. */
+    val batteryThresholdPercent: Int? = null,
     /** The available storage space on the device in Gigabytes (GB) at the time of the alert. Null if not applicable. */
     val availableStorageGb: Double? = null,
+    /** The storage threshold in Gigabytes (GB) that triggered this alert. Null if not applicable to storage alerts. */
+    val storageThresholdGb: Double? = null,
     /** The timestamp when the alert was generated. Defaults to the current time. */
     val timestamp: LocalDateTime = LocalDateTime.now(),
 ) {
@@ -63,7 +67,9 @@ data class DeviceAlert(
                 deviceModel = deviceName(),
                 androidVersion = androidVersion,
                 batteryLevel = batteryLevel,
+                batteryThresholdPercent = batteryThresholdPercent,
                 availableStorageGb = availableStorageGb,
+                storageThresholdGb = storageThresholdGb,
                 isoDateTime = timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             )
         return payload.toJson()
@@ -74,8 +80,24 @@ data class DeviceAlert(
         val formattedTimestamp = timestamp.format(formatter)
         val alertMessage =
             when (alertType) {
-                AlertType.BATTERY -> "Battery Level is at $batteryLevel%"
-                AlertType.STORAGE -> "Storage Space Available: $availableStorageGb GB"
+                AlertType.BATTERY ->
+                    when {
+                        batteryThresholdPercent != null && batteryLevel != null ->
+                            "Battery Critical: Current $batteryLevel% (Threshold: $batteryThresholdPercent%)"
+                        batteryLevel != null ->
+                            "Battery Level is at $batteryLevel%"
+                        else ->
+                            "Battery Level is low"
+                    }
+                AlertType.STORAGE ->
+                    when {
+                        storageThresholdGb != null && availableStorageGb != null ->
+                            "Storage Space Critical: Current $availableStorageGb GB (Threshold: $storageThresholdGb GB)"
+                        availableStorageGb != null ->
+                            "Storage Space Available: $availableStorageGb GB"
+                        else ->
+                            "Storage Space is low"
+                    }
             }
 
         return buildString {
@@ -94,12 +116,26 @@ data class DeviceAlert(
             when (alertType) {
                 AlertType.BATTERY ->
                     Pair(
-                        "Device battery is critically low at $batteryLevel%",
+                        when {
+                            batteryThresholdPercent != null && batteryLevel != null ->
+                                "Device battery is critically low (Current: $batteryLevel%, Threshold: $batteryThresholdPercent%)"
+                            batteryLevel != null ->
+                                "Device battery is critically low at $batteryLevel%"
+                            else ->
+                                "Device battery is critically low"
+                        },
                         "Please connect your device to a charger to prevent shutdown.",
                     )
                 AlertType.STORAGE ->
                     Pair(
-                        "Available storage space is low ($availableStorageGb GB)",
+                        when {
+                            storageThresholdGb != null && availableStorageGb != null ->
+                                "Available storage space is critically low (Current: $availableStorageGb GB, Threshold: $storageThresholdGb GB)"
+                            availableStorageGb != null ->
+                                "Available storage space is low ($availableStorageGb GB)"
+                            else ->
+                                "Available storage space is low"
+                        },
                         "Consider removing unused apps or media files to free up space.",
                     )
             }
@@ -121,12 +157,26 @@ data class DeviceAlert(
             when (alertType) {
                 AlertType.BATTERY ->
                     Pair(
-                        "Device battery is critically low at $batteryLevel%",
+                        when {
+                            batteryThresholdPercent != null && batteryLevel != null ->
+                                "Device battery is critically low (Current: $batteryLevel%, Threshold: $batteryThresholdPercent%)"
+                            batteryLevel != null ->
+                                "Device battery is critically low at $batteryLevel%"
+                            else ->
+                                "Device battery is critically low"
+                        },
                         "Please connect your device to a charger to prevent shutdown.",
                     )
                 AlertType.STORAGE ->
                     Pair(
-                        "Available storage space is low ($availableStorageGb GB)",
+                        when {
+                            storageThresholdGb != null && availableStorageGb != null ->
+                                "Available storage space is critically low (Current: $availableStorageGb GB, Threshold: $storageThresholdGb GB)"
+                            availableStorageGb != null ->
+                                "Available storage space is low ($availableStorageGb GB)"
+                            else ->
+                                "Available storage space is low"
+                        },
                         "Consider removing unused apps or media files to free up space.",
                     )
             }
@@ -184,7 +234,8 @@ fun main() {
             deviceBrand = "Samsung",
             deviceModel = "Galaxy S23",
             androidVersion = "Android 13",
-            availableStorageGb = 3.2,
+            availableStorageGb = 8.5,
+            storageThresholdGb = 10.0,
         )
 
     println("Battery Alert (JSON):")
