@@ -8,7 +8,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 /**
- * Unit tests for [AlertFormatter] to ensure storage notifications include both current and threshold values.
+ * Unit tests for [AlertFormatter] to ensure both storage and battery notifications include both current and threshold values.
  */
 @RunWith(RobolectricTestRunner::class)
 class AlertFormatterTest {
@@ -91,7 +91,84 @@ class AlertFormatterTest {
     }
 
     @Test
-    fun `battery alert formatting is unchanged`() {
+    fun `battery alert with current level and threshold shows both values in extended text`() {
+        // Given
+        val batteryAlert =
+            RemoteAlert.BatteryAlert(
+                alertId = 1L,
+                batteryPercentage = 15,
+                currentBatteryLevel = 8,
+            )
+
+        // When
+        val result = alertFormatter.format(batteryAlert, DeviceAlert.FormatType.EXTENDED_TEXT)
+
+        // Then
+        assertTrue("Should contain current battery level", result.contains("Current: 8%"))
+        assertTrue("Should contain threshold value", result.contains("Threshold: 15%"))
+        assertTrue("Should indicate critically low status", result.contains("critically low"))
+    }
+
+    @Test
+    fun `battery alert with current level and threshold shows both values in HTML`() {
+        // Given
+        val batteryAlert =
+            RemoteAlert.BatteryAlert(
+                alertId = 1L,
+                batteryPercentage = 15,
+                currentBatteryLevel = 8,
+            )
+
+        // When
+        val result = alertFormatter.format(batteryAlert, DeviceAlert.FormatType.HTML)
+
+        // Then
+        assertTrue("Should contain current battery level", result.contains("Current: 8%"))
+        assertTrue("Should contain threshold value", result.contains("Threshold: 15%"))
+        assertTrue("Should indicate critically low status", result.contains("critically low"))
+    }
+
+    @Test
+    fun `battery alert with current level and threshold shows both values in text format`() {
+        // Given
+        val batteryAlert =
+            RemoteAlert.BatteryAlert(
+                alertId = 1L,
+                batteryPercentage = 15,
+                currentBatteryLevel = 8,
+            )
+
+        // When
+        val result = alertFormatter.format(batteryAlert, DeviceAlert.FormatType.TEXT)
+
+        // Then
+        assertTrue("Should contain current battery level", result.contains("Current 8%"))
+        assertTrue("Should contain threshold value", result.contains("Threshold: 15%"))
+        assertTrue("Should indicate critical status", result.contains("Critical"))
+    }
+
+    @Test
+    fun `battery alert without current level falls back to threshold only`() {
+        // Given
+        val batteryAlert =
+            RemoteAlert.BatteryAlert(
+                alertId = 1L,
+                batteryPercentage = 15,
+                // currentBatteryLevel is null (default)
+            )
+
+        // When
+        val result = alertFormatter.format(batteryAlert, DeviceAlert.FormatType.EXTENDED_TEXT)
+
+        // Then
+        assertTrue("Should contain battery percentage", result.contains("15%"))
+        assertTrue("Should not contain current/threshold distinction", !result.contains("Current:"))
+        assertTrue("Should not contain current/threshold distinction", !result.contains("Threshold:"))
+        assertTrue("Should contain critical low message", result.contains("critically low"))
+    }
+
+    @Test
+    fun `battery alert formatting maintains backward compatibility`() {
         // Given
         val batteryAlert =
             RemoteAlert.BatteryAlert(

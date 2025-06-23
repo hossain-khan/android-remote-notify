@@ -23,10 +23,12 @@ sealed interface RemoteAlert {
      *
      * @property alertId Unique ID for the alert.
      * @property batteryPercentage The battery percentage threshold to trigger the alert.
+     * @property currentBatteryLevel The current battery level percentage when the alert was triggered. Used for notification display.
      */
     data class BatteryAlert(
         override val alertId: Long = 0,
         val batteryPercentage: Int,
+        val currentBatteryLevel: Int? = null,
     ) : RemoteAlert
 
     /**

@@ -185,7 +185,7 @@ class ObserveDeviceHealthWorkerTest {
             val result = worker.doWork()
 
             // Then
-            val triggeredAlert = batteryAlert.copy(batteryPercentage = 15)
+            val triggeredAlert = batteryAlert.copy(currentBatteryLevel = 15)
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify { notificationSender.sendNotification(triggeredAlert) }
             coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 15, true, NotifierType.EMAIL) }
@@ -320,7 +320,7 @@ class ObserveDeviceHealthWorkerTest {
             val result = worker.doWork()
 
             // Then
-            val triggeredAlert = batteryAlert.copy(batteryPercentage = 15)
+            val triggeredAlert = batteryAlert.copy(currentBatteryLevel = 15)
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify { notificationSender.sendNotification(triggeredAlert) }
             coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 15, true, NotifierType.EMAIL) }

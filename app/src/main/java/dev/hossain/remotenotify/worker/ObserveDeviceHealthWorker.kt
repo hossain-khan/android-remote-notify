@@ -151,7 +151,8 @@ class ObserveDeviceHealthWorker(
                             is RemoteAlert.BatteryAlert ->
                                 RemoteAlert.BatteryAlert(
                                     alertId = remoteAlert.alertId,
-                                    batteryPercentage = stateValue,
+                                    batteryPercentage = remoteAlert.batteryPercentage,
+                                    currentBatteryLevel = stateValue,
                                 )
                             is RemoteAlert.StorageAlert ->
                                 RemoteAlert.StorageAlert(

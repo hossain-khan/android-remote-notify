@@ -21,7 +21,13 @@ class AlertFormatter
                     is RemoteAlert.BatteryAlert ->
                         DeviceAlert(
                             alertType = AlertType.BATTERY,
-                            batteryLevel = remoteAlert.batteryPercentage,
+                            batteryLevel = remoteAlert.currentBatteryLevel ?: remoteAlert.batteryPercentage,
+                            batteryThresholdPercent =
+                                if (remoteAlert.currentBatteryLevel != null) {
+                                    remoteAlert.batteryPercentage
+                                } else {
+                                    null
+                                },
                         )
                     is RemoteAlert.StorageAlert ->
                         DeviceAlert(
