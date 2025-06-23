@@ -78,14 +78,15 @@ data class DeviceAlert(
         val alertMessage =
             when (alertType) {
                 AlertType.BATTERY -> "Battery Level is at $batteryLevel%"
-                AlertType.STORAGE -> when {
-                    storageThresholdGb != null && availableStorageGb != null ->
-                        "Storage Space Critical: Current $availableStorageGb GB (Threshold: $storageThresholdGb GB)"
-                    availableStorageGb != null ->
-                        "Storage Space Available: $availableStorageGb GB"
-                    else ->
-                        "Storage Space is low"
-                }
+                AlertType.STORAGE ->
+                    when {
+                        storageThresholdGb != null && availableStorageGb != null ->
+                            "Storage Space Critical: Current $availableStorageGb GB (Threshold: $storageThresholdGb GB)"
+                        availableStorageGb != null ->
+                            "Storage Space Available: $availableStorageGb GB"
+                        else ->
+                            "Storage Space is low"
+                    }
             }
 
         return buildString {

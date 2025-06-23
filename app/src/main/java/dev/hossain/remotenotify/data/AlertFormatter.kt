@@ -27,7 +27,14 @@ class AlertFormatter
                         DeviceAlert(
                             alertType = AlertType.STORAGE,
                             availableStorageGb = remoteAlert.currentStorageGb ?: remoteAlert.storageMinSpaceGb.toDouble(),
-                            storageThresholdGb = if (remoteAlert.currentStorageGb != null) remoteAlert.storageMinSpaceGb.toDouble() else null,
+                            storageThresholdGb =
+                                if (remoteAlert.currentStorageGb !=
+                                    null
+                                ) {
+                                    remoteAlert.storageMinSpaceGb.toDouble()
+                                } else {
+                                    null
+                                },
                         )
                 }
             return when (formatType) {
