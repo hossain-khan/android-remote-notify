@@ -72,3 +72,17 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
+
+# https://issuetracker.google.com/issues/413078297?pli=1
+# Thanks for the quick fix! Confirming the issue is resolved in DataStore 1.1.7.
+# DataStore Preferences specific rules
+#-keep class androidx.datastore.preferences.protobuf.** { *; }
+#-keep class androidx.datastore.preferences.internal.** { *; }
+
+# Generic rules for Protocol Buffers often used by DataStore
+#-dontwarn com.google.protobuf.**
+#
+#-keepclassmembers class com.google.protobuf.** {
+#    <fields>;
+#    <methods>;
+#}
