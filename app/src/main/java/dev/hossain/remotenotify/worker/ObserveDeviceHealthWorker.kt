@@ -93,6 +93,8 @@ class ObserveDeviceHealthWorker(
                             stateValue = deviceCurrentAvailableStorage.toInt(),
                         )
                     }
+
+                    is RemoteAlert.PluginAlert -> TODO()
                 }
             }
 
@@ -160,6 +162,8 @@ class ObserveDeviceHealthWorker(
                                     storageMinSpaceGb = remoteAlert.storageMinSpaceGb,
                                     currentStorageGb = stateValue.toDouble(),
                                 )
+
+                            is RemoteAlert.PluginAlert -> TODO()
                         }
 
                     kotlin

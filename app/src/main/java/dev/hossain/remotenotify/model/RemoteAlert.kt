@@ -44,6 +44,28 @@ sealed interface RemoteAlert {
         val storageMinSpaceGb: Int,
         val currentStorageGb: Double? = null,
     ) : RemoteAlert
+
+    /**
+     * Represents a plugin notification request from an external app.
+     * This allows other apps to send notifications through the configured mediums.
+     *
+     * @property alertId Unique ID for the alert.
+     * @property title The title/subject of the notification.
+     * @property message The body content of the notification.
+     * @property sourcePackage Package name of the requesting app.
+     * @property sourceAppName Human-readable name of the requesting app.
+     * @property priority Priority level of the notification.
+     * @property requestId Unique identifier for tracking the request.
+     */
+    data class PluginAlert(
+        override val alertId: Long = 0,
+        val title: String,
+        val message: String,
+        val sourcePackage: String,
+        val sourceAppName: String,
+        val priority: String,
+        val requestId: String,
+    ) : RemoteAlert
 }
 
 /**
@@ -66,6 +88,14 @@ internal fun RemoteAlert.toAlertConfigEntity(): AlertConfigEntity =
                 type = AlertType.STORAGE,
                 batteryPercentage = 0,
             )
+        is RemoteAlert.PluginAlert ->
+            // Plugin alerts are not persisted to database, return default
+            AlertConfigEntity(
+                id = alertId,
+                batteryPercentage = 0,
+                type = AlertType.BATTERY, // Default type
+                storageMinSpaceGb = 0,
+            )
     }
 
 /**
@@ -76,6 +106,7 @@ internal fun RemoteAlert.toAlertType(): AlertType =
     when (this) {
         is RemoteAlert.BatteryAlert -> AlertType.BATTERY
         is RemoteAlert.StorageAlert -> AlertType.STORAGE
+        is RemoteAlert.PluginAlert -> AlertType.BATTERY // Default for plugin alerts
     }
 
 /**
@@ -100,4 +131,5 @@ internal fun RemoteAlert.toTypeDisplayName(): String =
     when (this) {
         is RemoteAlert.BatteryAlert -> "Battery"
         is RemoteAlert.StorageAlert -> "Storage"
+        is RemoteAlert.PluginAlert -> "Plugin: $sourceAppName"
     }
