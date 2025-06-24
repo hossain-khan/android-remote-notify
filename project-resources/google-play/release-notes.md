@@ -10,7 +10,7 @@
 
 -----------------------------------------------------------------------------
 
-## Release v1.14
+## Release v1.14.1
 - Initial 1.x release of 'Remote Notify'! 🎉
 - Monitor battery 🔋 and storage 💾 levels of your remote Android devices.
 - Set up custom alerts and receive notifications via Email, Twilio SMS, Slack, Telegram, and REST webhooks.
