@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Git pre-commit hook for Android Remote Notify
+# This hook runs 'formatKotlin' task before each commit to ensure code formatting consistency
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+echo -e "${YELLOW}🔍 Running pre-commit hook: formatKotlin${NC}"
+
+# Check if there are any staged files
+if git diff --cached --quiet; then
+    echo -e "${YELLOW}ℹ️  No staged files found. Skipping formatKotlin.${NC}"
+    exit 0
+fi
+
+# Get the list of staged Kotlin files
+STAGED_KOTLIN_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(kt|kts)$' || true)
+
+if [ -z "$STAGED_KOTLIN_FILES" ]; then
+    echo -e "${YELLOW}ℹ️  No staged Kotlin files found. Skipping formatKotlin.${NC}"
+    exit 0
+fi
+
+echo -e "${YELLOW}📝 Found staged Kotlin files, running formatKotlin...${NC}"
+
+# Run formatKotlin task
+echo -e "${YELLOW}🔧 Running: ./gradlew formatKotlin${NC}"
+./gradlew formatKotlin
+
+# Check if formatKotlin succeeded
+GRADLE_EXIT_CODE=$?
+if [ $GRADLE_EXIT_CODE -ne 0 ]; then
+    echo -e "${RED}❌ formatKotlin task failed with exit code $GRADLE_EXIT_CODE.${NC}"
+    echo -e "${RED}   Please fix the build issues and try again.${NC}"
+    echo -e "${YELLOW}   Common issues:${NC}"
+    echo -e "${YELLOW}   - Missing local.properties with EMAIL_API_KEY${NC}"
+    echo -e "${YELLOW}   - Gradle dependency issues${NC}"
+    echo -e "${YELLOW}   - Android SDK not configured${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ formatKotlin task completed successfully.${NC}"
+
+# Check if any files were modified by formatKotlin
+MODIFIED_FILES=$(git diff --name-only)
+
+if [ -n "$MODIFIED_FILES" ]; then
+    echo -e "${YELLOW}📝 The following files were formatted and will be added to the commit:${NC}"
+    echo "$MODIFIED_FILES"
+    
+    # Add the modified files to staging
+    git add $MODIFIED_FILES
+    
+    echo -e "${GREEN}✅ Formatted files have been added to the commit.${NC}"
+else
+    echo -e "${GREEN}✅ No formatting changes were needed.${NC}"
+fi
+
+echo -e "${GREEN}🎉 Pre-commit hook completed successfully. Proceeding with commit.${NC}"
+exit 0
