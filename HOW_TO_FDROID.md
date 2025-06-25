@@ -183,7 +183,7 @@ If you want to distribute through your own F-Droid repository:
    - [ ] Add donation information if desired (replace `[PLACEHOLDER - Add if you want to include donation info]`)
    - [ ] Verify and update app description for F-Droid audience
 
-3. **Test F-Droid Build Thoroughly**
+### 3. Test F-Droid Build Thoroughly
    ```bash
    # Test clean build
    ./gradlew clean assembleFdroidRelease
@@ -194,6 +194,8 @@ If you want to distribute through your own F-Droid repository:
    # Check for any Google dependencies
    unzip -l app/build/outputs/apk/fdroid/release/app-fdroid-release.apk | grep -i google
    ```
+   
+   **Note**: If you encounter Android Gradle Plugin resolution issues in CI environments, try using a local development machine or different Android SDK setup. The build configuration is correct, but some CI environments may have limitations with newer AGP versions.
 
 4. **Create Release Notes**
    - Update [release notes](project-resources/google-play/release-notes.md) to mention F-Droid availability

@@ -1,0 +1,77 @@
+# F-Droid Metadata Template
+# This is a template for the F-Droid metadata file that would be created in the F-Droid data repository
+# File would be located at: metadata/dev.hossain.remotenotify.fdroid.yml
+
+Categories:
+  - System
+  - Utilities
+
+License: MIT
+
+AuthorName: Hossain Khan
+AuthorEmail: [PLACEHOLDER - Replace with maintainer email]
+AuthorWebSite: https://github.com/hossain-khan
+
+WebSite: https://github.com/hossain-khan/android-remote-notify
+SourceCode: https://github.com/hossain-khan/android-remote-notify
+IssueTracker: https://github.com/hossain-khan/android-remote-notify/issues
+Changelog: https://github.com/hossain-khan/android-remote-notify/blob/main/project-resources/google-play/release-notes.md
+
+Summary: Monitor remote Android device battery and storage levels
+
+Description: |
+  Remote Notify monitors battery and storage levels on Android devices and sends
+  notifications when thresholds are exceeded. Perfect for managing remote devices
+  that need proactive monitoring.
+
+  Features:
+  * Battery level monitoring with customizable thresholds (5%-50%)
+  * Storage space monitoring with configurable alerts (down to 2GB)
+  * Multiple notification channels: Telegram, REST webhooks, Slack
+  * Periodic background monitoring using WorkManager
+  * Alert history and logging with filtering capabilities
+  * Material3 UI with dark/light theme support
+  * Privacy-focused: No tracking or data collection in F-Droid builds
+
+  FOSS Benefits:
+  This F-Droid version is completely free and open source, excluding all
+  proprietary Google services. No external API keys are required for core
+  functionality. Users can monitor their devices using Telegram bots, custom
+  webhooks, or Slack integrations.
+
+  Perfect for:
+  * Monitoring remote IoT devices and always-on Android systems
+  * Server administrators managing Android-based systems
+  * Home automation setups with Android devices
+  * Anyone who needs proactive device health monitoring
+
+  The app uses modern Android architecture with Jetpack Compose UI, WorkManager
+  for reliable background processing, and follows Material Design 3 guidelines.
+
+RepoType: git
+Repo: https://github.com/hossain-khan/android-remote-notify.git
+
+Builds:
+  - versionName: '1.15'
+    versionCode: 19
+    commit: [PLACEHOLDER - Replace with actual git tag when ready]
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-17-jdk-headless
+      - update-alternatives --auto java
+    gradle:
+      - fdroid
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: '1.15'
+CurrentVersionCode: 19
+
+# Anti-Features: none for F-Droid build
+# No tracking, no non-free dependencies, no ads
+
+# Build notes:
+# - Uses fdroid flavor which excludes Google services
+# - No external API keys required for F-Droid build
+# - All proprietary dependencies are excluded via product flavors
