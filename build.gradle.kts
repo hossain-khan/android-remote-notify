@@ -28,4 +28,8 @@ plugins {
     // Project: https://github.com/square/anvil
     // Also see: https://github.com/ZacSweers/anvil/blob/main/FORK.md
     alias(libs.plugins.anvil) apply false
+
+    // Firebase and Google Services plugins (conditionally applied in app module)
+    alias(libs.plugins.firebase.crashlytics) apply false
+    alias(libs.plugins.google.services) apply false
 }

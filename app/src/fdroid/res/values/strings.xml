@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- F-Droid specific resources -->
+    <string name="app_name">Remote Notify (F-Droid)</string>
+    <string name="distribution_channel">F-Droid</string>
+    
+    <!-- Feature availability for F-Droid -->
+    <string name="email_notifications_unavailable">Email notifications require external API keys and are not available in F-Droid builds.</string>
+    <string name="play_review_unavailable">In-app reviews are not available in F-Droid builds.</string>
+</resources>
