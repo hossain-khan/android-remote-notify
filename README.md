@@ -12,6 +12,25 @@ Very specialized app that will notify about remote android device diagnostic dat
 
 <a href="https://play.google.com/store/apps/details?id=dev.hossain.remotenotify&pcampaignid=web_share" target="_blank"><img src="project-resources/google-play/GetItOnGooglePlay_Badge_Web_color_English.png" height="45"></a>
 
+## F-Droid Support 🆓
+
+This app is also available for F-Droid! The F-Droid version is built without Google services for a fully open-source experience.
+
+> [!TIP]
+> **F-Droid Build Features:**
+> - ✅ All core monitoring functionality (battery, storage)
+> - ✅ Telegram, webhook, and Slack notifications  
+> - ✅ No Google services or tracking
+> - ❌ Email notifications (requires external API)
+> - ❌ Google Play In-App Review
+
+📄 **Preparing for F-Droid submission** - See [HOW_TO_FDROID.md](HOW_TO_FDROID.md) for submission instructions.
+
+**Build F-Droid version locally:**
+```bash
+./gradlew assembleFdroidRelease
+```
+
 > [!CAUTION]  
 > LIMITATION: This app uses the [`WorkManager`](https://developer.android.com/reference/androidx/work/WorkManager) to schedule the periodic check for device health. 
 > The Work Manager is not guaranteed to run at exact time, it may be delayed or not run at all when the device is in deep [DOZE](https://developer.android.com/training/monitoring-device-state/doze-standby) mode or using battery saver. 

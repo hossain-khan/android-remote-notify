@@ -9,4 +9,9 @@ object MailgunConfig {
     const val API_KEY = BuildConfig.EMAIL_API_KEY
     const val DOMAIN = "notify.liquidlabs.ca"
     const val FROM_EMAIL = "alert@notify.liquidlabs.ca"
+    
+    /**
+     * Indicates if email notifications are supported in this build variant
+     */
+    const val IS_SUPPORTED = BuildConfig.SUPPORTS_EMAIL_NOTIFICATIONS
 }

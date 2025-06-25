@@ -4,8 +4,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.androidx.room)
     alias(libs.plugins.anvil)
-    alias(libs.plugins.firebase.crashlytics)
-    alias(libs.plugins.google.services)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.kapt)
@@ -14,6 +12,13 @@ plugins {
     alias(libs.plugins.kotlinter)
     alias(libs.plugins.kotlinx.kover)
     alias(libs.plugins.ksp)
+}
+
+// Apply Firebase plugins only when google-services.json exists (for gplay builds)
+val googleServicesFile = file("google-services.json")
+if (googleServicesFile.exists()) {
+    apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+    apply(plugin = libs.plugins.google.services.get().pluginId)
 }
 
 android {
@@ -28,24 +33,49 @@ android {
         // 📣 Don't forget to update release notes! 🤓
         versionName = "1.15"
 
-        // Read key or other properties from local.properties
-        val localProperties =
-            project.rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use {
-                Properties().apply { load(it) }
-            }
-        val apiKey = System.getenv("EMAIL_API_KEY") ?: localProperties?.getProperty("EMAIL_API_KEY") ?: ""
-        if (apiKey.isBlank()) {
-            error("""
-                EMAIL_API_KEY is not set in `local.properties`
-                Please add 'EMAIL_API_KEY=your_api_key' to `local.properties` file.
-            """.trimIndent())
-        }
-        buildConfigField("String", "EMAIL_API_KEY", "\"$apiKey\"")
-
         // Git commit hash to identify build source
         buildConfigField("String", "GIT_COMMIT_HASH", "\"${getGitCommitHash()}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("fdroid") {
+            dimension = "distribution"
+            applicationIdSuffix = ".fdroid"
+            versionNameSuffix = "-fdroid"
+            
+            // For F-Droid builds, email functionality is disabled by default
+            buildConfigField("String", "EMAIL_API_KEY", "\"\"")
+            buildConfigField("boolean", "SUPPORTS_EMAIL_NOTIFICATIONS", "false")
+            buildConfigField("boolean", "SUPPORTS_GOOGLE_PLAY_REVIEW", "false")
+            buildConfigField("boolean", "SUPPORTS_FIREBASE_ANALYTICS", "false")
+            buildConfigField("boolean", "SUPPORTS_FIREBASE_CRASHLYTICS", "false")
+            
+            // F-Droid specific app name
+            resValue("string", "flavor_app_name", "Remote Notify (F-Droid)")
+        }
+
+        create("gplay") {
+            dimension = "distribution"
+            
+            // Read API key for Google Play version
+            val localProperties =
+                project.rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use {
+                    Properties().apply { load(it) }
+                }
+            val apiKey = System.getenv("EMAIL_API_KEY") ?: localProperties?.getProperty("EMAIL_API_KEY") ?: ""
+            
+            buildConfigField("String", "EMAIL_API_KEY", "\"$apiKey\"")
+            buildConfigField("boolean", "SUPPORTS_EMAIL_NOTIFICATIONS", "true")
+            buildConfigField("boolean", "SUPPORTS_GOOGLE_PLAY_REVIEW", "true")
+            buildConfigField("boolean", "SUPPORTS_FIREBASE_ANALYTICS", "true")
+            buildConfigField("boolean", "SUPPORTS_FIREBASE_CRASHLYTICS", "true")
+            
+            // Default app name
+            resValue("string", "flavor_app_name", "Remote Notify")
+        }
     }
 
     buildTypes {
@@ -56,13 +86,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            firebaseCrashlytics {
-                // https://firebase.google.com/docs/crashlytics/get-deobfuscated-reports?platform=android
-                // https://developer.android.com/studio/debug/stacktraces
-                // https://developer.android.com/tools/retrace
-                // https://www.guardsquare.com/manual/tools/retrace
-                mappingFileUploadEnabled = true
-            }
         }
     }
 
@@ -190,13 +213,14 @@ dependencies {
     implementation(libs.eithernet)
     implementation(libs.eithernet.integration.retrofit)
 
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.analytics)
+    // Firebase and Google Play dependencies only for gplay flavor
+    "gplayImplementation"(platform(libs.firebase.bom))
+    "gplayImplementation"(libs.firebase.crashlytics)
+    "gplayImplementation"(libs.firebase.analytics)
 
-    // Google Play In-App Reviews
-    implementation(libs.google.play.review)
-    implementation(libs.google.play.review.ktx)
+    // Google Play In-App Reviews only for gplay flavor
+    "gplayImplementation"(libs.google.play.review)
+    "gplayImplementation"(libs.google.play.review.ktx)
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // Linting
