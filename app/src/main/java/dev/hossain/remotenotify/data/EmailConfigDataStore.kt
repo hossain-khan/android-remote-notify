@@ -13,8 +13,8 @@ import dev.hossain.remotenotify.notifier.mailgun.MailgunConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import me.tatarka.inject.annotations.Inject
-import me.tatarka.inject.annotations.SingleIn
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 
 private val Context.emailConfigDataStore: DataStore<Preferences> by preferencesDataStore(name = "email_config")
 

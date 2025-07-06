@@ -231,3 +231,10 @@ fun getGitCommitHash(): String {
     process.waitFor()
     return output.readText().trim()
 }
+
+
+metro {
+  // https://zacsweers.github.io/metro/debugging/
+  debug.set(true)
+  reportsDestination.set(layout.buildDirectory.dir("metro/reports"))
+}

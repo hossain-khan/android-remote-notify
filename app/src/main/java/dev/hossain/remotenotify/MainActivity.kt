@@ -15,7 +15,7 @@ import com.slack.circuit.overlay.ContentWithOverlays
 import com.slack.circuitx.gesturenavigation.GestureNavigationDecorationFactory
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertlist.AlertsListScreen
-import me.tatarka.inject.annotations.Inject
+import dev.zacsweers.metro.Inject
 
 class MainActivity
     @Inject

@@ -12,8 +12,8 @@ import dev.hossain.remotenotify.model.AlertMediumConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import me.tatarka.inject.annotations.Inject
-import me.tatarka.inject.annotations.SingleIn
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import timber.log.Timber
 
 private val Context.slackWebhookConfigDataStore: DataStore<Preferences> by preferencesDataStore(name = "slack_webhook_config")

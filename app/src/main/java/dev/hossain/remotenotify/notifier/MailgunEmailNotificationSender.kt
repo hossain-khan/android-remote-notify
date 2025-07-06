@@ -9,7 +9,7 @@ import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.DeviceAlert
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.toTypeDisplayName
-import me.tatarka.inject.annotations.Inject
+import dev.zacsweers.metro.Inject
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request

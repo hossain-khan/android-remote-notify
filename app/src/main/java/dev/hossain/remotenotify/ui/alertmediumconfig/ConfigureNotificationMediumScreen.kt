@@ -47,9 +47,8 @@ import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.PopResult
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.Inject
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
@@ -117,7 +116,7 @@ data class ConfigureNotificationMediumScreen constructor(
 }
 
 class ConfigureNotificationMediumPresenter
-    @AssistedInject
+    @Inject
     constructor(
         @Assisted private val screen: ConfigureNotificationMediumScreen,
         @Assisted private val navigator: Navigator,
@@ -260,7 +259,6 @@ class ConfigureNotificationMediumPresenter
         }
 
         @CircuitInject(ConfigureNotificationMediumScreen::class, AppScope::class)
-        @AssistedFactory
         fun interface Factory {
             fun create(
                 screen: ConfigureNotificationMediumScreen,

@@ -18,9 +18,9 @@ import dev.hossain.remotenotify.analytics.Analytics.Companion.eventConfigureNoti
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.notifier.NotifierType
-import me.tatarka.inject.annotations.ContributesBinding
-import me.tatarka.inject.annotations.Inject
-import me.tatarka.inject.annotations.SingleIn
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import java.util.Locale
 import kotlin.reflect.KClass
 

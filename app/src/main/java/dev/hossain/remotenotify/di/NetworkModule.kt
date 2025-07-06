@@ -1,8 +1,8 @@
 package dev.hossain.remotenotify.di
 
 import dev.hossain.remotenotify.BuildConfig
-import me.tatarka.inject.annotations.ContributesTo
-import me.tatarka.inject.annotations.Provides
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Provides
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 

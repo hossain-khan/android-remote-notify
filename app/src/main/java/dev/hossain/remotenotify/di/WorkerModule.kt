@@ -10,8 +10,8 @@ import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.worker.ObserveDeviceHealthWorker
-import me.tatarka.inject.annotations.ContributesTo
-import me.tatarka.inject.annotations.Provides
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Provides
 
 // Metro module to contribute the WorkerFactory
 @ContributesTo(AppScope::class)

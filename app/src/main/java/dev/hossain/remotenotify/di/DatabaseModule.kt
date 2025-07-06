@@ -5,9 +5,9 @@ import androidx.room.Room
 import dev.hossain.remotenotify.db.AlertCheckLogDao
 import dev.hossain.remotenotify.db.AlertConfigDao
 import dev.hossain.remotenotify.db.AppDatabase
-import me.tatarka.inject.annotations.ContributesTo
-import me.tatarka.inject.annotations.Provides
-import me.tatarka.inject.annotations.SingleIn
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Provides
+import dev.zacsweers.metro.SingleIn
 
 @ContributesTo(AppScope::class)
 interface DatabaseModule {

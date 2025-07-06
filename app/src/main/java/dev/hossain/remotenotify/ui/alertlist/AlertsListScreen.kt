@@ -74,7 +74,8 @@ import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_ID
 import dev.hossain.remotenotify.worker.ObserveDeviceHealthWorker.Companion.WORK_DATA_KEY_LAST_RUN_TIMESTAMP_MS
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
-import me.tatarka.inject.annotations.Inject
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.Inject
 import timber.log.Timber
 
 @Parcelize
@@ -113,7 +114,7 @@ data object AlertsListScreen : Screen {
 class AlertsListPresenter
     @Inject
     constructor(
-        private val navigator: Navigator,
+        @Assisted private val navigator: Navigator,
         private val remoteAlertRepository: RemoteAlertRepository,
         private val batteryMonitor: BatteryMonitor,
         private val storageMonitor: StorageMonitor,

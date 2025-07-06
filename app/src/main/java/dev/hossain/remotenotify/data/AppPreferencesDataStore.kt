@@ -12,8 +12,8 @@ import dev.hossain.remotenotify.di.ApplicationContext
 import dev.hossain.remotenotify.worker.DEFAULT_PERIODIC_INTERVAL_MINUTES
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import me.tatarka.inject.annotations.Inject
-import me.tatarka.inject.annotations.SingleIn
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 
 private val Context.appPreferencesDataStore: DataStore<Preferences> by preferencesDataStore(name = "app_preferences")
 

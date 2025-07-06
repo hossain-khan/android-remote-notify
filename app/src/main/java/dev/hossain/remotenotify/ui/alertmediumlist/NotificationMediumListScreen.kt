@@ -278,7 +278,6 @@ class NotificationMediumListPresenter
          * Factory for creating instances of [NotificationMediumListPresenter].
          */
         @CircuitInject(NotificationMediumListScreen::class, AppScope::class)
-        @AssistedFactory
         fun interface Factory {
             /**
              * Creates an instance of [NotificationMediumListPresenter].

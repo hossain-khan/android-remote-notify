@@ -7,7 +7,7 @@ import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.DeviceAlert.FormatType
 import dev.hossain.remotenotify.model.RemoteAlert
 import kotlinx.coroutines.flow.first
-import me.tatarka.inject.annotations.Inject
+import dev.zacsweers.metro.Inject
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request

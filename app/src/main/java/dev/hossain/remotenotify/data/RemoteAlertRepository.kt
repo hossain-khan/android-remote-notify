@@ -14,8 +14,8 @@ import dev.hossain.remotenotify.model.toRemoteAlert
 import dev.hossain.remotenotify.notifier.NotifierType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import me.tatarka.inject.annotations.ContributesBinding
-import me.tatarka.inject.annotations.Inject
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 
 interface RemoteAlertRepository {
     suspend fun saveRemoteAlert(remoteAlert: RemoteAlert)

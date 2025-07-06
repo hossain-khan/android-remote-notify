@@ -49,8 +49,8 @@ import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.Inject
 import dev.hossain.remotenotify.BuildConfig
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics

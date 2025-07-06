@@ -5,8 +5,8 @@ import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.DeviceAlert
 import dev.hossain.remotenotify.model.DeviceAlert.FormatType
 import dev.hossain.remotenotify.model.RemoteAlert
-import me.tatarka.inject.annotations.Inject
-import me.tatarka.inject.annotations.SingleIn
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 
 @SingleIn(AppScope::class)
 class AlertFormatter

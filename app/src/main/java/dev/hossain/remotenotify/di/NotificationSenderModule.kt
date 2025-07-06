@@ -7,10 +7,10 @@ import dev.hossain.remotenotify.notifier.SlackWebhookRequestSender
 import dev.hossain.remotenotify.notifier.TelegramNotificationSender
 import dev.hossain.remotenotify.notifier.TwilioNotificationSender
 import dev.hossain.remotenotify.notifier.WebhookRequestSender
-import me.tatarka.inject.annotations.ContributesTo
-import me.tatarka.inject.annotations.IntoSet
-import me.tatarka.inject.annotations.Multibinding
-import me.tatarka.inject.annotations.Provides
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.IntoSet
+import dev.zacsweers.metro.Multibinding
+import dev.zacsweers.metro.Provides
 
 @Keep
 @ContributesTo(AppScope::class)
