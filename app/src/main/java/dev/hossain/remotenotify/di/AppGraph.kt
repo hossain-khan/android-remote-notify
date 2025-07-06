@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
 @DependencyGraph
 @SingleIn(AppScope::class)
 interface AppGraph {
-    val activityProviders: Map<KClass<out Activity>, @JvmSuppressWildcards Provider<Activity>>
+    val activityProviders: Map<KClass<out Activity>, Provider<Activity>>
     val circuit: Circuit
     val workerFactory: WorkerFactory
 
