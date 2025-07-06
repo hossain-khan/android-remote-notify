@@ -6,8 +6,8 @@ import dev.hossain.remotenotify.data.WebhookConfigDataStore
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.DeviceAlert.FormatType
 import dev.hossain.remotenotify.model.RemoteAlert
-import kotlinx.coroutines.flow.first
 import dev.zacsweers.metro.Inject
+import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request

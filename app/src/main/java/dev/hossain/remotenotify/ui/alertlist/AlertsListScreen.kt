@@ -72,10 +72,10 @@ import dev.hossain.remotenotify.ui.alertchecklog.AlertCheckLogViewerScreen
 import dev.hossain.remotenotify.ui.alertmediumlist.NotificationMediumListScreen
 import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_ID
 import dev.hossain.remotenotify.worker.ObserveDeviceHealthWorker.Companion.WORK_DATA_KEY_LAST_RUN_TIMESTAMP_MS
-import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.Inject
+import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 
 @Parcelize

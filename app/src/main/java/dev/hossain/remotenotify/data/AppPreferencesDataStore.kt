@@ -10,10 +10,10 @@ import androidx.datastore.preferences.preferencesDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.di.ApplicationContext
 import dev.hossain.remotenotify.worker.DEFAULT_PERIODIC_INTERVAL_MINUTES
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 private val Context.appPreferencesDataStore: DataStore<Preferences> by preferencesDataStore(name = "app_preferences")
 

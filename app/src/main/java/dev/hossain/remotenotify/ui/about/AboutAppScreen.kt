@@ -49,14 +49,14 @@ import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
-import dev.zacsweers.metro.Assisted
-import dev.zacsweers.metro.Inject
 import dev.hossain.remotenotify.BuildConfig
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertlist.AppUsageEducationSheetUi
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -80,7 +80,7 @@ data object AboutAppScreen : Screen {
 }
 
 class AboutAppPresenter
-    @AssistedInject
+    @Inject
     constructor(
         @Assisted private val navigator: Navigator,
         private val analytics: Analytics,

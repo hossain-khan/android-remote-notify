@@ -9,11 +9,11 @@ import androidx.datastore.preferences.preferencesDataStore
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.di.ApplicationContext
 import dev.hossain.remotenotify.model.AlertMediumConfig
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.SingleIn
 import timber.log.Timber
 
 private val Context.webhookConfigDataStore: DataStore<Preferences> by preferencesDataStore(name = "webhook_config")

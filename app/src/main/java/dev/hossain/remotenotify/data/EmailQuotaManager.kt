@@ -10,10 +10,10 @@ import androidx.datastore.preferences.preferencesDataStore
 import dev.hossain.remotenotify.data.EmailQuotaManager.Companion.ValidationKeys.EMAIL_DAILY_QUOTA
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.di.ApplicationContext
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import java.time.Instant
 
 private val Context.emailQuotaDataStore: DataStore<Preferences> by preferencesDataStore(name = "email_quota")
