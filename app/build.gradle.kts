@@ -155,7 +155,7 @@ dependencies {
     implementation(libs.circuitx.gestureNav)
     implementation(libs.circuitx.overlays)
     implementation(libs.androidx.junit.ktx)
-    ksp(libs.circuit.codegen)
+    // Removed: ksp(libs.circuit.codegen) - not compatible with Metro
 
     implementation(libs.timber)
 
@@ -216,10 +216,7 @@ dependencies {
     testImplementation(libs.robolectric)
 }
 
-ksp {
-    // Circuit-KSP
-    arg("circuit-codegen-extraContributingAnnotations", "com.slack.circuit.codegen.annotations.CircuitInject")
-}
+
 
 
 // Helper function to get the current Git commit hash

@@ -257,14 +257,6 @@ class ConfigureNotificationMediumPresenter
                 }
             }
         }
-
-        @CircuitInject(ConfigureNotificationMediumScreen::class, AppScope::class)
-        fun interface Factory {
-            fun create(
-                screen: ConfigureNotificationMediumScreen,
-                navigator: Navigator,
-            ): ConfigureNotificationMediumPresenter
-        }
     }
 
 @OptIn(ExperimentalMaterial3Api::class)

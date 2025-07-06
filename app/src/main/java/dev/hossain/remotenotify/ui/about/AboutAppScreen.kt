@@ -133,11 +133,6 @@ class AboutAppPresenter
                 }
             }
         }
-
-        @CircuitInject(AboutAppScreen::class, AppScope::class)
-        fun interface Factory {
-            fun create(navigator: Navigator): AboutAppPresenter
-        }
     }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -8,7 +8,7 @@ import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provider
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
-import dev.zacsweers.metro.createGraph
+import dev.zacsweers.metro.createGraphFactory
 
 @DependencyGraph
 @SingleIn(AppScope::class)
@@ -25,6 +25,6 @@ interface AppGraph {
     }
 
     companion object {
-        fun create(context: Context): AppGraph = createGraph<AppGraph> { create(context) }
+        override fun create(context: Context): AppGraph = createGraphFactory<Factory>().create(context)
     }
 }

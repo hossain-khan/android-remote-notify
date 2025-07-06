@@ -272,19 +272,6 @@ class NotificationMediumListPresenter
                 }
             }
         }
-
-        /**
-         * Factory for creating instances of [NotificationMediumListPresenter].
-         */
-        @CircuitInject(NotificationMediumListScreen::class, AppScope::class)
-        fun interface Factory {
-            /**
-             * Creates an instance of [NotificationMediumListPresenter].
-             * @param navigator The navigator for navigating to other screens.
-             * @return An instance of [NotificationMediumListPresenter].
-             */
-            fun create(navigator: Navigator): NotificationMediumListPresenter
-        }
     }
 
 /**

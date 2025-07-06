@@ -243,11 +243,6 @@ class AlertCheckLogViewerPresenter
                 },
             )
         }
-
-        @CircuitInject(AlertCheckLogViewerScreen::class, AppScope::class)
-        fun interface Factory {
-            fun create(navigator: Navigator): AlertCheckLogViewerPresenter
-        }
     }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -9,33 +9,27 @@ import dev.hossain.remotenotify.notifier.TwilioNotificationSender
 import dev.hossain.remotenotify.notifier.WebhookRequestSender
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.IntoSet
-import dev.zacsweers.metro.Multibinding
 import dev.zacsweers.metro.Provides
 
 @Keep
 @ContributesTo(AppScope::class)
 interface NotificationSenderModule {
-    @Multibinding
     @IntoSet
     @Provides
     fun bindTelegramNotificationSender(sender: TelegramNotificationSender): NotificationSender = sender
 
-    @Multibinding
     @IntoSet
     @Provides
     fun bindSlackWebhookRequestSender(sender: SlackWebhookRequestSender): NotificationSender = sender
 
-    @Multibinding
     @IntoSet
     @Provides
     fun bindWebhookNotificationSender(sender: WebhookRequestSender): NotificationSender = sender
 
-    @Multibinding
     @IntoSet
     @Provides
     fun bindTwilioNotificationSender(sender: TwilioNotificationSender): NotificationSender = sender
 
-    @Multibinding
     @IntoSet
     @Provides
     fun bindMailgunEmailNotificationSender(sender: MailgunEmailNotificationSender): NotificationSender = sender

@@ -225,11 +225,6 @@ class AlertsListPresenter
                 }
             }
         }
-
-        @CircuitInject(AlertsListScreen::class, AppScope::class)
-        fun interface Factory {
-            fun create(navigator: Navigator): AlertsListPresenter
-        }
     }
 
 @OptIn(ExperimentalMaterial3Api::class)
