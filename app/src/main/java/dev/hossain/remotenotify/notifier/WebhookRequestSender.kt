@@ -1,24 +1,19 @@
 package dev.hossain.remotenotify.notifier
 
-import com.squareup.anvil.annotations.ContributesMultibinding
 import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.WebhookConfigDataStore
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.DeviceAlert.FormatType
 import dev.hossain.remotenotify.model.RemoteAlert
 import kotlinx.coroutines.flow.first
+import me.tatarka.inject.annotations.Inject
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Named
 
-@ContributesMultibinding(AppScope::class)
-@Named("webhook")
 class WebhookRequestSender
     @Inject
     constructor(

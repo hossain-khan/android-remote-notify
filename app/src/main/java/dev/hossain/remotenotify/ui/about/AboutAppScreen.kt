@@ -50,7 +50,6 @@ import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
 import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.BuildConfig
 import dev.hossain.remotenotify.R
@@ -136,7 +135,6 @@ class AboutAppPresenter
         }
 
         @CircuitInject(AboutAppScreen::class, AppScope::class)
-        @AssistedFactory
         fun interface Factory {
             fun create(navigator: Navigator): AboutAppPresenter
         }

@@ -7,14 +7,14 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.squareup.anvil.annotations.optional.SingleIn
 import dev.hossain.remotenotify.data.EmailQuotaManager.Companion.ValidationKeys.EMAIL_DAILY_QUOTA
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.di.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import me.tatarka.inject.annotations.Inject
+import me.tatarka.inject.annotations.SingleIn
 import java.time.Instant
-import javax.inject.Inject
 
 private val Context.emailQuotaDataStore: DataStore<Preferences> by preferencesDataStore(name = "email_quota")
 

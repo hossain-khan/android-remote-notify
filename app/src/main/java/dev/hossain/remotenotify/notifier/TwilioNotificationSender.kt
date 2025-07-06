@@ -1,22 +1,17 @@
 package dev.hossain.remotenotify.notifier
 
-import com.squareup.anvil.annotations.ContributesMultibinding
 import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.TwilioConfigDataStore
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.RemoteAlert
+import me.tatarka.inject.annotations.Inject
 import okhttp3.Credentials
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Named
 
-@ContributesMultibinding(AppScope::class)
-@Named("twilio")
 class TwilioNotificationSender
     @Inject
     constructor(

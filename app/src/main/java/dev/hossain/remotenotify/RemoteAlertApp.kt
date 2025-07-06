@@ -4,12 +4,11 @@ import android.app.Application
 import android.util.Log
 import androidx.work.Configuration
 import androidx.work.WorkManager
-import androidx.work.WorkerFactory
-import dev.hossain.remotenotify.di.AppComponent
+import dev.hossain.remotenotify.di.AppGraph
 import dev.hossain.remotenotify.utils.CrashlyticsTree
 import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_ID
+import dev.zacsweers.metro.createGraphFactory
 import timber.log.Timber
-import javax.inject.Inject
 
 /**
  * Application class for the app with key initializations.
@@ -17,12 +16,9 @@ import javax.inject.Inject
 class RemoteAlertApp :
     Application(),
     Configuration.Provider {
-    private val appComponent: AppComponent by lazy { AppComponent.create(this) }
+    private val appGraph: AppGraph by lazy { createGraphFactory<AppGraph.Factory>().create(this) }
 
-    fun appComponent(): AppComponent = appComponent
-
-    @Inject
-    lateinit var workerFactory: WorkerFactory
+    fun appComponent(): AppGraph = appGraph
 
     override val workManagerConfiguration: Configuration
         get() {
@@ -30,14 +26,13 @@ class RemoteAlertApp :
             return Configuration
                 .Builder()
                 .setMinimumLoggingLevel(if (BuildConfig.DEBUG) Log.DEBUG else Log.WARN)
-                .setWorkerFactory(workerFactory)
+                .setWorkerFactory(appGraph.workerFactory)
                 .build()
         }
 
     override fun onCreate() {
         super.onCreate()
         installLoggingTree()
-        appComponent.inject(this)
 
         // TEST WORKER CODE
 //        dev.hossain.remotenotify.worker

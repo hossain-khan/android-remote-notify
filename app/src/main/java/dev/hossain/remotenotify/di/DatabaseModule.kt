@@ -2,17 +2,15 @@ package dev.hossain.remotenotify.di
 
 import android.content.Context
 import androidx.room.Room
-import com.squareup.anvil.annotations.ContributesTo
-import com.squareup.anvil.annotations.optional.SingleIn
-import dagger.Module
-import dagger.Provides
 import dev.hossain.remotenotify.db.AlertCheckLogDao
 import dev.hossain.remotenotify.db.AlertConfigDao
 import dev.hossain.remotenotify.db.AppDatabase
+import me.tatarka.inject.annotations.ContributesTo
+import me.tatarka.inject.annotations.Provides
+import me.tatarka.inject.annotations.SingleIn
 
-@Module
 @ContributesTo(AppScope::class)
-object DatabaseModule {
+interface DatabaseModule {
     @Provides
     @SingleIn(AppScope::class)
     fun provideDatabase(

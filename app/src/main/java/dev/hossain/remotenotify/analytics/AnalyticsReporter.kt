@@ -5,8 +5,6 @@ import com.google.firebase.analytics.FirebaseAnalytics.Param.SCREEN_CLASS
 import com.google.firebase.analytics.FirebaseAnalytics.Param.SCREEN_NAME
 import com.google.firebase.analytics.logEvent
 import com.slack.circuit.runtime.screen.Screen
-import com.squareup.anvil.annotations.ContributesBinding
-import com.squareup.anvil.annotations.optional.SingleIn
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_GOTO_SETTINGS
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_IGNORE
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_INFO
@@ -20,8 +18,10 @@ import dev.hossain.remotenotify.analytics.Analytics.Companion.eventConfigureNoti
 import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.notifier.NotifierType
+import me.tatarka.inject.annotations.ContributesBinding
+import me.tatarka.inject.annotations.Inject
+import me.tatarka.inject.annotations.SingleIn
 import java.util.Locale
-import javax.inject.Inject
 import kotlin.reflect.KClass
 
 /**

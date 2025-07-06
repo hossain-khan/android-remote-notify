@@ -53,9 +53,6 @@ import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
@@ -77,6 +74,7 @@ import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_ID
 import dev.hossain.remotenotify.worker.ObserveDeviceHealthWorker.Companion.WORK_DATA_KEY_LAST_RUN_TIMESTAMP_MS
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import me.tatarka.inject.annotations.Inject
 import timber.log.Timber
 
 @Parcelize
@@ -113,9 +111,9 @@ data object AlertsListScreen : Screen {
 }
 
 class AlertsListPresenter
-    @AssistedInject
+    @Inject
     constructor(
-        @Assisted private val navigator: Navigator,
+        private val navigator: Navigator,
         private val remoteAlertRepository: RemoteAlertRepository,
         private val batteryMonitor: BatteryMonitor,
         private val storageMonitor: StorageMonitor,
@@ -228,7 +226,6 @@ class AlertsListPresenter
         }
 
         @CircuitInject(AlertsListScreen::class, AppScope::class)
-        @AssistedFactory
         fun interface Factory {
             fun create(navigator: Navigator): AlertsListPresenter
         }

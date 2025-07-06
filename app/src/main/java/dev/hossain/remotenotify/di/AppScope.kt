@@ -1,9 +1,11 @@
 package dev.hossain.remotenotify.di
 
+import dev.zacsweers.metro.Scope
+
 /**
- * App scope for dependency injection.
+ * App scope for dependency injection using Metro.
  *
- * - https://github.com/square/anvil?tab=readme-ov-file#scopes
- * - https://github.com/square/anvil/blob/main/sample/scopes/src/main/java/com/squareup/scopes/AppScope.kt
+ * - https://zacsweers.github.io/metro/scopes/
  */
-abstract class AppScope private constructor()
+@Scope
+annotation class AppScope

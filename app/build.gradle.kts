@@ -3,12 +3,11 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.androidx.room)
-    alias(libs.plugins.anvil)
+    alias(libs.plugins.metro)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.google.services)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlinter)
@@ -160,11 +159,6 @@ dependencies {
 
     implementation(libs.timber)
 
-    implementation(libs.dagger)
-    // Dagger KSP support is in Alpha, not available yet. Using KAPT for now.
-    // https://dagger.dev/dev-guide/ksp.html
-    kapt(libs.dagger.compiler)
-
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
@@ -183,9 +177,6 @@ dependencies {
 
     // Navigation Compose
     implementation(libs.androidx.navigation.compose)
-
-    implementation(libs.anvil.annotations)
-    implementation(libs.anvil.annotations.optional)
 
     implementation(libs.eithernet)
     implementation(libs.eithernet.integration.retrofit)
@@ -226,10 +217,8 @@ dependencies {
 }
 
 ksp {
-    // Anvil-KSP
-    arg("anvil-ksp-extraContributingAnnotations", "com.slack.circuit.codegen.annotations.CircuitInject")
-    // kotlin-inject-anvil (requires 0.0.3+)
-    arg("kotlin-inject-anvil-contributing-annotations", "com.slack.circuit.codegen.annotations.CircuitInject")
+    // Circuit-KSP
+    arg("circuit-codegen-extraContributingAnnotations", "com.slack.circuit.codegen.annotations.CircuitInject")
 }
 
 

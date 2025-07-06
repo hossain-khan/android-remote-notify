@@ -1,15 +1,13 @@
 package dev.hossain.remotenotify.di
 
-import com.squareup.anvil.annotations.ContributesTo
-import dagger.Module
-import dagger.Provides
 import dev.hossain.remotenotify.BuildConfig
+import me.tatarka.inject.annotations.ContributesTo
+import me.tatarka.inject.annotations.Provides
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 
-@Module
 @ContributesTo(AppScope::class)
-object NetworkModule {
+interface NetworkModule {
     @Provides
     fun provideOkHttpClient(): OkHttpClient {
         val loggingInterceptor =
