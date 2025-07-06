@@ -6,7 +6,8 @@ import android.content.Intent
 import androidx.annotation.Keep
 import androidx.core.app.AppComponentFactory
 import dev.hossain.remotenotify.RemoteAlertApp
-import javax.inject.Provider
+import dev.zacsweers.metro.Provider
+import kotlin.reflect.KClass
 
 /**
  * Custom implementation of [AppComponentFactory] used to inject Android components
@@ -38,15 +39,15 @@ class ComposeAppComponentFactory : AppComponentFactory() {
      * @param providers A map containing Dagger providers for the available classes.
      * @return The instance of the class if found in the providers map, or null if not.
      */
-    private inline fun <reified T> getInstance(
+    private inline fun <reified T : Any> getInstance(
         classLoader: ClassLoader,
         className: String,
-        providers: Map<Class<out T>, @JvmSuppressWildcards Provider<T>>,
+        providers: Map<KClass<out T>, Provider<T>>,
     ): T? {
         // Load the class using the provided ClassLoader and attempt to retrieve the instance.
         val clazz = Class.forName(className, false, classLoader).asSubclass(T::class.java)
-        val modelProvider = providers[clazz] ?: return null
-        return modelProvider.get() as T
+        val modelProvider = providers[clazz.kotlin] ?: return null
+        return modelProvider()
     }
 
     /**
@@ -95,6 +96,6 @@ class ComposeAppComponentFactory : AppComponentFactory() {
      * This map is initialized when the application is created via the Dagger component.
      */
     companion object {
-        private lateinit var activityProviders: Map<Class<out Activity>, Provider<Activity>>
+        private lateinit var activityProviders: Map<KClass<out Activity>, Provider<Activity>>
     }
 }
