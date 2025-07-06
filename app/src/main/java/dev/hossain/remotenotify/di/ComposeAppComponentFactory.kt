@@ -27,7 +27,7 @@ import kotlin.reflect.KClass
  * ```
  *
  * See official example at:
- * - https://github.com/ZacSweers/metro/blob/main/examples/compose-navigation-app/src/main/kotlin/dev/zacsweers/metro/sample/androidviewmodel/components/MetroAppComponentFactory.kt
+ * - https://github.com/ZacSweers/metro/blob/main/samples/compose-navigation-app/src/main/kotlin/dev/zacsweers/metro/sample/androidviewmodel/components/MetroAppComponentFactory.kt
  */
 @Keep
 class ComposeAppComponentFactory : AppComponentFactory() {
@@ -86,10 +86,8 @@ class ComposeAppComponentFactory : AppComponentFactory() {
         className: String,
     ): Application {
         val app = super.instantiateApplicationCompat(classLoader, className)
-
         // Retrieve the Metro app graph and the activity providers from it
         activityProviders = (app as RemoteAlertApp).appComponent().activityProviders
-
         return app
     }
 
