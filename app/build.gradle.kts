@@ -91,6 +91,14 @@ android {
             isReturnDefaultValues = true
         }
     }
+
+    lint {
+        // Disable Instantiatable lint rule because we use a custom AppComponentFactory
+        // (ComposeAppComponentFactory) for dependency injection. Activities are injected
+        // via constructor parameters and instantiated by our DI framework (Metro) rather
+        // than the Android system's default no-arg constructor mechanism.
+        disable += "Instantiatable"
+    }
 }
 
 // Kotlin Code Coverage - https://github.com/Kotlin/kotlinx-kover
