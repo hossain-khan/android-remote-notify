@@ -87,7 +87,7 @@ class ComposeAppComponentFactory : AppComponentFactory() {
     ): Application {
         val app = super.instantiateApplicationCompat(classLoader, className)
         // Retrieve the Metro app graph and the activity providers from it
-        activityProviders = (app as RemoteAlertApp).appComponent().activityProviders
+        activityProviders = (app as RemoteAlertApp).appGraph().activityProviders
         return app
     }
 

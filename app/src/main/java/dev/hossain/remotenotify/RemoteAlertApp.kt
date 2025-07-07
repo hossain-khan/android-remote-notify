@@ -18,7 +18,7 @@ class RemoteAlertApp :
     Configuration.Provider {
     private val appGraph: AppGraph by lazy { createGraphFactory<AppGraph.Factory>().create(this) }
 
-    fun appComponent(): AppGraph = appGraph
+    fun appGraph(): AppGraph = appGraph
 
     override val workManagerConfiguration: Configuration
         get() {
