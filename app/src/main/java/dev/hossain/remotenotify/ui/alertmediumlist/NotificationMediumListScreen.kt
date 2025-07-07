@@ -54,13 +54,9 @@ import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.configPreviewText
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
@@ -68,6 +64,9 @@ import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen
 import dev.hossain.remotenotify.worker.DEFAULT_PERIODIC_INTERVAL_MINUTES
 import dev.hossain.remotenotify.worker.sendPeriodicWorkRequest
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -159,7 +158,7 @@ data object NotificationMediumListScreen : Screen {
  * @param analytics The analytics tracker.
  */
 class NotificationMediumListPresenter
-    @AssistedInject
+    @Inject
     constructor(
         @Assisted private val navigator: Navigator,
         private val appPreferencesDataStore: AppPreferencesDataStore,
@@ -272,20 +271,6 @@ class NotificationMediumListPresenter
                     }
                 }
             }
-        }
-
-        /**
-         * Factory for creating instances of [NotificationMediumListPresenter].
-         */
-        @CircuitInject(NotificationMediumListScreen::class, AppScope::class)
-        @AssistedFactory
-        fun interface Factory {
-            /**
-             * Creates an instance of [NotificationMediumListPresenter].
-             * @param navigator The navigator for navigating to other screens.
-             * @return An instance of [NotificationMediumListPresenter].
-             */
-            fun create(navigator: Navigator): NotificationMediumListPresenter
         }
     }
 
