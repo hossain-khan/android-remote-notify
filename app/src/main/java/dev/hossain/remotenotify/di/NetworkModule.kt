@@ -1,6 +1,7 @@
 package dev.hossain.remotenotify.di
 
 import dev.hossain.remotenotify.BuildConfig
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
 import okhttp3.OkHttpClient

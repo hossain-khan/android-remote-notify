@@ -57,7 +57,6 @@ import com.slack.circuitx.effects.LaunchedImpressionEffect
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.configPreviewText
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
@@ -65,6 +64,7 @@ import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen
 import dev.hossain.remotenotify.worker.DEFAULT_PERIODIC_INTERVAL_MINUTES
 import dev.hossain.remotenotify.worker.sendPeriodicWorkRequest
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.FlowPreview

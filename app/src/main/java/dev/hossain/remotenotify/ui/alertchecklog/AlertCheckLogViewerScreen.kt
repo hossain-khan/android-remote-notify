@@ -90,7 +90,6 @@ import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.notifier.NotifierType
@@ -98,6 +97,7 @@ import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.formatDateTime
 import dev.hossain.remotenotify.utils.formatDuration
 import dev.hossain.remotenotify.utils.formatTimeElapsed
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.launch

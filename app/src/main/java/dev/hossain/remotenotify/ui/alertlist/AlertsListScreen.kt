@@ -57,7 +57,6 @@ import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
@@ -72,6 +71,7 @@ import dev.hossain.remotenotify.ui.alertchecklog.AlertCheckLogViewerScreen
 import dev.hossain.remotenotify.ui.alertmediumlist.NotificationMediumListScreen
 import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_ID
 import dev.hossain.remotenotify.worker.ObserveDeviceHealthWorker.Companion.WORK_DATA_KEY_LAST_RUN_TIMESTAMP_MS
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.launch

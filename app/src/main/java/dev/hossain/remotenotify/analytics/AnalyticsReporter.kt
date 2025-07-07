@@ -15,9 +15,9 @@ import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_WORKER_JOB_S
 import dev.hossain.remotenotify.analytics.Analytics.Companion.eventAlertAdded
 import dev.hossain.remotenotify.analytics.Analytics.Companion.eventAlertSentUsingNotifier
 import dev.hossain.remotenotify.analytics.Analytics.Companion.eventConfigureNotifier
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.notifier.NotifierType
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn

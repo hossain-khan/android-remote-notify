@@ -1,10 +1,10 @@
 package dev.hossain.remotenotify.data
 
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.DeviceAlert
 import dev.hossain.remotenotify.model.DeviceAlert.FormatType
 import dev.hossain.remotenotify.model.RemoteAlert
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 

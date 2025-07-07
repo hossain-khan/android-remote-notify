@@ -52,9 +52,9 @@ import com.slack.circuitx.effects.LaunchedImpressionEffect
 import dev.hossain.remotenotify.BuildConfig
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertlist.AppUsageEducationSheetUi
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.launch

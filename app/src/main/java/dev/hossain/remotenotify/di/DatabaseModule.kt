@@ -5,6 +5,7 @@ import androidx.room.Room
 import dev.hossain.remotenotify.db.AlertCheckLogDao
 import dev.hossain.remotenotify.db.AlertConfigDao
 import dev.hossain.remotenotify.db.AppDatabase
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesTo
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn

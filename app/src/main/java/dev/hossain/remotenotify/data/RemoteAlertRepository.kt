@@ -4,7 +4,6 @@ import dev.hossain.remotenotify.db.AlertCheckLogDao
 import dev.hossain.remotenotify.db.AlertCheckLogEntity
 import dev.hossain.remotenotify.db.AlertConfigDao
 import dev.hossain.remotenotify.db.AlertConfigEntity
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertCheckLog
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
@@ -12,6 +11,7 @@ import dev.hossain.remotenotify.model.toAlertCheckLog
 import dev.hossain.remotenotify.model.toAlertConfigEntity
 import dev.hossain.remotenotify.model.toRemoteAlert
 import dev.hossain.remotenotify.notifier.NotifierType
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
