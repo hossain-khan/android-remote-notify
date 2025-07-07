@@ -17,12 +17,14 @@ interface CircuitModule {
     /**
      * Metro multi-binding method that provides a set of Presenter.Factory instances.
      */
-    @Multibinds fun presenterFactories(): Set<Presenter.Factory>
+    @Multibinds(allowEmpty = true)
+    fun presenterFactories(): Set<Presenter.Factory>
 
     /**
      * Metro multi-binding method that provides a set of Ui.Factory instances.
      */
-    @Multibinds fun uiFactories(): Set<Ui.Factory>
+    @Multibinds(allowEmpty = true)
+    fun uiFactories(): Set<Ui.Factory>
 
     /**
      * Provides a singleton instance of Circuit with presenter and ui configured.
