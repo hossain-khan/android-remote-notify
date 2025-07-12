@@ -54,9 +54,6 @@ import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
@@ -68,6 +65,9 @@ import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen
 import dev.hossain.remotenotify.worker.DEFAULT_PERIODIC_INTERVAL_MINUTES
 import dev.hossain.remotenotify.worker.sendPeriodicWorkRequest
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -159,7 +159,7 @@ data object NotificationMediumListScreen : Screen {
  * @param analytics The analytics tracker.
  */
 class NotificationMediumListPresenter
-    @AssistedInject
+    @Inject
     constructor(
         @Assisted private val navigator: Navigator,
         private val appPreferencesDataStore: AppPreferencesDataStore,

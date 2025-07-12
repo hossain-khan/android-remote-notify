@@ -2,14 +2,14 @@ package dev.hossain.remotenotify.di
 
 import android.app.Activity
 import android.content.Context
-import com.squareup.anvil.annotations.MergeComponent
-import com.squareup.anvil.annotations.optional.SingleIn
-import dagger.BindsInstance
 import dev.hossain.remotenotify.RemoteAlertApp
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Component
+import dev.zacsweers.metro.SingleIn
 import javax.inject.Provider
 
-@MergeComponent(
-    scope = AppScope::class,
+@SingleIn(AppScope::class)
+@Component(
     modules = [
         AppModule::class,
         CircuitModule::class,
@@ -18,7 +18,6 @@ import javax.inject.Provider
         NotificationSenderModule::class,
     ],
 )
-@SingleIn(AppScope::class)
 interface AppComponent {
     val activityProviders: Map<Class<out Activity>, @JvmSuppressWildcards Provider<Activity>>
 
@@ -27,14 +26,15 @@ interface AppComponent {
      */
     fun inject(app: RemoteAlertApp)
 
-    @MergeComponent.Factory
+    @Component.Factory
     interface Factory {
         fun create(
-            @ApplicationContext @BindsInstance context: Context,
+            @ApplicationContext context: Context,
         ): AppComponent
     }
 
     companion object {
-        fun create(context: Context): AppComponent = DaggerAppComponent.factory().create(context)
+        fun create(context: Context): AppComponent = 
+            dev.zacsweers.metro.createComponent<AppComponent.Factory>().create(context)
     }
 }
