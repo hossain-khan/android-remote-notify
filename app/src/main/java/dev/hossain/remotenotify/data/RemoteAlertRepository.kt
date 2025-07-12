@@ -1,6 +1,5 @@
 package dev.hossain.remotenotify.data
 
-import com.squareup.anvil.annotations.ContributesBinding
 import dev.hossain.remotenotify.db.AlertCheckLogDao
 import dev.hossain.remotenotify.db.AlertCheckLogEntity
 import dev.hossain.remotenotify.db.AlertConfigDao
@@ -13,9 +12,10 @@ import dev.hossain.remotenotify.model.toAlertCheckLog
 import dev.hossain.remotenotify.model.toAlertConfigEntity
 import dev.hossain.remotenotify.model.toRemoteAlert
 import dev.hossain.remotenotify.notifier.NotifierType
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 interface RemoteAlertRepository {
     suspend fun saveRemoteAlert(remoteAlert: RemoteAlert)
