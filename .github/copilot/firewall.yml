@@ -1,20 +1,26 @@
 allow:
   # Google's Android development services
   - dl.google.com
+  - "*.dl.google.com"
   - maven.google.com
   - "*.googleapis.com"
   - "*.gstatic.com"
   - storage.googleapis.com
-  
+  - developer.android.com
+  - androidrepository.googleapis.com
+
   # Firebase services
   - "*.firebase.google.com"
   - "*.firebaseapp.com"
-  
+
   # Maven repositories
   - repo1.maven.org
   - central.maven.org
   - repo.maven.apache.org
-  
+  - jcenter.bintray.com
+
   # Gradle services
   - plugins.gradle.org
+  - "*.gradle.org"
   - services.gradle.org
+  - docs.gradle.org
