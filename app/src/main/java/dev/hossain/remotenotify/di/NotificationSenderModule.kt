@@ -1,15 +1,15 @@
 package dev.hossain.remotenotify.di
 
 import androidx.annotation.Keep
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoSet
 import dev.hossain.remotenotify.notifier.MailgunEmailNotificationSender
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.SlackWebhookRequestSender
 import dev.hossain.remotenotify.notifier.TelegramNotificationSender
 import dev.hossain.remotenotify.notifier.TwilioNotificationSender
 import dev.hossain.remotenotify.notifier.WebhookRequestSender
+import dev.zacsweers.metro.Binds
+import dev.zacsweers.metro.IntoSet
+import dev.zacsweers.metro.Module
 
 @Keep
 @Module

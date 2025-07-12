@@ -68,6 +68,10 @@ kotlinxSerializationProperties = "1.8.1"
 # https://github.com/google/ksp/releases
 ksp = "2.1.10-1.0.31"
 
+# Metro KSP plugin
+# https://zacsweers.github.io/metro/
+metro = "0.4.0"
+
 lifecycleRuntimeKtx = "2.9.1"
 
 # A modern JSON library for Kotlin and Java.
@@ -160,6 +164,13 @@ anvil-annotations-optional = { group = "dev.zacsweers.anvil", name = "annotation
 
 # https://mvnrepository.com/artifact/androidx.compose.ui/ui-text-google-fonts
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googleFonts" }
+
+# Metro KSP plugin
+# https://zacsweers.github.io/metro/
+metro = { group = "dev.zacsweers.metro", name = "metro", version.ref = "metro" }
+
+# javax.inject for Metro
+javax-inject = { group = "javax.inject", name = "javax.inject", version = "1" }
 
 # https://github.com/JakeWharton/timber
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber"}
@@ -257,3 +268,7 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.
 # Kover is a set of solutions for collecting test coverage of Kotlin code compiled for JVM and Android platforms.
 # https://github.com/Kotlin/kotlinx-kover?tab=readme-ov-file#kover-gradle-plugin
 kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.1" }
+
+# Metro KSP plugin
+# https://zacsweers.github.io/metro/
+metro = { id = "dev.zacsweers.metro", version.ref = "metro" }

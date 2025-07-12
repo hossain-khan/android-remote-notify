@@ -53,9 +53,6 @@ import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
@@ -75,6 +72,9 @@ import dev.hossain.remotenotify.ui.alertchecklog.AlertCheckLogViewerScreen
 import dev.hossain.remotenotify.ui.alertmediumlist.NotificationMediumListScreen
 import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_ID
 import dev.hossain.remotenotify.worker.ObserveDeviceHealthWorker.Companion.WORK_DATA_KEY_LAST_RUN_TIMESTAMP_MS
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
@@ -113,7 +113,7 @@ data object AlertsListScreen : Screen {
 }
 
 class AlertsListPresenter
-    @AssistedInject
+    @Inject
     constructor(
         @Assisted private val navigator: Navigator,
         private val remoteAlertRepository: RemoteAlertRepository,

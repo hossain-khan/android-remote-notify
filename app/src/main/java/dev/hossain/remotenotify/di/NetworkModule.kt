@@ -1,9 +1,9 @@
 package dev.hossain.remotenotify.di
 
-import com.squareup.anvil.annotations.ContributesTo
-import dagger.Module
-import dagger.Provides
 import dev.hossain.remotenotify.BuildConfig
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Module
+import dev.zacsweers.metro.Provides
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 

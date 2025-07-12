@@ -8,6 +8,7 @@ import androidx.work.WorkerFactory
 import dev.hossain.remotenotify.di.AppComponent
 import dev.hossain.remotenotify.utils.CrashlyticsTree
 import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_ID
+import dev.zacsweers.metro.createComponent
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -17,7 +18,7 @@ import javax.inject.Inject
 class RemoteAlertApp :
     Application(),
     Configuration.Provider {
-    private val appComponent: AppComponent by lazy { AppComponent.create(this) }
+    private val appComponent: AppComponent by lazy { createComponent<AppComponent.Factory>().create(this) }
 
     fun appComponent(): AppComponent = appComponent
 

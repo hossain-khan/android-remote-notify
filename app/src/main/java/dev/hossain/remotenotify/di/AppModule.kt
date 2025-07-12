@@ -5,11 +5,11 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
-import com.squareup.anvil.annotations.ContributesTo
-import dagger.Module
-import dagger.Provides
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
+import dev.zacsweers.metro.ContributesTo
+import dev.zacsweers.metro.Module
+import dev.zacsweers.metro.Provides
 import java.time.Clock
 
 @ContributesTo(AppScope::class)
