@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Define custom permission for plugin access -->
+    <permission
+        android:name="dev.hossain.remotenotify.plugin.ACCESS"
+        android:label="@string/plugin_permission_label"
+        android:description="@string/plugin_permission_description"
+        android:protectionLevel="normal" />
+
     <application
         android:name="dev.hossain.remotenotify.RemoteAlertApp"
         android:appComponentFactory=".di.ComposeAppComponentFactory"
@@ -26,6 +33,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Plugin ContentProvider for external app access -->
+        <provider
+            android:name="dev.hossain.remotenotify.plugin.PluginProvider"
+            android:authorities="dev.hossain.remotenotify.plugin"
+            android:exported="true"
+            android:permission="dev.hossain.remotenotify.plugin.ACCESS" />
 
         <!--
             You must remove the default initializer for a custom getWorkManagerConfiguration() implementation to take effect.

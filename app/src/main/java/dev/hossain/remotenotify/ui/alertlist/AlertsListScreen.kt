@@ -460,6 +460,7 @@ fun NotificationItem(
                             painterResource(id = R.drawable.battery_3_bar_24dp)
                         is RemoteAlert.StorageAlert ->
                             painterResource(id = R.drawable.hard_disk_24dp)
+                        is RemoteAlert.PluginAlert -> TODO()
                     },
                 contentDescription = null,
                 modifier = Modifier.size(36.dp),
@@ -471,6 +472,7 @@ fun NotificationItem(
                     when (remoteAlert) {
                         is RemoteAlert.BatteryAlert -> "Battery Alert"
                         is RemoteAlert.StorageAlert -> "Storage Alert"
+                        is RemoteAlert.PluginAlert -> TODO()
                     },
                 style = MaterialTheme.typography.titleSmall,
             )
@@ -501,6 +503,8 @@ fun NotificationItem(
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
+
+                    is RemoteAlert.PluginAlert -> TODO()
                 }
             }
         },
