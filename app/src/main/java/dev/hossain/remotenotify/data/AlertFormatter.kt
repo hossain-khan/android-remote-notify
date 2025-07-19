@@ -1,12 +1,12 @@
 package dev.hossain.remotenotify.data
 
-import com.squareup.anvil.annotations.optional.SingleIn
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.DeviceAlert
 import dev.hossain.remotenotify.model.DeviceAlert.FormatType
 import dev.hossain.remotenotify.model.RemoteAlert
-import javax.inject.Inject
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 
 @SingleIn(AppScope::class)
 class AlertFormatter

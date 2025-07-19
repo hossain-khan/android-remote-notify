@@ -3,12 +3,11 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.androidx.room)
-    alias(libs.plugins.anvil)
+    alias(libs.plugins.metro)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.google.services)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlinter)
@@ -92,6 +91,14 @@ android {
             isReturnDefaultValues = true
         }
     }
+
+    lint {
+        // Disable Instantiatable lint rule because we use a custom AppComponentFactory
+        // (ComposeAppComponentFactory) for dependency injection. Activities are injected
+        // via constructor parameters and instantiated by our DI framework (Metro) rather
+        // than the Android system's default no-arg constructor mechanism.
+        disable += "Instantiatable"
+    }
 }
 
 // Kotlin Code Coverage - https://github.com/Kotlin/kotlinx-kover
@@ -156,14 +163,9 @@ dependencies {
     implementation(libs.circuitx.gestureNav)
     implementation(libs.circuitx.overlays)
     implementation(libs.androidx.junit.ktx)
-    ksp(libs.circuit.codegen)
+    // Removed: ksp(libs.circuit.codegen) - not compatible with Metro
 
     implementation(libs.timber)
-
-    implementation(libs.dagger)
-    // Dagger KSP support is in Alpha, not available yet. Using KAPT for now.
-    // https://dagger.dev/dev-guide/ksp.html
-    kapt(libs.dagger.compiler)
 
     // Retrofit
     implementation(libs.retrofit)
@@ -183,9 +185,6 @@ dependencies {
 
     // Navigation Compose
     implementation(libs.androidx.navigation.compose)
-
-    implementation(libs.anvil.annotations)
-    implementation(libs.anvil.annotations.optional)
 
     implementation(libs.eithernet)
     implementation(libs.eithernet.integration.retrofit)
@@ -225,12 +224,7 @@ dependencies {
     testImplementation(libs.robolectric)
 }
 
-ksp {
-    // Anvil-KSP
-    arg("anvil-ksp-extraContributingAnnotations", "com.slack.circuit.codegen.annotations.CircuitInject")
-    // kotlin-inject-anvil (requires 0.0.3+)
-    arg("kotlin-inject-anvil-contributing-annotations", "com.slack.circuit.codegen.annotations.CircuitInject")
-}
+
 
 
 // Helper function to get the current Git commit hash
@@ -241,4 +235,11 @@ fun getGitCommitHash(): String {
     val process = processBuilder.start()
     process.waitFor()
     return output.readText().trim()
+}
+
+
+metro {
+  // https://zacsweers.github.io/metro/debugging/
+  debug.set(true)
+  reportsDestination.set(layout.buildDirectory.dir("metro/reports"))
 }
