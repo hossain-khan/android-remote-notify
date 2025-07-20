@@ -16,6 +16,7 @@ import dev.zacsweers.metro.SingleIn
 @ContributesBinding(AppScope::class)
 @Inject
 interface CircuitModule { // TODO rename this to CircuitMultibinding
+
     /**
      * Dagger multi-binding method that provides a set of Presenter.Factory instances.
      */
