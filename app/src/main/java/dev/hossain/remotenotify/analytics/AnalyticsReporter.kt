@@ -5,8 +5,6 @@ import com.google.firebase.analytics.FirebaseAnalytics.Param.SCREEN_CLASS
 import com.google.firebase.analytics.FirebaseAnalytics.Param.SCREEN_NAME
 import com.google.firebase.analytics.logEvent
 import com.slack.circuit.runtime.screen.Screen
-import com.squareup.anvil.annotations.ContributesBinding
-import com.squareup.anvil.annotations.optional.SingleIn
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_GOTO_SETTINGS
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_IGNORE
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_INFO
@@ -17,11 +15,13 @@ import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_WORKER_JOB_S
 import dev.hossain.remotenotify.analytics.Analytics.Companion.eventAlertAdded
 import dev.hossain.remotenotify.analytics.Analytics.Companion.eventAlertSentUsingNotifier
 import dev.hossain.remotenotify.analytics.Analytics.Companion.eventConfigureNotifier
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.notifier.NotifierType
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import java.util.Locale
-import javax.inject.Inject
 import kotlin.reflect.KClass
 
 /**
@@ -139,8 +139,8 @@ interface Analytics {
  */
 @SingleIn(AppScope::class)
 @ContributesBinding(AppScope::class)
+@Inject
 class AnalyticsImpl
-    @Inject
     constructor(
         private val firebaseAnalytics: FirebaseAnalytics,
     ) : Analytics {

@@ -54,14 +54,10 @@ import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.toAlertType
@@ -70,6 +66,10 @@ import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.utils.BatteryOptimizationHelper
 import dev.hossain.remotenotify.utils.findActivity
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -111,8 +111,8 @@ data object AddNewRemoteAlertScreen : Screen {
     }
 }
 
+@Inject
 class AddNewRemoteAlertPresenter
-    @AssistedInject
     constructor(
         @Assisted private val navigator: Navigator,
         private val remoteAlertRepository: RemoteAlertRepository,
