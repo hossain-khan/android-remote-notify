@@ -41,8 +41,6 @@ junitKtx = "1.2.1"
 # https://developer.android.com/jetpack/androidx/releases/test
 junitVersion = "1.2.1"
 
-kotlin = "2.2.0"
-
 # MockK mocking library for Kotlin
 # https://mockk.io
 mockk = "1.14.2"
@@ -60,11 +58,14 @@ kotlinxSerializationProperties = "1.8.1"
 # https://github.com/google/ksp/releases
 ksp = "2.2.0-2.0.2"
 
+# Kotlin Version (must be compatible with the KSP version above)
+kotlin = "2.2.0"
+
 lifecycleRuntimeKtx = "2.9.1"
 
-# Metro KSP plugin for dependency injection
+# Metro - A multiplatform dependency injection framework for Kotlin
 # https://zacsweers.github.io/metro/
-metro = "0.4.0"
+metro = "0.5.1"
 
 # A modern JSON library for Kotlin and Java.
 # https://github.com/square/moshi
