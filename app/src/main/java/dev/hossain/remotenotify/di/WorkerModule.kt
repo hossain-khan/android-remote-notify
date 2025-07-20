@@ -4,19 +4,18 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
-import com.squareup.anvil.annotations.ContributesTo
-import dagger.Module
-import dagger.Provides
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.worker.ObserveDeviceHealthWorker
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.Provides
 
-// Anvil module to contribute the WorkerFactory
-@Module
-@ContributesTo(AppScope::class)
+@ContributesBinding(AppScope::class)
+@Inject
 object WorkerModule {
     @Provides
     fun provideWorkerFactory(
