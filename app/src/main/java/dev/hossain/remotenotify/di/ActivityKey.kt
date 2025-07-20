@@ -1,12 +1,14 @@
 package dev.hossain.remotenotify.di
 
 import android.app.Activity
-import dagger.MapKey
+import dev.zacsweers.metro.MapKey
 import kotlin.reflect.KClass
 
 /**
- * A Dagger multi-binding key used for registering a [Activity] into the top level dagger graphs.
+ * A Metro multi-binding [MapKey] used for registering a [Activity] into the top level graphs.
  */
-@MapKey annotation class ActivityKey(
+@Target(AnnotationTarget.CLASS)
+@MapKey
+annotation class ActivityKey(
     val value: KClass<out Activity>,
 )

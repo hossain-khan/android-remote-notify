@@ -10,13 +10,14 @@ import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.worker.ObserveDeviceHealthWorker
+import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.Provides
 
 @ContributesBinding(AppScope::class)
 @Inject
-object WorkerModule {
+object WorkerModule { // TODO: rename to WorkerBindings or similar
     @Provides
     fun provideWorkerFactory(
         batteryMonitor: BatteryMonitor,
