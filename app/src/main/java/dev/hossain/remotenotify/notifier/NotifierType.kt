@@ -9,7 +9,7 @@ import dev.hossain.remotenotify.di.NotificationSenderModule
  * ℹ️ Steps to take to add new notifier:
  * 1. Add new enum value here.
  * 2. Create a new class that implements [NotificationSender] interface.
- * 3. Add new class to [NotificationSenderModule] Dagger module.
+ * 3. Add new class to [NotificationSenderModule] Metro Bindings.
  */
 @Keep
 enum class NotifierType(

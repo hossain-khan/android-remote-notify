@@ -49,15 +49,15 @@ import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.BuildConfig
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertlist.AppUsageEducationSheetUi
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -80,8 +80,8 @@ data object AboutAppScreen : Screen {
     }
 }
 
+@Inject
 class AboutAppPresenter
-    @AssistedInject
     constructor(
         @Assisted private val navigator: Navigator,
         private val analytics: Analytics,
@@ -135,7 +135,6 @@ class AboutAppPresenter
             }
         }
 
-        @CircuitInject(AboutAppScreen::class, AppScope::class)
         @AssistedFactory
         fun interface Factory {
             fun create(navigator: Navigator): AboutAppPresenter

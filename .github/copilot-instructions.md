@@ -32,7 +32,7 @@
 
 ### Architecture Components
 - **Navigation & State Management**: [Slack Circuit](https://slackhq.github.io/circuit/) - Compose-driven architecture
-- **Dependency Injection**: Dagger 2.56.2 + [Anvil](https://github.com/ZacSweers/anvil) (forked version)
+- **Dependency Injection**: [Metro](https://zacsweers.github.io/metro/) - Kotlin-first dependency injection framework
 - **Database**: Room 2.7.1 with SQLite backend
 - **Networking**: Retrofit 3.0.0 + OkHttp 4.12.0 + Moshi 1.15.2
 - **Background Processing**: WorkManager 2.10.1 for periodic health checks
@@ -105,9 +105,8 @@ app/src/main/java/dev/hossain/remotenotify/
 │   ├── dao/                       # Data Access Objects
 │   └── AppDatabase.kt             # Database configuration
 ├── di/                            # Dependency injection modules
-│   ├── AppComponent.kt            # Main Dagger component
-│   ├── *Module.kt                 # Dagger modules
-│   └── AppScope.kt                # Custom scopes
+│   ├── AppGraph.kt                # Main Metro dependency graph
+│   └── *Bindings.kt               # Metro binding containers
 ├── model/                         # Domain models and data classes
 ├── monitor/                       # Device monitoring logic
 ├── notifier/                      # Notification channel implementations
@@ -138,44 +137,94 @@ When creating new screens, follow the Circuit pattern:
 @Parcelize
 data object SettingsScreen : Screen
 
-// Presenter
-@CircuitInject(SettingsScreen::class, AppScope::class)
-@AssistedFactory
-interface SettingsPresenterFactory {
-    fun create(navigator: Navigator): SettingsPresenter
+// Presenter with Metro assisted injection
+@Inject
+class SettingsPresenter(
+    @Assisted private val navigator: Navigator,
+    // Inject other dependencies
+) : Presenter<SettingsScreen.State> {
+    
+    @Composable
+    override fun present(): SettingsScreen.State {
+        // State management logic
+        return SettingsScreen.State(
+            // ... state properties
+        )
+    }
+    
+    @AssistedFactory
+    fun interface Factory {
+        fun create(navigator: Navigator): SettingsPresenter
+    }
 }
 
-@Composable
-fun SettingsPresenter(
-    navigator: Navigator,
-    // Inject dependencies
-): SettingsScreen.State {
-    // State management logic
+// Presenter factory for Circuit integration
+@Inject
+@ContributesIntoSet(AppScope::class)
+class SettingsPresenterFactory(
+    private val factory: SettingsPresenter.Factory,
+) : Presenter.Factory {
+    override fun create(
+        screen: Screen,
+        navigator: Navigator,
+        context: CircuitContext,
+    ): Presenter<*>? = when (screen) {
+        SettingsScreen -> factory.create(navigator)
+        else -> null
+    }
 }
 
 // UI
-@CircuitInject(SettingsScreen::class, AppScope::class)
+@CircuitInject(screen = SettingsScreen::class, scope = AppScope::class)
+@Composable
 fun SettingsUi(state: SettingsScreen.State, modifier: Modifier = Modifier) {
     // UI composition
 }
 ```
 
 ### Dependency Injection Patterns
-Use Anvil for automatic Dagger component contribution:
+Use Metro for Kotlin-first dependency injection:
 
 ```kotlin
-@ContributesTo(AppScope::class)
-@Module
-interface FeatureModule {
-    @Binds
-    fun bindRepository(impl: RepositoryImpl): Repository
+// Binding containers for organizing related providers
+@BindingContainer
+object FeatureModule {
+    @Provides
+    fun provideService(impl: ServiceImpl): Service = impl
 }
 
-@SingleIn(AppScope::class)
+// Constructor injection with contributions
 @ContributesBinding(AppScope::class)
-class RepositoryImpl @Inject constructor(
+@Inject
+class RepositoryImpl(
     private val dataSource: DataSource
 ) : Repository
+
+// Multibinding contributions
+@ContributesIntoSet(AppScope::class)
+@Inject
+class NotificationSenderImpl(
+    private val httpClient: OkHttpClient
+) : NotificationSender
+
+// Dependency graph configuration
+@DependencyGraph(
+    AppScope::class,
+    bindingContainers = [
+        NetworkModule::class,
+        DatabaseModule::class,
+        AnalyticsModule::class,
+    ],
+)
+interface AppGraph {
+    val repository: Repository
+    val notifiers: Set<NotificationSender>
+    
+    @DependencyGraph.Factory
+    fun interface Factory {
+        fun create(@Provides application: Application): AppGraph
+    }
+}
 ```
 
 ### Data Layer Patterns
@@ -187,7 +236,8 @@ interface RemoteAlertRepository {
 }
 
 // DataStore usage
-class ConfigurationDataStore @Inject constructor(
+@Inject
+class ConfigurationDataStore(
     @ApplicationContext private val context: Context
 ) {
     private val dataStore = context.dataStore
@@ -213,7 +263,8 @@ interface HealthWorkerFactory {
     fun create(appContext: Context, params: WorkerParameters): HealthWorker
 }
 
-class HealthWorker @AssistedInject constructor(
+@Inject
+class HealthWorker(
     @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
     private val repository: Repository

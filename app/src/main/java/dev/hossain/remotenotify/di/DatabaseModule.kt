@@ -2,22 +2,19 @@ package dev.hossain.remotenotify.di
 
 import android.content.Context
 import androidx.room.Room
-import com.squareup.anvil.annotations.ContributesTo
-import com.squareup.anvil.annotations.optional.SingleIn
-import dagger.Module
-import dagger.Provides
 import dev.hossain.remotenotify.db.AlertCheckLogDao
 import dev.hossain.remotenotify.db.AlertConfigDao
 import dev.hossain.remotenotify.db.AppDatabase
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.BindingContainer
+import dev.zacsweers.metro.Provides
+import dev.zacsweers.metro.SingleIn
 
-@Module
-@ContributesTo(AppScope::class)
-object DatabaseModule {
+@BindingContainer
+object DatabaseModule { // TODO: rename to DatabaseBindings or similar
     @Provides
     @SingleIn(AppScope::class)
-    fun provideDatabase(
-        @ApplicationContext context: Context,
-    ): AppDatabase =
+    fun provideDatabase(context: Context): AppDatabase =
         Room
             .databaseBuilder(context, AppDatabase::class.java, "notify_app.db")
             .fallbackToDestructiveMigration(dropAllTables = true)

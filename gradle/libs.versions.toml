@@ -9,22 +9,18 @@ adaptiveAndroid = "1.1.0"
 # https://developer.android.com/studio/releases#android_gradle_plugin_and_android_studio_compatibility
 agp = "8.10.0"
 
-# Forked Anvil
-# https://github.com/ZacSweers/anvil
-# Original Anvil - https://github.com/square/anvil
-anvil = "0.4.1"
+# Metro - A multiplatform dependency injection framework for Kotlin
+# https://zacsweers.github.io/metro/
+metro = "0.5.1"
 
 # https://github.com/slackhq/circuit/releases
-circuit = "0.28.0"
+circuit = "0.29.1"
 
 composeBom = "2025.06.00"
 composeLintChecks = "1.4.2"
 composeMaterial3 = "1.3.2"
 coreKtx = "1.16.0"
 coroutinesTest = "1.10.2"
-
-# https://dagger.dev/dev-guide/ksp
-dagger = "2.56.2"
 
 dataStore = "1.1.7"
 
@@ -49,7 +45,7 @@ junitKtx = "1.2.1"
 # https://developer.android.com/jetpack/androidx/releases/test
 junitVersion = "1.2.1"
 
-kotlin = "2.1.10"
+kotlin = "2.2.0"
 
 # MockK mocking library for Kotlin
 # https://mockk.io
@@ -66,7 +62,7 @@ kotlinxSerializationProperties = "1.8.1"
 # Kotlin Symbol Processing API
 # https://kotlinlang.org/docs/ksp-overview.html
 # https://github.com/google/ksp/releases
-ksp = "2.1.10-1.0.31"
+ksp = "2.2.0-2.0.2"
 
 lifecycleRuntimeKtx = "2.9.1"
 
@@ -149,15 +145,6 @@ circuitx-gestureNav = { group = "com.slack.circuit", name = "circuitx-gesture-na
 circuit-codegen-annotations = { group = "com.slack.circuit", name = "circuit-codegen-annotations", version.ref = "circuit" }
 circuit-codegen = { group = "com.slack.circuit", name = "circuit-codegen", version.ref = "circuit" }
 
-dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger" }
-dagger = { module = "com.google.dagger:dagger", version.ref = "dagger" }
-
-# https://mvnrepository.com/artifact/com.squareup.anvil/annotations-optional
-# https://github.com/ZacSweers/anvil/blob/main/FORK.md
-anvil-annotations = { group = "dev.zacsweers.anvil", name = "annotations", version.ref = "anvil"}
-anvil-annotations-optional = { group = "dev.zacsweers.anvil", name = "annotations-optional", version.ref = "anvil"}
-
-
 # https://mvnrepository.com/artifact/androidx.compose.ui/ui-text-google-fonts
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googleFonts" }
 
@@ -223,7 +210,6 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 
 androidx-room = { id = "androidx.room", version.ref = "roomDb" }
 
@@ -239,10 +225,9 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
 
-# Forked Anvil
-# https://github.com/ZacSweers/anvil/blob/main/FORK.md
-# Original Anvil - https://github.com/square/anvil
-anvil = { id = "dev.zacsweers.anvil", version.ref = "anvil" }
+# Metro - A multiplatform dependency injection framework for Kotlin
+# https://zacsweers.github.io/metro/
+metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 
 # Kotlin linter with built-in formatter
 # https://github.com/jeremymailen/kotlinter-gradle

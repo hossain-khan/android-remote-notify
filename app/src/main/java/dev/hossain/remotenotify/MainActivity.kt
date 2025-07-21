@@ -14,17 +14,18 @@ import com.slack.circuit.foundation.NavigableCircuitContent
 import com.slack.circuit.foundation.rememberCircuitNavigator
 import com.slack.circuit.overlay.ContentWithOverlays
 import com.slack.circuitx.gesturenavigation.GestureNavigationDecorationFactory
-import com.squareup.anvil.annotations.ContributesMultibinding
 import dev.hossain.remotenotify.di.ActivityKey
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertlist.AlertsListScreen
-import javax.inject.Inject
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.binding
 
-@ContributesMultibinding(AppScope::class, boundType = Activity::class)
+@ContributesIntoMap(AppScope::class, binding<Activity>())
 @ActivityKey(MainActivity::class)
+@Inject
 class MainActivity
-    @Inject
     constructor(
         private val circuit: Circuit,
     ) : ComponentActivity() {

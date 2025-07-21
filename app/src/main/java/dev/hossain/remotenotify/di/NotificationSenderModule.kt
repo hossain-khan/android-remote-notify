@@ -1,36 +1,39 @@
 package dev.hossain.remotenotify.di
 
 import androidx.annotation.Keep
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoSet
 import dev.hossain.remotenotify.notifier.MailgunEmailNotificationSender
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.SlackWebhookRequestSender
 import dev.hossain.remotenotify.notifier.TelegramNotificationSender
 import dev.hossain.remotenotify.notifier.TwilioNotificationSender
 import dev.hossain.remotenotify.notifier.WebhookRequestSender
+import dev.zacsweers.metro.BindingContainer
+import dev.zacsweers.metro.IntoSet
+import dev.zacsweers.metro.Provides
 
+/**
+ * https://zacsweers.github.io/metro/bindings/#multibindings
+ */
 @Keep
-@Module
-abstract class NotificationSenderModule {
-    @Binds
+@BindingContainer
+object NotificationSenderModule { // TODO rename this to NotificationSenderMultibinding
+    @Provides
     @IntoSet
-    abstract fun bindTelegramNotificationSender(sender: TelegramNotificationSender): NotificationSender
+    fun bindTelegramNotificationSender(sender: TelegramNotificationSender): NotificationSender = sender
 
-    @Binds
+    @Provides
     @IntoSet
-    abstract fun bindSlackWebhookRequestSender(sender: SlackWebhookRequestSender): NotificationSender
+    fun bindSlackWebhookRequestSender(sender: SlackWebhookRequestSender): NotificationSender = sender
 
-    @Binds
+    @Provides
     @IntoSet
-    abstract fun bindWebhookNotificationSender(sender: WebhookRequestSender): NotificationSender
+    fun bindWebhookNotificationSender(sender: WebhookRequestSender): NotificationSender = sender
 
-    @Binds
+    @Provides
     @IntoSet
-    abstract fun bindTwilioNotificationSender(sender: TwilioNotificationSender): NotificationSender
+    fun bindTwilioNotificationSender(sender: TwilioNotificationSender): NotificationSender = sender
 
-    @Binds
+    @Provides
     @IntoSet
-    abstract fun bindMailgunEmailNotificationSender(sender: MailgunEmailNotificationSender): NotificationSender
+    fun bindMailgunEmailNotificationSender(sender: MailgunEmailNotificationSender): NotificationSender = sender
 }

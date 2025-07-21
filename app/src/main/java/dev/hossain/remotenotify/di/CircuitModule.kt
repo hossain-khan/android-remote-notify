@@ -3,27 +3,29 @@ package dev.hossain.remotenotify.di
 import com.slack.circuit.foundation.Circuit
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.ui.Ui
-import com.squareup.anvil.annotations.ContributesTo
-import com.squareup.anvil.annotations.optional.SingleIn
-import dagger.Module
-import dagger.Provides
-import dagger.multibindings.Multibinds
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.BindingContainer
+import dev.zacsweers.metro.Multibinds
+import dev.zacsweers.metro.Provides
+import dev.zacsweers.metro.SingleIn
 
 /**
- * Dagger module that provides dependencies for the Circuit framework.
+ * Metro module that provides dependencies for the Circuit framework.
  */
-@ContributesTo(AppScope::class)
-@Module
-interface CircuitModule {
-    /**
-     * Dagger multi-binding method that provides a set of Presenter.Factory instances.
-     */
-    @Multibinds fun presenterFactories(): Set<Presenter.Factory>
+@BindingContainer
+interface CircuitModule { // TODO rename this to CircuitMultibinding
 
     /**
-     * Dagger multi-binding method that provides a set of Ui.Factory instances.
+     * Metro multi-binding method that provides a set of Presenter.Factory instances.
      */
-    @Multibinds fun viewFactories(): Set<Ui.Factory>
+    @Multibinds(allowEmpty = true)
+    val presenterFactories: Set<Presenter.Factory>
+
+    /**
+     * Metro multi-binding method that provides a set of Ui.Factory instances.
+     */
+    @Multibinds(allowEmpty = true)
+    val viewFactories: Set<Ui.Factory>
 
     companion object {
         /**

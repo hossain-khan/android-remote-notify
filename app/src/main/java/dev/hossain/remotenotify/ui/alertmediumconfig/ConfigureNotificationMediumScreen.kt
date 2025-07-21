@@ -47,15 +47,11 @@ import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.PopResult
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.EmailQuotaManager
 import dev.hossain.remotenotify.data.EmailQuotaManager.Companion.ValidationKeys.EMAIL_DAILY_QUOTA
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.DeviceAlert
 import dev.hossain.remotenotify.model.RemoteAlert
@@ -65,6 +61,10 @@ import dev.hossain.remotenotify.notifier.of
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen.ConfigurationResult
 import dev.hossain.remotenotify.utils.PreformattedCodeBlock
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Assisted
+import dev.zacsweers.metro.AssistedFactory
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -116,8 +116,8 @@ data class ConfigureNotificationMediumScreen constructor(
     }
 }
 
+@Inject
 class ConfigureNotificationMediumPresenter
-    @AssistedInject
     constructor(
         @Assisted private val screen: ConfigureNotificationMediumScreen,
         @Assisted private val navigator: Navigator,
@@ -259,7 +259,6 @@ class ConfigureNotificationMediumPresenter
             }
         }
 
-        @CircuitInject(ConfigureNotificationMediumScreen::class, AppScope::class)
         @AssistedFactory
         fun interface Factory {
             fun create(

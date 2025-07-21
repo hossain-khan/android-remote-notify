@@ -6,8 +6,10 @@ import android.os.Environment
 import android.os.StatFs
 import android.os.storage.StorageManager
 import androidx.core.content.ContextCompat
+import dev.zacsweers.metro.Inject
 import java.util.UUID
 
+@Inject
 class StorageMonitor(
     private val context: Context,
 ) {

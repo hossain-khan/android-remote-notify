@@ -1,26 +1,26 @@
 package dev.hossain.remotenotify.notifier
 
-import com.squareup.anvil.annotations.ContributesMultibinding
 import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.TelegramConfigDataStore
-import dev.hossain.remotenotify.di.AppScope
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.DeviceAlert.FormatType
 import dev.hossain.remotenotify.model.RemoteAlert
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoSet
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.Named
 import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Named
 
-@ContributesMultibinding(AppScope::class)
+@ContributesIntoSet(AppScope::class)
 @Named("telegram") // Could not use `NotifierType.TELEGRAM.name` as it's not a constant.
+@Inject
 class TelegramNotificationSender
-    @Inject
     constructor(
         private val telegramConfigDataStore: TelegramConfigDataStore,
         private val okHttpClient: OkHttpClient,

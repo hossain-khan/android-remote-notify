@@ -135,7 +135,7 @@ class ObserveDeviceHealthWorker(
     ) {
         Timber.i("Notification triggered - sending: $remoteAlert")
         if (notifiers.isEmpty()) {
-            // This should ideally not happen unless dagger setup has failed
+            // This should ideally not happen unless Metro DI setup has failed
             Timber.tag(WORKER_LOG_TAG).e("No remote notifier has been registered")
         }
 
