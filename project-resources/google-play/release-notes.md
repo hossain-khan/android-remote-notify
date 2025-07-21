@@ -10,6 +10,25 @@
 
 -----------------------------------------------------------------------------
 
+## Release v1.16 (Unreleased)
+- Initial 1.x release of 'Remote Notify'! 🎉
+- Monitor battery 🔋 and storage 💾 levels of your remote Android devices.
+- Set up custom alerts and receive notifications via Email, Twilio SMS, Slack, Telegram, and REST webhooks.
+- ⚒️ Maintenance - TBA
+- 🆕 Feature - TBA
+
+Full changelog: https://github.com/hossain-khan/android-remote-notify/releases/tag/v1.16
+
+
+## Release v1.15
+- Initial 1.x release of 'Remote Notify'! 🎉
+- Monitor battery 🔋 and storage 💾 levels of your remote Android devices.
+- Set up custom alerts and receive notifications via Email, Twilio SMS, Slack, Telegram, and REST webhooks.
+- Added alert check log viewer with filtering to diagnose issues.
+- ⚒️ Maintenance - Migrated DI framework from Dagger+Anvil to Metro 🚉
+
+Full changelog: https://github.com/hossain-khan/android-remote-notify/releases/tag/v1.15
+
 ## Release v1.14.1
 - Initial 1.x release of 'Remote Notify'! 🎉
 - Monitor battery 🔋 and storage 💾 levels of your remote Android devices.
