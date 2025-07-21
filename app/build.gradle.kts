@@ -23,9 +23,9 @@ android {
         applicationId = "dev.hossain.remotenotify"
         minSdk = 30
         targetSdk = 35
-        versionCode = 19
+        versionCode = 20
         // 📣 Don't forget to update release notes! 🤓
-        versionName = "1.15"
+        versionName = "1.16"
 
         // Read key or other properties from local.properties
         val localProperties =
