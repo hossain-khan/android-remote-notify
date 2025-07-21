@@ -9,6 +9,8 @@ import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.DeviceAlert
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.toTypeDisplayName
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.Named
 import okhttp3.FormBody
@@ -22,7 +24,7 @@ import android.util.Base64.encodeToString as encodeBase64
  * - https://documentation.mailgun.com/docs/mailgun/user-manual/get-started/
  * - https://documentation.mailgun.com/en/latest/api-sending.html#sending
  */
-@ContributesMultibinding(AppScope::class)
+@ContributesIntoSet(AppScope::class)
 @Named("email")
 @Inject
 class MailgunEmailNotificationSender

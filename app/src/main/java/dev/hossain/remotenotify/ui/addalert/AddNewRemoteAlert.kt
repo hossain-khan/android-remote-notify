@@ -232,7 +232,6 @@ class AddNewRemoteAlertPresenter
             }
         }
 
-        @CircuitInject(AddNewRemoteAlertScreen::class, AppScope::class)
         @AssistedFactory
         fun interface Factory {
             fun create(navigator: Navigator): AddNewRemoteAlertPresenter

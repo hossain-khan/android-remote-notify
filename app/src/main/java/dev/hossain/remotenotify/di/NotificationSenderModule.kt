@@ -7,6 +7,7 @@ import dev.hossain.remotenotify.notifier.SlackWebhookRequestSender
 import dev.hossain.remotenotify.notifier.TelegramNotificationSender
 import dev.hossain.remotenotify.notifier.TwilioNotificationSender
 import dev.hossain.remotenotify.notifier.WebhookRequestSender
+import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.IntoSet
 import dev.zacsweers.metro.Provides
 
@@ -14,24 +15,25 @@ import dev.zacsweers.metro.Provides
  * https://zacsweers.github.io/metro/bindings/#multibindings
  */
 @Keep
-interface NotificationSenderModule { // TODO rename this to NotificationSenderMultibinding
+@BindingContainer
+object NotificationSenderModule { // TODO rename this to NotificationSenderMultibinding
     @Provides
     @IntoSet
-    fun bindTelegramNotificationSender(sender: TelegramNotificationSender): NotificationSender
+    fun bindTelegramNotificationSender(sender: TelegramNotificationSender): NotificationSender = sender
 
     @Provides
     @IntoSet
-    fun bindSlackWebhookRequestSender(sender: SlackWebhookRequestSender): NotificationSender
+    fun bindSlackWebhookRequestSender(sender: SlackWebhookRequestSender): NotificationSender = sender
 
     @Provides
     @IntoSet
-    fun bindWebhookNotificationSender(sender: WebhookRequestSender): NotificationSender
+    fun bindWebhookNotificationSender(sender: WebhookRequestSender): NotificationSender = sender
 
     @Provides
     @IntoSet
-    fun bindTwilioNotificationSender(sender: TwilioNotificationSender): NotificationSender
+    fun bindTwilioNotificationSender(sender: TwilioNotificationSender): NotificationSender = sender
 
     @Provides
     @IntoSet
-    fun bindMailgunEmailNotificationSender(sender: MailgunEmailNotificationSender): NotificationSender
+    fun bindMailgunEmailNotificationSender(sender: MailgunEmailNotificationSender): NotificationSender = sender
 }

@@ -12,7 +12,18 @@ import dev.zacsweers.metro.Provider
 import dev.zacsweers.metro.Provides
 import kotlin.reflect.KClass
 
-@DependencyGraph(AppScope::class)
+@DependencyGraph(
+    AppScope::class,
+    bindingContainers = [
+        AnalyticsModule::class,
+        AppModule::class,
+        CircuitModule::class,
+        DatabaseModule::class,
+        NetworkModule::class,
+        NotificationSenderModule::class,
+        WorkerModule::class,
+    ],
+)
 interface AppGraph {
     @Provides fun provideApplicationContext(application: Application): Context = application
 

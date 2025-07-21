@@ -245,7 +245,6 @@ class AlertCheckLogViewerPresenter
             )
         }
 
-        @CircuitInject(AlertCheckLogViewerScreen::class, AppScope::class)
         @AssistedFactory
         fun interface Factory {
             fun create(navigator: Navigator): AlertCheckLogViewerPresenter

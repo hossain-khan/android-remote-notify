@@ -227,7 +227,6 @@ class AlertsListPresenter
             }
         }
 
-        @CircuitInject(AlertsListScreen::class, AppScope::class)
         @AssistedFactory
         fun interface Factory {
             fun create(navigator: Navigator): AlertsListPresenter

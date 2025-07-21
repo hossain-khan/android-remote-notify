@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
+import dev.zacsweers.metro.Inject
 
+@Inject
 class BatteryMonitor(
     private val context: Context,
 ) {

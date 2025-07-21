@@ -217,10 +217,14 @@ dependencies {
 }
 
 ksp {
-    // Anvil-KSP
-    arg("anvil-ksp-extraContributingAnnotations", "com.slack.circuit.codegen.annotations.CircuitInject")
-    // kotlin-inject-anvil (requires 0.0.3+)
-    arg("kotlin-inject-anvil-contributing-annotations", "com.slack.circuit.codegen.annotations.CircuitInject")
+    // Circuit-KSP for Metro
+    arg("circuit.codegen.mode", "metro")
+}
+
+metro {
+    interop {
+        includeDagger()
+    }
 }
 
 
