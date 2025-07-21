@@ -108,8 +108,6 @@ kover {
                     "*Composable",
                     "*Parcelize",
                     "*Preview",
-                    // Generated classes by Dagger 🗡️
-                    "dagger.internal.DaggerGenerated",
                     "javax.annotation.processing.Generated"
                 )
             }
@@ -218,13 +216,8 @@ dependencies {
 
 ksp {
     // Circuit-KSP for Metro
+    // https://slackhq.github.io/circuit/code-gen/
     arg("circuit.codegen.mode", "metro")
-}
-
-metro {
-    interop {
-        includeDagger()
-    }
 }
 
 

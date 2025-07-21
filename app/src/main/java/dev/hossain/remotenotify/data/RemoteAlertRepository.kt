@@ -13,9 +13,9 @@ import dev.hossain.remotenotify.model.toRemoteAlert
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 interface RemoteAlertRepository {
     suspend fun saveRemoteAlert(remoteAlert: RemoteAlert)
@@ -42,8 +42,8 @@ interface RemoteAlertRepository {
 }
 
 @ContributesBinding(AppScope::class)
+@Inject
 class RemoteAlertRepositoryImpl
-    @Inject
     constructor(
         private val alertConfigDao: AlertConfigDao,
         private val alertCheckLogDao: AlertCheckLogDao,
