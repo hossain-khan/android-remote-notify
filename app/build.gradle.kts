@@ -220,6 +220,16 @@ ksp {
     arg("circuit.codegen.mode", "metro")
 }
 
+metro {
+    // Enable Metro code generation for assisted injection factories.
+    // https://zacsweers.github.io/metro/injection-types/#automatic-assisted-factory-generation
+    // generateAssistedFactories.set(true)
+
+    enableKotlinVersionCompatibilityChecks = true
+
+    reportsDestination = layout.buildDirectory.asFile.get().resolve("reports/metro")
+}
+
 
 // Helper function to get the current Git commit hash
 fun getGitCommitHash(): String {
