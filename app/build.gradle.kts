@@ -84,6 +84,10 @@ android {
         schemaDirectory("$projectDir/schemas")
     }
 
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+
     // Needed for Kover
     testOptions {
         unitTests {
