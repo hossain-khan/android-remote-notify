@@ -30,12 +30,6 @@
 -keep class * extends com.slack.circuit.foundation.Circuit { *; }
 -keep @com.slack.circuit.codegen.annotations.CircuitInject class * { *; }
 
-# Dagger
--keepclassmembers,allowobfuscation class * {
-    @javax.inject.* *;
-    @dagger.* *;
-}
-
 # Room
 -keep class * extends androidx.room.RoomDatabase
 -keep @androidx.room.Entity class *
