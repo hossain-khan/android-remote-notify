@@ -135,8 +135,9 @@ class AboutAppPresenter
             }
         }
 
+        @CircuitInject(AboutAppScreen::class, AppScope::class)
         @AssistedFactory
-        fun interface Factory {
+        interface Factory {
             fun create(navigator: Navigator): AboutAppPresenter
         }
     }

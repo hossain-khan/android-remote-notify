@@ -17,7 +17,6 @@ import kotlin.reflect.KClass
     bindingContainers = [
         AnalyticsBindings::class,
         AppBindings::class,
-        CircuitMultibindings::class,
         DatabaseBindings::class,
         NetworkBindings::class,
         NotificationSenderMultibindings::class,
