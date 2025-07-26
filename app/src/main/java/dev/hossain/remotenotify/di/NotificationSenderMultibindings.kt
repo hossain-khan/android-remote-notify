@@ -16,7 +16,7 @@ import dev.zacsweers.metro.Provides
  */
 @Keep
 @BindingContainer
-object NotificationSenderModule { // TODO rename this to NotificationSenderMultibinding
+object NotificationSenderMultibindings {
     @Provides
     @IntoSet
     fun bindTelegramNotificationSender(sender: TelegramNotificationSender): NotificationSender = sender

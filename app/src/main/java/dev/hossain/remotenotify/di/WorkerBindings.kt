@@ -14,7 +14,7 @@ import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.Provides
 
 @BindingContainer
-object WorkerModule { // TODO: rename to WorkerBindings or similar
+object WorkerBindings {
     @Provides
     fun provideWorkerFactory(
         batteryMonitor: BatteryMonitor,

@@ -13,8 +13,7 @@ import dev.zacsweers.metro.SingleIn
  * Metro module that provides dependencies for the Circuit framework.
  */
 @BindingContainer
-interface CircuitModule { // TODO rename this to CircuitMultibinding
-
+interface CircuitMultibindings {
     /**
      * Metro multi-binding method that provides a set of Presenter.Factory instances.
      */
