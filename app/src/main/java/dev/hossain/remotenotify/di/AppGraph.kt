@@ -15,13 +15,12 @@ import kotlin.reflect.KClass
 @DependencyGraph(
     AppScope::class,
     bindingContainers = [
-        AnalyticsModule::class,
-        AppModule::class,
-        CircuitModule::class,
-        DatabaseModule::class,
-        NetworkModule::class,
-        NotificationSenderModule::class,
-        WorkerModule::class,
+        AnalyticsBindings::class,
+        AppBindings::class,
+        DatabaseBindings::class,
+        NetworkBindings::class,
+        NotificationSenderMultibindings::class,
+        WorkerBindings::class,
     ],
 )
 interface AppGraph {

@@ -11,7 +11,7 @@ import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
 
 @BindingContainer
-object DatabaseModule { // TODO: rename to DatabaseBindings or similar
+object DatabaseBindings {
     @Provides
     @SingleIn(AppScope::class)
     fun provideDatabase(context: Context): AppDatabase =

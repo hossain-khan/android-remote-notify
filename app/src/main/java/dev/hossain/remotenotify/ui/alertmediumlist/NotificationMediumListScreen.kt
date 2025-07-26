@@ -277,8 +277,9 @@ class NotificationMediumListPresenter
         /**
          * Factory for creating instances of [NotificationMediumListPresenter].
          */
+        @CircuitInject(NotificationMediumListScreen::class, AppScope::class)
         @AssistedFactory
-        fun interface Factory {
+        interface Factory {
             /**
              * Creates an instance of [NotificationMediumListPresenter].
              * @param navigator The navigator for navigating to other screens.

@@ -259,8 +259,9 @@ class ConfigureNotificationMediumPresenter
             }
         }
 
+        @CircuitInject(ConfigureNotificationMediumScreen::class, AppScope::class)
         @AssistedFactory
-        fun interface Factory {
+        interface Factory {
             fun create(
                 screen: ConfigureNotificationMediumScreen,
                 navigator: Navigator,

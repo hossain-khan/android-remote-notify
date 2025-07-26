@@ -6,7 +6,7 @@ import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.Provides
 
 @BindingContainer
-object AnalyticsModule { // TODO: rename to AnalyticsBindings or similar
+object AnalyticsBindings {
     @Provides
     fun provideFirebaseAnalytics(context: Context): FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
 }

@@ -7,7 +7,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 
 @BindingContainer
-object NetworkModule { // TODO: rename to NetworkBindings or similar
+object NetworkBindings {
     @Provides
     fun provideOkHttpClient(): OkHttpClient {
         val loggingInterceptor =
