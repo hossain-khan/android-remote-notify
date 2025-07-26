@@ -25,7 +25,7 @@
 ## Technology Stack & Architecture
 
 ### Core Technologies
-- **Language**: Kotlin 2.1.10 with Java 17 compatibility
+- **Language**: Kotlin 2.2.0 with Java 17 compatibility
 - **UI Framework**: Jetpack Compose with Material3 design system
 - **Minimum SDK**: 30 (Android 11)
 - **Target SDK**: 35 (Android 15)
@@ -106,6 +106,7 @@ app/src/main/java/dev/hossain/remotenotify/
 │   └── AppDatabase.kt             # Database configuration
 ├── di/                            # Dependency injection modules
 │   ├── AppGraph.kt                # Main Metro dependency graph
+│   ├── CircuitProviders.kt        # Circuit framework providers
 │   └── *Bindings.kt               # Metro binding containers
 ├── model/                         # Domain models and data classes
 ├── monitor/                       # Device monitoring logic
@@ -113,9 +114,8 @@ app/src/main/java/dev/hossain/remotenotify/
 ├── theme/                         # Compose theme and styling
 ├── ui/                           # UI layer (screens and components)
 │   ├── */                        # Feature-based screen packages
-│   │   ├── *Screen.kt            # Circuit screen definitions
-│   │   ├── *Presenter.kt         # Circuit presenters
-│   │   └── *Ui.kt               # Circuit UI implementations
+│   │   ├── *Screen.kt            # Circuit screen, presenter, and UI in combined files
+│   │   └── *ConfigInputUi.kt     # Feature-specific UI components
 │   └── components/               # Reusable UI components
 ├── utils/                        # Utility classes and extensions
 └── worker/                       # Background work implementations
@@ -130,12 +130,24 @@ app/src/androidTest/java/             # Instrumentation tests
 ## Development Guidelines
 
 ### Circuit Framework Usage
-When creating new screens, follow the Circuit pattern:
+When creating new screens, follow the Circuit pattern where Screen, Presenter, and UI are defined in the same file:
 
 ```kotlin
+// All-in-one file: SettingsScreen.kt
+
 // Screen definition
 @Parcelize
-data object SettingsScreen : Screen
+data object SettingsScreen : Screen {
+    data class State(
+        val settings: Settings,
+        val eventSink: (Event) -> Unit,
+    ) : CircuitUiState
+
+    sealed class Event : CircuitUiEvent {
+        data object NavigateBack : Event()
+        // ... other events
+    }
+}
 
 // Presenter with Metro assisted injection
 @Inject
@@ -148,39 +160,32 @@ class SettingsPresenter(
     override fun present(): SettingsScreen.State {
         // State management logic
         return SettingsScreen.State(
-            // ... state properties
+            settings = currentSettings,
+            eventSink = { event ->
+                when (event) {
+                    SettingsScreen.Event.NavigateBack -> navigator.pop()
+                    // Handle other events
+                }
+            }
         )
     }
     
+    @CircuitInject(SettingsScreen::class, AppScope::class)
     @AssistedFactory
     fun interface Factory {
         fun create(navigator: Navigator): SettingsPresenter
     }
 }
 
-// Presenter factory for Circuit integration
-@Inject
-@ContributesIntoSet(AppScope::class)
-class SettingsPresenterFactory(
-    private val factory: SettingsPresenter.Factory,
-) : Presenter.Factory {
-    override fun create(
-        screen: Screen,
-        navigator: Navigator,
-        context: CircuitContext,
-    ): Presenter<*>? = when (screen) {
-        SettingsScreen -> factory.create(navigator)
-        else -> null
-    }
-}
-
-// UI
-@CircuitInject(screen = SettingsScreen::class, scope = AppScope::class)
+// UI in the same file
+@CircuitInject(SettingsScreen::class, AppScope::class)
 @Composable
 fun SettingsUi(state: SettingsScreen.State, modifier: Modifier = Modifier) {
     // UI composition
 }
 ```
+
+Note: The project uses `@CircuitInject` annotations on presenter factories and UI functions for automatic registration. Circuit uses this information to automatically create presenter and UI factories that are collected via `CircuitProviders.kt`.
 
 ### Dependency Injection Patterns
 Use Metro for Kotlin-first dependency injection:
@@ -188,9 +193,18 @@ Use Metro for Kotlin-first dependency injection:
 ```kotlin
 // Binding containers for organizing related providers
 @BindingContainer
-object FeatureModule {
+object NetworkBindings {
     @Provides
-    fun provideService(impl: ServiceImpl): Service = impl
+    fun provideOkHttpClient(): OkHttpClient {
+        // Implementation
+    }
+}
+
+// Circuit providers use @ContributesTo for interface-based modules
+@ContributesTo(AppScope::class)
+interface CircuitProviders {
+    @Multibinds fun presenterFactories(): Set<Presenter.Factory>
+    @Multibinds fun viewFactories(): Set<Ui.Factory>
 }
 
 // Constructor injection with contributions
@@ -211,14 +225,17 @@ class NotificationSenderImpl(
 @DependencyGraph(
     AppScope::class,
     bindingContainers = [
-        NetworkModule::class,
-        DatabaseModule::class,
-        AnalyticsModule::class,
+        AnalyticsBindings::class,
+        AppBindings::class,
+        DatabaseBindings::class,
+        NetworkBindings::class,
+        NotificationSenderMultibindings::class,
+        WorkerBindings::class,
     ],
 )
 interface AppGraph {
-    val repository: Repository
-    val notifiers: Set<NotificationSender>
+    val workManager: WorkManager
+    val workerFactory: WorkerFactory
     
     @DependencyGraph.Factory
     fun interface Factory {
@@ -235,7 +252,7 @@ interface RemoteAlertRepository {
     suspend fun saveAlert(alert: RemoteAlert): Result<Unit>
 }
 
-// DataStore usage
+// DataStore usage with Metro injection
 @Inject
 class ConfigurationDataStore(
     @ApplicationContext private val context: Context
