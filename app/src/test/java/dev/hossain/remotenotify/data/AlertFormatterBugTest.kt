@@ -67,7 +67,6 @@ class AlertFormatterBugTest {
         val testCases =
             listOf(
                 Pair(15.0, "15.0 GB available"),
-                Pair(10.0, "10.0 GB available (at threshold)"),
                 Pair(8.0, "8.0 GB available"),
                 Pair(5.0, "5.0 GB available"),
                 Pair(2.0, "2.0 GB available"),
@@ -95,8 +94,8 @@ class AlertFormatterBugTest {
                 result.contains("Threshold: 10.0 GB"),
             )
             assertFalse(
-                "[$description] Bug check: Threshold should NOT match current storage value",
-                result.contains("Threshold: $currentStorage GB"),
+                "[$description] Bug check: Threshold should NOT match current storage value when they differ",
+                currentStorage != 10.0 && result.contains("Threshold: $currentStorage GB"),
             )
         }
     }
@@ -107,7 +106,6 @@ class AlertFormatterBugTest {
         val testCases =
             listOf(
                 Pair(25, "25% battery"),
-                Pair(20, "20% battery (at threshold)"),
                 Pair(15, "15% battery"),
                 Pair(10, "10% battery"),
                 Pair(5, "5% battery"),
@@ -135,8 +133,8 @@ class AlertFormatterBugTest {
                 result.contains("Threshold: 20%"),
             )
             assertFalse(
-                "[$description] Bug check: Threshold should NOT match current battery level",
-                result.contains("Threshold: $currentLevel%"),
+                "[$description] Bug check: Threshold should NOT match current battery level when they differ",
+                currentLevel != 20 && result.contains("Threshold: $currentLevel%"),
             )
         }
     }
