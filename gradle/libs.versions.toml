@@ -7,11 +7,11 @@ adaptiveAndroid = "1.1.0"
 
 # Android Studio version and AGP version compatibility
 # https://developer.android.com/studio/releases#android_gradle_plugin_and_android_studio_compatibility
-agp = "8.10.0"
+agp = "8.13.0"
 
 # Metro - A multiplatform dependency injection framework for Kotlin
 # https://zacsweers.github.io/metro/
-metro = "0.5.1"
+metro = "0.6.10"
 
 # https://github.com/slackhq/circuit/releases
 circuit = "0.29.1"
@@ -28,7 +28,7 @@ dataStore = "1.1.7"
 # https://github.com/slackhq/EitherNet
 eithernet = "2.0.0"
 espressoCore = "3.6.1"
-firebaseBom = "33.15.0"
+firebaseBom = "34.4.0"
 
 # https://developer.android.com/develop/ui/compose/text/fonts
 googleFonts = "1.8.2"
@@ -45,7 +45,7 @@ junitKtx = "1.2.1"
 # https://developer.android.com/jetpack/androidx/releases/test
 junitVersion = "1.2.1"
 
-kotlin = "2.2.0"
+kotlin = "2.2.20"
 
 # MockK mocking library for Kotlin
 # https://mockk.io
@@ -62,7 +62,7 @@ kotlinxSerializationProperties = "1.8.1"
 # Kotlin Symbol Processing API
 # https://kotlinlang.org/docs/ksp-overview.html
 # https://github.com/google/ksp/releases
-ksp = "2.2.0-2.0.2"
+ksp = "2.2.20-2.0.4"
 
 lifecycleRuntimeKtx = "2.9.1"
 
@@ -81,7 +81,7 @@ retrofit = "3.0.0"
 
 # Room Database
 # https://developer.android.com/training/data-storage/room
-roomDb = "2.7.1"
+roomDb = "2.8.0"
 
 testCore = "1.6.1"
 
@@ -182,9 +182,6 @@ robolectric = { group = "org.robolectric", name = "robolectric", version = "4.14
 # https://mockk.io
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 
-# open-meteo-api-kotlin
-# https://github.com/open-meteo/open-meteo-api-kotlin/releases
-openmeteo-api-kotlin = { group = "com.open-meteo", name = "open-meteo-api-kotlin", version = "0.7.1-beta.1" }
 
 # Adaptive library to create adaptive UIs
 # https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive
