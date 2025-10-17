@@ -146,21 +146,25 @@ class ObserveDeviceHealthWorker(
                     Timber.tag(WORKER_LOG_TAG).i("Sending notification with ${notifier.notifierType}")
 
                     // Update the alert with the current state value for the user notification
+                    // IMPORTANT: Preserve the threshold from the original alert configuration
+                    // and set the current value from the actual device state measurement
                     val triggeredRemoteAlert =
                         when (remoteAlert) {
                             is RemoteAlert.BatteryAlert ->
                                 RemoteAlert.BatteryAlert(
                                     alertId = remoteAlert.alertId,
-                                    batteryPercentage = remoteAlert.batteryPercentage,
-                                    currentBatteryLevel = stateValue,
+                                    batteryPercentage = remoteAlert.batteryPercentage,  // Threshold from DB
+                                    currentBatteryLevel = stateValue,  // Current measured battery level
                                 )
                             is RemoteAlert.StorageAlert ->
                                 RemoteAlert.StorageAlert(
                                     alertId = remoteAlert.alertId,
-                                    storageMinSpaceGb = remoteAlert.storageMinSpaceGb,
-                                    currentStorageGb = stateValue.toDouble(),
+                                    storageMinSpaceGb = remoteAlert.storageMinSpaceGb,  // Threshold from DB
+                                    currentStorageGb = stateValue.toDouble(),  // Current measured storage
                                 )
                         }
+
+                    Timber.tag(WORKER_LOG_TAG).d("Sending alert - Configured: $remoteAlert, Triggered: $triggeredRemoteAlert")
 
                     kotlin
                         .runCatching { notifier.sendNotification(triggeredRemoteAlert) }
