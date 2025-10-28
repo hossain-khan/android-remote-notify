@@ -153,14 +153,14 @@ class ObserveDeviceHealthWorker(
                             is RemoteAlert.BatteryAlert ->
                                 RemoteAlert.BatteryAlert(
                                     alertId = remoteAlert.alertId,
-                                    batteryPercentage = remoteAlert.batteryPercentage,  // Threshold from DB
-                                    currentBatteryLevel = stateValue,  // Current measured battery level
+                                    batteryPercentage = remoteAlert.batteryPercentage, // Threshold from DB
+                                    currentBatteryLevel = stateValue, // Current measured battery level
                                 )
                             is RemoteAlert.StorageAlert ->
                                 RemoteAlert.StorageAlert(
                                     alertId = remoteAlert.alertId,
-                                    storageMinSpaceGb = remoteAlert.storageMinSpaceGb,  // Threshold from DB
-                                    currentStorageGb = stateValue.toDouble(),  // Current measured storage
+                                    storageMinSpaceGb = remoteAlert.storageMinSpaceGb, // Threshold from DB
+                                    currentStorageGb = stateValue.toDouble(), // Current measured storage
                                 )
                         }
 
