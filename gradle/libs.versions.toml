@@ -238,4 +238,4 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.
 
 # Kover is a set of solutions for collecting test coverage of Kotlin code compiled for JVM and Android platforms.
 # https://github.com/Kotlin/kotlinx-kover?tab=readme-ov-file#kover-gradle-plugin
-kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.1" }
+kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.3" }
