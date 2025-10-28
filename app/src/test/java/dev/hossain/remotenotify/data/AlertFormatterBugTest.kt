@@ -28,8 +28,8 @@ class AlertFormatterBugTest {
         val firstAlert =
             RemoteAlert.StorageAlert(
                 alertId = 1L,
-                storageMinSpaceGb = 10,  // Threshold: 10 GB
-                currentStorageGb = 9.0,   // Current: 9.0 GB
+                storageMinSpaceGb = 10, // Threshold: 10 GB
+                currentStorageGb = 9.0, // Current: 9.0 GB
             )
 
         // When
@@ -43,8 +43,8 @@ class AlertFormatterBugTest {
         val secondAlert =
             RemoteAlert.StorageAlert(
                 alertId = 1L,
-                storageMinSpaceGb = 10,  // Threshold should STILL be: 10 GB
-                currentStorageGb = 6.0,   // Current: 6.0 GB
+                storageMinSpaceGb = 10, // Threshold should STILL be: 10 GB
+                currentStorageGb = 6.0, // Current: 6.0 GB
             )
 
         // When
@@ -77,7 +77,7 @@ class AlertFormatterBugTest {
             val alert =
                 RemoteAlert.StorageAlert(
                     alertId = 1L,
-                    storageMinSpaceGb = 10,  // Threshold is always 10 GB
+                    storageMinSpaceGb = 10, // Threshold is always 10 GB
                     currentStorageGb = currentStorage,
                 )
 
@@ -116,7 +116,7 @@ class AlertFormatterBugTest {
             val alert =
                 RemoteAlert.BatteryAlert(
                     alertId = 1L,
-                    batteryPercentage = 20,  // Threshold is always 20%
+                    batteryPercentage = 20, // Threshold is always 20%
                     currentBatteryLevel = currentLevel,
                 )
 
