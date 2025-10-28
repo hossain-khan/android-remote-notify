@@ -14,7 +14,7 @@ agp = "8.13.0"
 metro = "0.6.10"
 
 # https://github.com/slackhq/circuit/releases
-circuit = "0.29.1"
+circuit = "0.30.0"
 
 composeBom = "2025.06.00"
 composeLintChecks = "1.4.2"
@@ -49,22 +49,22 @@ kotlin = "2.2.20"
 
 # MockK mocking library for Kotlin
 # https://mockk.io
-mockk = "1.14.2"
+mockk = "1.14.6"
 
 # Kotlin linter with built-in formatter
 # https://github.com/jeremymailen/kotlinter-gradle
 # https://github.com/pinterest/ktlint
 kotlinter = "5.1.1"
 
-kotlinxSerializationJson = "1.8.1"
-kotlinxSerializationProperties = "1.8.1"
+kotlinxSerializationJson = "1.9.0"
+kotlinxSerializationProperties = "1.9.0"
 
 # Kotlin Symbol Processing API
 # https://kotlinlang.org/docs/ksp-overview.html
 # https://github.com/google/ksp/releases
 ksp = "2.2.20-2.0.4"
 
-lifecycleRuntimeKtx = "2.9.1"
+lifecycleRuntimeKtx = "2.9.4"
 
 # A modern JSON library for Kotlin and Java.
 # https://github.com/square/moshi
@@ -72,7 +72,7 @@ moshi = "1.15.2"
 
 # Navigation for Jetpack Compose
 # https://developer.android.com/develop/ui/compose/navigation
-navigationCompose = "2.9.0"
+navigationCompose = "2.9.5"
 
 # Http client for Android
 # https://square.github.io/okhttp/
@@ -81,7 +81,7 @@ retrofit = "3.0.0"
 
 # Room Database
 # https://developer.android.com/training/data-storage/room
-roomDb = "2.8.0"
+roomDb = "2.8.2"
 
 testCore = "1.6.1"
 
@@ -89,7 +89,7 @@ testCore = "1.6.1"
 timber = "5.0.1"
 
 # https://developer.android.com/jetpack/androidx/releases/work
-workManager = "2.10.1"
+workManager = "2.11.0"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
@@ -176,7 +176,7 @@ moshi-kotlin-codegen = { group = "com.squareup.moshi", name = "moshi-kotlin-code
 eithernet = { group = "com.slack.eithernet", name = "eithernet", version.ref = "eithernet" }
 eithernet-integration-retrofit = { group = "com.slack.eithernet", name = "eithernet-integration-retrofit", version.ref = "eithernet" }
 
-robolectric = { group = "org.robolectric", name = "robolectric", version = "4.14.1" }
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.16" }
 
 # MockK mocking library for Kotlin
 # https://mockk.io
