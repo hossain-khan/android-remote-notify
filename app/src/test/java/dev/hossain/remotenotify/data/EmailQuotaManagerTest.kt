@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -21,8 +19,6 @@ class EmailQuotaManagerTest {
     private lateinit var context: Context
     private lateinit var emailQuotaManager: EmailQuotaManager
     private val testDataStoreName = "test_email_quota"
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
 
     @Before
     fun setUp() {
@@ -142,24 +138,18 @@ class EmailQuotaManagerTest {
         }
 
     @Test
-    fun `quota resets on new day`() =
+    fun `getRemainingQuota returns 0 when quota is exhausted`() =
         runTest {
             // Given - Reach quota limit
             emailQuotaManager.recordEmailSent()
             emailQuotaManager.recordEmailSent()
             assertThat(emailQuotaManager.canSendEmail()).isFalse()
 
-            // When - Force a day change by manipulating the clock
-            // This is a bit tricky in tests, so we need to directly test the behavior
+            // When - Check remaining quota
+            val remainingQuota = emailQuotaManager.getRemainingQuota()
 
-            // For testing purposes, we'd need to simulate a day change
-            // This would require refactoring EmailQuotaManager to accept a clock dependency
-            // As a workaround, we can check that getRemainingQuota returns max again
-
-            // Then
-            // Check that canSendEmail() will return true after a day change
-            // This is a partial test since we can't easily simulate time passing
-            assertThat(emailQuotaManager.getRemainingQuota()).isEqualTo(0)
+            // Then - Should be 0
+            assertThat(remainingQuota).isEqualTo(0)
         }
 
     @Test
