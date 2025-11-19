@@ -56,25 +56,6 @@ class ObserveDeviceHealthWorkerTest {
     private lateinit var worker: ObserveDeviceHealthWorker
     private lateinit var context: Context
 
-    // No longer necessary now that we are using `Timber.uprootAll()`
-
-    /*companion object { // Use a companion object for static initialization
-        private var firebaseInitialized = false
-
-        @JvmStatic // Important for JUnit to recognize the @BeforeClass method
-        @BeforeClass
-        fun setup() {
-            // Avoid `./gradlew :app:testReleaseUnitTest` test failure
-            // - java.lang.IllegalStateException: Default FirebaseApp is not initialized in this process
-            // dev.hossain.remotenotify. Make sure to call FirebaseApp.initializeApp(Context) first.
-            if (!firebaseInitialized) {
-                val context = ApplicationProvider.getApplicationContext<Context>()
-                FirebaseApp.initializeApp(context)
-                firebaseInitialized = true
-            }
-        }
-    }*/
-
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
@@ -141,7 +122,7 @@ class ObserveDeviceHealthWorkerTest {
             coVerify(exactly = 0) { repository.insertAlertCheckLog(any(), any(), any(), any(), any()) }
         }
 
-    @Ignore("Breakpoint is not working to debug the test.")
+    @Ignore("Test has incomplete mock setup - repository.insertAlertCheckLog needs proper mocking")
     @Test
     fun `doWork logs battery check but doesn't notify when threshold not met`() =
         runTest {
@@ -191,7 +172,7 @@ class ObserveDeviceHealthWorkerTest {
             coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 15, true, NotifierType.EMAIL) }
         }
 
-    @Ignore("Breakpoint is not working to debug the test.")
+    @Ignore("Test has incomplete mock setup - repository.insertAlertCheckLog needs proper mocking")
     @Test
     fun `doWork logs storage check but doesn't notify when threshold not met`() =
         runTest {
