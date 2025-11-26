@@ -238,12 +238,9 @@ metro {
 }
 
 
-// Helper function to get the current Git commit hash
+// Helper function to get the current Git commit hash (configuration cache compatible)
 fun getGitCommitHash(): String {
-    val processBuilder = ProcessBuilder("git", "rev-parse", "--short", "HEAD")
-    val output = File.createTempFile("git-short-commit-hash", "")
-    processBuilder.redirectOutput(output)
-    val process = processBuilder.start()
-    process.waitFor()
-    return output.readText().trim()
+    return providers.exec {
+        commandLine("git", "rev-parse", "--short", "HEAD")
+    }.standardOutput.asText.get().trim()
 }
