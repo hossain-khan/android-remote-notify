@@ -16,14 +16,26 @@ interface AlertConfigDao {
     @Query("SELECT * FROM alert_config ORDER BY created_on ASC")
     fun getAllFlow(): Flow<List<AlertConfigEntity>>
 
+    /**
+     * Retrieves an alert configuration by its unique ID.
+     *
+     * @param alertId The unique identifier of the alert.
+     * @return The alert configuration if found, null otherwise.
+     */
     @Query("SELECT * FROM alert_config WHERE id = :alertId")
     suspend fun getById(alertId: Long): AlertConfigEntity?
 
     @Insert
     suspend fun insert(notification: AlertConfigEntity)
 
+    /**
+     * Updates an existing alert configuration.
+     *
+     * @param notification The alert configuration to update.
+     * @return The number of rows updated (0 if no rows matched the primary key).
+     */
     @Update
-    suspend fun update(notification: AlertConfigEntity)
+    suspend fun update(notification: AlertConfigEntity): Int
 
     @Delete
     suspend fun delete(notification: AlertConfigEntity)

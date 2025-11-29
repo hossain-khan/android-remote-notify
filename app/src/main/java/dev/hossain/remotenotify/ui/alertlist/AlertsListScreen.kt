@@ -531,8 +531,8 @@ fun NotificationItem(
         },
         modifier =
             modifier
-                .padding(horizontal = 4.dp)
-                .clickable(onClick = onClick),
+                .clickable(onClick = onClick)
+                .padding(horizontal = 4.dp),
     )
 }
 

@@ -72,6 +72,7 @@ import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
 
 @Parcelize
 data class AddNewRemoteAlertScreen(
@@ -156,17 +157,21 @@ class AddNewRemoteAlertPresenter
             // Load existing alert data in edit mode
             LaunchedEffect(screen.alertId) {
                 screen.alertId?.let { alertId ->
-                    remoteAlertRepository.getRemoteAlertById(alertId)?.let { existingAlert ->
-                        existingAlertId = existingAlert.alertId
-                        when (existingAlert) {
-                            is RemoteAlert.BatteryAlert -> {
-                                selectedType = AlertType.BATTERY
-                                threshold = existingAlert.batteryPercentage
-                            }
-                            is RemoteAlert.StorageAlert -> {
-                                selectedType = AlertType.STORAGE
-                                threshold = existingAlert.storageMinSpaceGb
-                            }
+                    val existingAlert = remoteAlertRepository.getRemoteAlertById(alertId)
+                    if (existingAlert == null) {
+                        Timber.w("Alert with ID $alertId not found")
+                        navigator.pop()
+                        return@LaunchedEffect
+                    }
+                    existingAlertId = existingAlert.alertId
+                    when (existingAlert) {
+                        is RemoteAlert.BatteryAlert -> {
+                            selectedType = AlertType.BATTERY
+                            threshold = existingAlert.batteryPercentage
+                        }
+                        is RemoteAlert.StorageAlert -> {
+                            selectedType = AlertType.STORAGE
+                            threshold = existingAlert.storageMinSpaceGb
                         }
                     }
                 }
@@ -214,25 +219,29 @@ class AddNewRemoteAlertPresenter
                 when (event) {
                     is AddNewRemoteAlertScreen.Event.SaveNotification -> {
                         scope.launch {
-                            val alertIdForUpdate = existingAlertId
-                            if (isEditMode && alertIdForUpdate != null) {
-                                // Update existing alert
-                                val updatedAlert =
-                                    when (event.notification) {
-                                        is RemoteAlert.BatteryAlert ->
-                                            event.notification.copy(alertId = alertIdForUpdate)
-                                        is RemoteAlert.StorageAlert ->
-                                            event.notification.copy(alertId = alertIdForUpdate)
-                                    }
-                                analytics.logAlertEdited(updatedAlert.toAlertType())
-                                remoteAlertRepository.updateRemoteAlert(updatedAlert)
-                            } else {
-                                // Save new alert
-                                analytics.logAlertAdded(event.notification.toAlertType())
-                                remoteAlertRepository.saveRemoteAlert(event.notification)
+                            try {
+                                val alertIdForUpdate = existingAlertId
+                                if (isEditMode && alertIdForUpdate != null) {
+                                    // Update existing alert
+                                    val updatedAlert =
+                                        when (event.notification) {
+                                            is RemoteAlert.BatteryAlert ->
+                                                event.notification.copy(alertId = alertIdForUpdate)
+                                            is RemoteAlert.StorageAlert ->
+                                                event.notification.copy(alertId = alertIdForUpdate)
+                                        }
+                                    analytics.logAlertEdited(updatedAlert.toAlertType())
+                                    remoteAlertRepository.updateRemoteAlert(updatedAlert)
+                                } else {
+                                    // Save new alert
+                                    analytics.logAlertAdded(event.notification.toAlertType())
+                                    remoteAlertRepository.saveRemoteAlert(event.notification)
+                                }
+                                navigator.pop()
+                            } catch (e: Exception) {
+                                Timber.e(e, "Failed to save/update alert")
                             }
                         }
-                        navigator.pop()
                     }
                     AddNewRemoteAlertScreen.Event.NavigateBack -> {
                         navigator.pop()

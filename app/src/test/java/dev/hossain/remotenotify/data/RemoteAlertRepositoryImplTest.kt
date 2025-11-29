@@ -9,6 +9,7 @@ import dev.hossain.remotenotify.model.RemoteAlert
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -58,14 +59,38 @@ class RemoteAlertRepositoryImplTest {
                     alertId = 1L,
                     batteryPercentage = 25,
                 )
+            val capturedSlot = slot<AlertConfigEntity>()
+            coEvery { mockAlertConfigDao.update(capture(capturedSlot)) } returns 1
 
             // When
-            repository.updateRemoteAlert(testAlert)
+            val result = repository.updateRemoteAlert(testAlert)
 
             // Then
             coVerify {
                 mockAlertConfigDao.update(any<AlertConfigEntity>())
             }
+            assertThat(capturedSlot.captured.id).isEqualTo(1L)
+            assertThat(capturedSlot.captured.batteryPercentage).isEqualTo(25)
+            assertThat(capturedSlot.captured.type).isEqualTo(AlertType.BATTERY)
+            assertThat(result).isEqualTo(1)
+        }
+
+    @Test
+    fun `updateRemoteAlert should return zero when alert not found`() =
+        runTest {
+            // Given
+            val testAlert =
+                RemoteAlert.BatteryAlert(
+                    alertId = 999L,
+                    batteryPercentage = 25,
+                )
+            coEvery { mockAlertConfigDao.update(any()) } returns 0
+
+            // When
+            val result = repository.updateRemoteAlert(testAlert)
+
+            // Then
+            assertThat(result).isEqualTo(0)
         }
 
     @Test
