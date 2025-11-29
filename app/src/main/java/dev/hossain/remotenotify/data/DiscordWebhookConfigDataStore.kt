@@ -91,7 +91,9 @@ class DiscordWebhookConfigDataStore
                 Timber.e("Invalid Discord webhook URL format: $url")
             }
 
-            Timber.i("Discord webhook config is valid")
+            if (errors.isEmpty()) {
+                Timber.i("Discord webhook config is valid")
+            }
             return ConfigValidationResult(
                 isValid = errors.isEmpty(),
                 errors = errors,
