@@ -515,7 +515,7 @@ private fun AlertTypeSelector(
                         )
                     }
                 },
-                onClick = { if (enabled) onTypeSelected(alertType) },
+                onClick = { onTypeSelected(alertType) },
                 selected = alertType == selectedType,
                 enabled = enabled,
             ) {
