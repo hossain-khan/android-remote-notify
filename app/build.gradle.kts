@@ -60,10 +60,10 @@ android {
             // For local builds: Fall back to debug keystore
             val keystoreFile = System.getenv("KEYSTORE_FILE")?.takeIf { it.isNotBlank() }?.let { rootProject.file(it) }
                 ?: file("../keystore/debug.keystore")
-            val keystorePassword = System.getenv("KEYSTORE_PASSWORD") ?: "android"
-            val keyAliasValue = System.getenv("KEY_ALIAS") ?: "androiddebugkey"
+            val keystorePassword = System.getenv("KEYSTORE_PASSWORD")?.takeIf { it.isNotBlank() } ?: "android"
+            val keyAliasValue = System.getenv("KEY_ALIAS")?.takeIf { it.isNotBlank() } ?: "androiddebugkey"
             // Use KEY_PASSWORD if set, otherwise fall back to KEYSTORE_PASSWORD
-            val keyPasswordValue = System.getenv("KEY_PASSWORD") ?: keystorePassword
+            val keyPasswordValue = System.getenv("KEY_PASSWORD")?.takeIf { it.isNotBlank() } ?: keystorePassword
 
             storeFile = keystoreFile
             storePassword = keystorePassword
