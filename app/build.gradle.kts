@@ -58,7 +58,7 @@ android {
         create("release") {
             // For CI/CD: Use keystore from environment variables (GitHub Actions)
             // For local builds: Fall back to debug keystore
-            val keystoreFile = System.getenv("KEYSTORE_FILE")?.let { rootProject.file(it) }
+            val keystoreFile = System.getenv("KEYSTORE_FILE")?.takeIf { it.isNotBlank() }?.let { rootProject.file(it) }
                 ?: file("../keystore/debug.keystore")
             val keystorePassword = System.getenv("KEYSTORE_PASSWORD") ?: "android"
             val keyAliasValue = System.getenv("KEY_ALIAS") ?: "androiddebugkey"

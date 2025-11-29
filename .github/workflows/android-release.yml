@@ -59,9 +59,11 @@ jobs:
           fi
 
       - name: Decode keystore from base64
+        id: keystore
         run: |
           if [ -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
             echo "⚠️ KEYSTORE_BASE64 secret is not set, using debug keystore for signing"
+            echo "USE_RELEASE_KEYSTORE=false" >> $GITHUB_OUTPUT
           else
             echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore/remote-notify-release.keystore
             if [ ! -s keystore/remote-notify-release.keystore ]; then
@@ -69,12 +71,15 @@ jobs:
               exit 1
             fi
             echo "✅ Release keystore decoded successfully"
+            echo "USE_RELEASE_KEYSTORE=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Build Release APK and AAB
         run: ./gradlew assembleRelease bundleRelease --parallel --daemon
         env:
-          KEYSTORE_FILE: keystore/remote-notify-release.keystore
+          # Only set KEYSTORE_FILE when release keystore was decoded successfully
+          # Otherwise, build.gradle.kts will fall back to debug keystore
+          KEYSTORE_FILE: ${{ steps.keystore.outputs.USE_RELEASE_KEYSTORE == 'true' && 'keystore/remote-notify-release.keystore' || '' }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
