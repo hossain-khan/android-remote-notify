@@ -65,6 +65,10 @@ class ConfigurationImporter
         /**
          * Tests if the password can decrypt the configuration.
          *
+         * Note: This tests against the first available encrypted config. Since all configs
+         * in a single export use the same password, testing against one config is sufficient.
+         * If a config can be decrypted, the password is correct for all encrypted data.
+         *
          * @param configuration The configuration to test
          * @param password Password to test
          * @return True if password is valid
@@ -73,7 +77,8 @@ class ConfigurationImporter
             configuration: AppConfiguration,
             password: String,
         ): Boolean {
-            // Try to decrypt any encrypted config to verify password
+            // Try to decrypt any encrypted config to verify password.
+            // All notifier configs use the same password during export.
             val encryptedConfig =
                 configuration.notifiers.telegram
                     ?: configuration.notifiers.email

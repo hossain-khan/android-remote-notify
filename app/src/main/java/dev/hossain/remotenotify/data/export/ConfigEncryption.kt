@@ -21,6 +21,13 @@ object ConfigEncryption {
     private const val IV_LENGTH = 12
     private const val SALT_LENGTH = 16
     private const val TAG_LENGTH = 128
+
+    /**
+     * PBKDF2 iteration count for key derivation.
+     * 100,000 iterations is the recommended minimum for PBKDF2 with SHA-256 as of OWASP 2023 guidelines.
+     * This provides a good balance between security and performance on mobile devices.
+     * See: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+     */
     private const val ITERATIONS = 100000
 
     /**

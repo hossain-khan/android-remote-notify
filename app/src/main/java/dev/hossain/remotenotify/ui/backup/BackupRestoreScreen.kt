@@ -76,9 +76,16 @@ import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.parcelize.IgnoredOnParcel
 
 @Parcelize
 data object BackupRestoreScreen : Screen {
+    /**
+     * Minimum password length required for export encryption.
+     */
+    @IgnoredOnParcel
+    const val MIN_PASSWORD_LENGTH = 6
+
     data class State(
         val isLoading: Boolean = false,
         val message: String? = null,
@@ -215,7 +222,7 @@ class BackupRestorePresenter
                                         showImportPasswordDialog = true
                                     }
                                     is ImportValidationResult.Invalid -> {
-                                        message = "Invalid configuration: ${validationResult.errors.joinToString()}"
+                                        message = "Invalid configuration: ${validationResult.errors.joinToString(separator = "; ")}"
                                     }
                                 }
                             } catch (e: Exception) {
@@ -538,7 +545,7 @@ fun BackupRestoreScreenUi(
                                 .format(Date())
                         exportLauncher.launch("remote_notify_backup_$timestamp.json")
                     },
-                    enabled = exportPassword.length >= 6,
+                    enabled = exportPassword.length >= BackupRestoreScreen.MIN_PASSWORD_LENGTH,
                 ) {
                     Text("Export")
                 }
