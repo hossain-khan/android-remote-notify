@@ -231,7 +231,10 @@ class AddNewRemoteAlertPresenter
                                                 event.notification.copy(alertId = alertIdForUpdate)
                                         }
                                     analytics.logAlertEdited(updatedAlert.toAlertType())
-                                    remoteAlertRepository.updateRemoteAlert(updatedAlert)
+                                    val rowsUpdated = remoteAlertRepository.updateRemoteAlert(updatedAlert)
+                                    if (rowsUpdated == 0) {
+                                        Timber.w("Alert with ID $alertIdForUpdate was not found during update")
+                                    }
                                 } else {
                                     // Save new alert
                                     analytics.logAlertAdded(event.notification.toAlertType())
