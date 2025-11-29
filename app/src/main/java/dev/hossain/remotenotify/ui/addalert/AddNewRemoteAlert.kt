@@ -214,14 +214,15 @@ class AddNewRemoteAlertPresenter
                 when (event) {
                     is AddNewRemoteAlertScreen.Event.SaveNotification -> {
                         scope.launch {
-                            if (isEditMode && existingAlertId != null) {
+                            val alertIdForUpdate = existingAlertId
+                            if (isEditMode && alertIdForUpdate != null) {
                                 // Update existing alert
                                 val updatedAlert =
                                     when (event.notification) {
                                         is RemoteAlert.BatteryAlert ->
-                                            event.notification.copy(alertId = existingAlertId!!)
+                                            event.notification.copy(alertId = alertIdForUpdate)
                                         is RemoteAlert.StorageAlert ->
-                                            event.notification.copy(alertId = existingAlertId!!)
+                                            event.notification.copy(alertId = alertIdForUpdate)
                                     }
                                 analytics.logAlertEdited(updatedAlert.toAlertType())
                                 remoteAlertRepository.updateRemoteAlert(updatedAlert)
