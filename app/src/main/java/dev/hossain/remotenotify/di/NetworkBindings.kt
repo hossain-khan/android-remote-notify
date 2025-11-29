@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.di
 
+import com.squareup.moshi.Moshi
 import dev.hossain.remotenotify.BuildConfig
 import dev.zacsweers.metro.BindingContainer
 import dev.zacsweers.metro.Provides
@@ -23,4 +24,10 @@ object NetworkBindings {
                 }
             }.build()
     }
+
+    @Provides
+    fun provideMoshi(): Moshi =
+        Moshi
+            .Builder()
+            .build()
 }

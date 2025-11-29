@@ -5,6 +5,8 @@ import com.google.firebase.analytics.FirebaseAnalytics.Param.SCREEN_CLASS
 import com.google.firebase.analytics.FirebaseAnalytics.Param.SCREEN_NAME
 import com.google.firebase.analytics.logEvent
 import com.slack.circuit.runtime.screen.Screen
+import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_CONFIG_EXPORT
+import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_CONFIG_IMPORT
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_GOTO_SETTINGS
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_IGNORE
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_INFO
@@ -13,6 +15,7 @@ import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_WORKER_JOB_C
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_WORKER_JOB_FAILED
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_WORKER_JOB_STARTED
 import dev.hossain.remotenotify.analytics.Analytics.Companion.eventAlertAdded
+import dev.hossain.remotenotify.analytics.Analytics.Companion.eventAlertEdited
 import dev.hossain.remotenotify.analytics.Analytics.Companion.eventAlertSentUsingNotifier
 import dev.hossain.remotenotify.analytics.Analytics.Companion.eventConfigureNotifier
 import dev.hossain.remotenotify.model.AlertType
@@ -41,10 +44,13 @@ interface Analytics {
         internal const val EVENT_SEND_APP_FEEDBACK = "rn_send_app_feedback"
         private const val EVENT_CONFIGURE_NOTIFIER_PREFIX = "rn_configure_"
         private const val EVENT_ALERT_ADDED_PREFIX = "rn_alert_added_"
+        private const val EVENT_ALERT_EDITED_PREFIX = "rn_alert_edited_"
         private const val EVENT_ALERT_SENT_USING_PREFIX = "rn_alert_sent_"
         internal const val EVENT_OPTIMIZE_BATTERY_INFO = "rn_battery_optimize_show_info"
         internal const val EVENT_OPTIMIZE_BATTERY_GOTO_SETTINGS = "rn_battery_optimize_go_settings"
         internal const val EVENT_OPTIMIZE_BATTERY_IGNORE = "rn_battery_optimize_ignore"
+        internal const val EVENT_CONFIG_EXPORT = "rn_config_export"
+        internal const val EVENT_CONFIG_IMPORT = "rn_config_import"
 
         // NOTE: Instead of event property, I am using unique event name for each notifier and alert type.
         internal fun NotifierType.eventConfigureNotifier() = "$EVENT_CONFIGURE_NOTIFIER_PREFIX${name.lowercase(locale = Locale.US)}"
@@ -52,6 +58,8 @@ interface Analytics {
         internal fun NotifierType.eventAlertSentUsingNotifier() = "$EVENT_ALERT_SENT_USING_PREFIX${name.lowercase(locale = Locale.US)}"
 
         internal fun AlertType.eventAlertAdded() = "$EVENT_ALERT_ADDED_PREFIX${name.lowercase(locale = Locale.US)}"
+
+        internal fun AlertType.eventAlertEdited() = "$EVENT_ALERT_EDITED_PREFIX${name.lowercase(locale = Locale.US)}"
     }
 
     /**
@@ -96,6 +104,13 @@ interface Analytics {
     suspend fun logAlertAdded(alertType: AlertType)
 
     /**
+     * Logs event when an alert is edited.
+     *
+     * @param alertType The type of alert that was edited.
+     */
+    suspend fun logAlertEdited(alertType: AlertType)
+
+    /**
      * Logs event when an alert is sent.
      *
      * @param alertType The type of alert that was sent.
@@ -127,6 +142,32 @@ interface Analytics {
      * Logs event when user ignores battery optimization.
      */
     suspend fun logOptimizeBatteryIgnore()
+
+    /**
+     * Logs event when configuration is exported.
+     *
+     * @param success Whether the export was successful
+     * @param alertsCount Number of alerts exported
+     * @param notifiersCount Number of notifiers exported
+     */
+    suspend fun logConfigExport(
+        success: Boolean,
+        alertsCount: Int = 0,
+        notifiersCount: Int = 0,
+    )
+
+    /**
+     * Logs event when configuration is imported.
+     *
+     * @param success Whether the import was successful
+     * @param alertsCount Number of alerts imported
+     * @param notifiersCount Number of notifiers imported
+     */
+    suspend fun logConfigImport(
+        success: Boolean,
+        alertsCount: Int = 0,
+        notifiersCount: Int = 0,
+    )
 }
 
 /**
@@ -195,6 +236,10 @@ class AnalyticsImpl
             firebaseAnalytics.logEvent(alertType.eventAlertAdded()) {}
         }
 
+        override suspend fun logAlertEdited(alertType: AlertType) {
+            firebaseAnalytics.logEvent(alertType.eventAlertEdited()) {}
+        }
+
         override suspend fun logAlertSent(
             alertType: AlertType,
             notifierType: NotifierType,
@@ -230,5 +275,29 @@ class AnalyticsImpl
 
         override suspend fun logOptimizeBatteryIgnore() {
             firebaseAnalytics.logEvent(EVENT_OPTIMIZE_BATTERY_IGNORE) {}
+        }
+
+        override suspend fun logConfigExport(
+            success: Boolean,
+            alertsCount: Int,
+            notifiersCount: Int,
+        ) {
+            firebaseAnalytics.logEvent(EVENT_CONFIG_EXPORT) {
+                param(FirebaseAnalytics.Param.SUCCESS, if (success) 1L else 0L)
+                param("alerts_count", alertsCount.toLong())
+                param("notifiers_count", notifiersCount.toLong())
+            }
+        }
+
+        override suspend fun logConfigImport(
+            success: Boolean,
+            alertsCount: Int,
+            notifiersCount: Int,
+        ) {
+            firebaseAnalytics.logEvent(EVENT_CONFIG_IMPORT) {
+                param(FirebaseAnalytics.Param.SUCCESS, if (success) 1L else 0L)
+                param("alerts_count", alertsCount.toLong())
+                param("notifiers_count", notifiersCount.toLong())
+            }
         }
     }

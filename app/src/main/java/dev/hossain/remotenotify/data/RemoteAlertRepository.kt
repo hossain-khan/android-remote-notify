@@ -20,6 +20,22 @@ import kotlinx.coroutines.flow.map
 interface RemoteAlertRepository {
     suspend fun saveRemoteAlert(remoteAlert: RemoteAlert)
 
+    /**
+     * Updates an existing remote alert configuration in the repository.
+     *
+     * @param remoteAlert The alert to update. Must have a valid alertId corresponding to an existing alert.
+     * @return The number of rows updated (0 if the alert was not found).
+     */
+    suspend fun updateRemoteAlert(remoteAlert: RemoteAlert): Int
+
+    /**
+     * Retrieves a remote alert by its unique identifier.
+     *
+     * @param alertId The unique ID of the alert to retrieve.
+     * @return The [RemoteAlert] if found, or `null` if no alert with the given ID exists.
+     */
+    suspend fun getRemoteAlertById(alertId: Long): RemoteAlert?
+
     suspend fun getAllRemoteAlert(): List<RemoteAlert>
 
     fun getAllRemoteAlertFlow(): Flow<List<RemoteAlert>>
@@ -52,6 +68,13 @@ class RemoteAlertRepositoryImpl
             val entity = remoteAlert.toAlertConfigEntity()
             alertConfigDao.insert(entity)
         }
+
+        override suspend fun updateRemoteAlert(remoteAlert: RemoteAlert): Int {
+            val entity = remoteAlert.toAlertConfigEntity()
+            return alertConfigDao.update(entity)
+        }
+
+        override suspend fun getRemoteAlertById(alertId: Long): RemoteAlert? = alertConfigDao.getById(alertId)?.toRemoteAlert()
 
         override suspend fun getAllRemoteAlert(): List<RemoteAlert> = alertConfigDao.getAll().map { it.toRemoteAlert() }
 
