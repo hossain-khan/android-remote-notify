@@ -32,7 +32,7 @@ class DiscordWebhookNotificationSender
         companion object {
             // Discord embed color codes (decimal)
             private const val COLOR_BATTERY_CRITICAL = 16711680 // #FF0000 (red)
-            private const val COLOR_STORAGE_CRITICAL = 16744192 // #FFA500 (orange)
+            private const val COLOR_STORAGE_CRITICAL = 16753920 // #FFA500 (orange)
         }
 
         override suspend fun sendNotification(remoteAlert: RemoteAlert): Boolean {
