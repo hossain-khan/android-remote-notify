@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.ui.alertlist
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -98,6 +99,10 @@ data object AlertsListScreen : Screen {
             val notification: RemoteAlert,
         ) : Event()
 
+        data class EditRemoteAlert(
+            val notification: RemoteAlert,
+        ) : Event()
+
         data object AddNotification : Event()
 
         data object AddNotificationDestination : Event()
@@ -190,8 +195,13 @@ class AlertsListPresenter
                         }
                     }
 
+                    is AlertsListScreen.Event.EditRemoteAlert -> {
+                        Timber.d("Editing alert: ${event.notification.alertId}")
+                        navigator.goTo(AddNewRemoteAlertScreen(alertId = event.notification.alertId))
+                    }
+
                     AlertsListScreen.Event.AddNotification -> {
-                        navigator.goTo(AddNewRemoteAlertScreen)
+                        navigator.goTo(AddNewRemoteAlertScreen())
                     }
 
                     AlertsListScreen.Event.AddNotificationDestination -> {
@@ -331,6 +341,9 @@ fun AlertsListUi(
                     ) { _: Int, remoteAlert: RemoteAlert ->
                         NotificationItem(
                             remoteAlert = remoteAlert,
+                            onClick = {
+                                state.eventSink(AlertsListScreen.Event.EditRemoteAlert(remoteAlert))
+                            },
                             onDelete = {
                                 state.eventSink(AlertsListScreen.Event.DeleteNotification(remoteAlert))
                             },
@@ -447,6 +460,7 @@ private fun DeviceCurrentStateUi(state: AlertsListScreen.State) {
 @Composable
 fun NotificationItem(
     remoteAlert: RemoteAlert,
+    onClick: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -515,7 +529,10 @@ fun NotificationItem(
                 )
             }
         },
-        modifier = modifier.padding(horizontal = 4.dp),
+        modifier =
+            modifier
+                .padding(horizontal = 4.dp)
+                .clickable(onClick = onClick),
     )
 }
 

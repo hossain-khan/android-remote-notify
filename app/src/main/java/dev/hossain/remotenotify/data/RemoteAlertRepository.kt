@@ -20,6 +20,10 @@ import kotlinx.coroutines.flow.map
 interface RemoteAlertRepository {
     suspend fun saveRemoteAlert(remoteAlert: RemoteAlert)
 
+    suspend fun updateRemoteAlert(remoteAlert: RemoteAlert)
+
+    suspend fun getRemoteAlertById(alertId: Long): RemoteAlert?
+
     suspend fun getAllRemoteAlert(): List<RemoteAlert>
 
     fun getAllRemoteAlertFlow(): Flow<List<RemoteAlert>>
@@ -52,6 +56,13 @@ class RemoteAlertRepositoryImpl
             val entity = remoteAlert.toAlertConfigEntity()
             alertConfigDao.insert(entity)
         }
+
+        override suspend fun updateRemoteAlert(remoteAlert: RemoteAlert) {
+            val entity = remoteAlert.toAlertConfigEntity()
+            alertConfigDao.update(entity)
+        }
+
+        override suspend fun getRemoteAlertById(alertId: Long): RemoteAlert? = alertConfigDao.getById(alertId)?.toRemoteAlert()
 
         override suspend fun getAllRemoteAlert(): List<RemoteAlert> = alertConfigDao.getAll().map { it.toRemoteAlert() }
 

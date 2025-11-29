@@ -74,8 +74,11 @@ import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data object AddNewRemoteAlertScreen : Screen {
+data class AddNewRemoteAlertScreen(
+    val alertId: Long? = null,
+) : Screen {
     data class State(
+        val isEditMode: Boolean,
         val showBatteryOptSheet: Boolean,
         val isBatteryOptimized: Boolean,
         val selectedAlertType: AlertType,
@@ -114,6 +117,7 @@ data object AddNewRemoteAlertScreen : Screen {
 @Inject
 class AddNewRemoteAlertPresenter
     constructor(
+        @Assisted private val screen: AddNewRemoteAlertScreen,
         @Assisted private val navigator: Navigator,
         private val remoteAlertRepository: RemoteAlertRepository,
         private val storageMonitor: StorageMonitor,
@@ -130,8 +134,10 @@ class AddNewRemoteAlertPresenter
             }
             var hideBatteryOptReminder by remember { mutableStateOf(false) }
 
+            val isEditMode = screen.alertId != null
             var selectedType by remember { mutableStateOf(AlertType.BATTERY) }
             var threshold by remember { mutableIntStateOf(10) }
+            var existingAlertId by remember { mutableStateOf<Long?>(null) }
 
             val availableStorage = remember { storageMonitor.getAvailableStorageInGB().toInt() }
 
@@ -145,6 +151,25 @@ class AddNewRemoteAlertPresenter
 
             LaunchedImpressionEffect {
                 analytics.logScreenView(AddNewRemoteAlertScreen::class)
+            }
+
+            // Load existing alert data in edit mode
+            LaunchedEffect(screen.alertId) {
+                screen.alertId?.let { alertId ->
+                    remoteAlertRepository.getRemoteAlertById(alertId)?.let { existingAlert ->
+                        existingAlertId = existingAlert.alertId
+                        when (existingAlert) {
+                            is RemoteAlert.BatteryAlert -> {
+                                selectedType = AlertType.BATTERY
+                                threshold = existingAlert.batteryPercentage
+                            }
+                            is RemoteAlert.StorageAlert -> {
+                                selectedType = AlertType.STORAGE
+                                threshold = existingAlert.storageMinSpaceGb
+                            }
+                        }
+                    }
+                }
             }
 
             // Update threshold if needed when switching types
@@ -177,6 +202,7 @@ class AddNewRemoteAlertPresenter
             }
 
             return AddNewRemoteAlertScreen.State(
+                isEditMode = isEditMode,
                 showBatteryOptSheet = showBatteryOptimizeSheet,
                 isBatteryOptimized = isBatteryOptimized,
                 selectedAlertType = selectedType,
@@ -188,8 +214,22 @@ class AddNewRemoteAlertPresenter
                 when (event) {
                     is AddNewRemoteAlertScreen.Event.SaveNotification -> {
                         scope.launch {
-                            analytics.logAlertAdded(event.notification.toAlertType())
-                            remoteAlertRepository.saveRemoteAlert(event.notification)
+                            if (isEditMode && existingAlertId != null) {
+                                // Update existing alert
+                                val updatedAlert =
+                                    when (event.notification) {
+                                        is RemoteAlert.BatteryAlert ->
+                                            event.notification.copy(alertId = existingAlertId!!)
+                                        is RemoteAlert.StorageAlert ->
+                                            event.notification.copy(alertId = existingAlertId!!)
+                                    }
+                                analytics.logAlertEdited(updatedAlert.toAlertType())
+                                remoteAlertRepository.updateRemoteAlert(updatedAlert)
+                            } else {
+                                // Save new alert
+                                analytics.logAlertAdded(event.notification.toAlertType())
+                                remoteAlertRepository.saveRemoteAlert(event.notification)
+                            }
                         }
                         navigator.pop()
                     }
@@ -235,7 +275,10 @@ class AddNewRemoteAlertPresenter
         @CircuitInject(AddNewRemoteAlertScreen::class, AppScope::class)
         @AssistedFactory
         interface Factory {
-            fun create(navigator: Navigator): AddNewRemoteAlertPresenter
+            fun create(
+                screen: AddNewRemoteAlertScreen,
+                navigator: Navigator,
+            ): AddNewRemoteAlertPresenter
         }
     }
 
@@ -247,12 +290,14 @@ fun AddNewRemoteAlertUi(
     modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val screenTitle = if (state.isEditMode) "Edit Alert" else "Add New Alert"
+    val buttonText = if (state.isEditMode) "Update Alert" else "Save Alert"
 
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Add New Alert") },
+                title = { Text(screenTitle) },
                 navigationIcon = {
                     IconButton(onClick = { state.eventSink(AddNewRemoteAlertScreen.Event.NavigateBack) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -292,6 +337,7 @@ fun AddNewRemoteAlertUi(
                             state.eventSink(AddNewRemoteAlertScreen.Event.UpdateAlertType(type))
                         },
                         modifier = Modifier.padding(top = 8.dp),
+                        enabled = !state.isEditMode, // Disable alert type change in edit mode
                     )
                 }
             }
@@ -405,7 +451,7 @@ fun AddNewRemoteAlertUi(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = state.threshold > 0,
             ) {
-                Text("Save Alert")
+                Text(buttonText)
             }
 
             // Only show card if both conditions are met
@@ -444,6 +490,7 @@ private fun AlertTypeSelector(
     selectedType: AlertType,
     onTypeSelected: (AlertType) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
         AlertType.entries.forEachIndexed { index, alertType ->
@@ -467,8 +514,9 @@ private fun AlertTypeSelector(
                         )
                     }
                 },
-                onClick = { onTypeSelected(alertType) },
+                onClick = { if (enabled) onTypeSelected(alertType) },
                 selected = alertType == selectedType,
+                enabled = enabled,
             ) {
                 Text(
                     when (alertType) {
@@ -489,6 +537,7 @@ private fun PreviewAddNewRemoteAlertUi() {
         AddNewRemoteAlertUi(
             state =
                 AddNewRemoteAlertScreen.State(
+                    isEditMode = false,
                     showBatteryOptSheet = false,
                     isBatteryOptimized = false,
                     selectedAlertType = AlertType.BATTERY,
@@ -510,12 +559,35 @@ private fun PreviewStorageAlertUi() {
         AddNewRemoteAlertUi(
             state =
                 AddNewRemoteAlertScreen.State(
+                    isEditMode = false,
                     showBatteryOptSheet = false,
                     isBatteryOptimized = true,
                     selectedAlertType = AlertType.STORAGE,
                     threshold = 8,
                     availableStorage = 16,
                     storageSliderMax = 20,
+                    hideBatteryOptReminder = false,
+                    eventSink = {},
+                ),
+        )
+    }
+}
+
+@Composable
+@PreviewLightDark
+@PreviewDynamicColors
+private fun PreviewEditAlertUi() {
+    ComposeAppTheme {
+        AddNewRemoteAlertUi(
+            state =
+                AddNewRemoteAlertScreen.State(
+                    isEditMode = true,
+                    showBatteryOptSheet = false,
+                    isBatteryOptimized = true,
+                    selectedAlertType = AlertType.BATTERY,
+                    threshold = 20,
+                    availableStorage = 56,
+                    storageSliderMax = 96,
                     hideBatteryOptReminder = false,
                     eventSink = {},
                 ),
