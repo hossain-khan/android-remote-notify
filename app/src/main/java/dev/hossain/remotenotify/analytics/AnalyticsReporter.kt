@@ -13,6 +13,7 @@ import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_WORKER_JOB_C
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_WORKER_JOB_FAILED
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_WORKER_JOB_STARTED
 import dev.hossain.remotenotify.analytics.Analytics.Companion.eventAlertAdded
+import dev.hossain.remotenotify.analytics.Analytics.Companion.eventAlertEdited
 import dev.hossain.remotenotify.analytics.Analytics.Companion.eventAlertSentUsingNotifier
 import dev.hossain.remotenotify.analytics.Analytics.Companion.eventConfigureNotifier
 import dev.hossain.remotenotify.model.AlertType
@@ -41,6 +42,7 @@ interface Analytics {
         internal const val EVENT_SEND_APP_FEEDBACK = "rn_send_app_feedback"
         private const val EVENT_CONFIGURE_NOTIFIER_PREFIX = "rn_configure_"
         private const val EVENT_ALERT_ADDED_PREFIX = "rn_alert_added_"
+        private const val EVENT_ALERT_EDITED_PREFIX = "rn_alert_edited_"
         private const val EVENT_ALERT_SENT_USING_PREFIX = "rn_alert_sent_"
         internal const val EVENT_OPTIMIZE_BATTERY_INFO = "rn_battery_optimize_show_info"
         internal const val EVENT_OPTIMIZE_BATTERY_GOTO_SETTINGS = "rn_battery_optimize_go_settings"
@@ -52,6 +54,8 @@ interface Analytics {
         internal fun NotifierType.eventAlertSentUsingNotifier() = "$EVENT_ALERT_SENT_USING_PREFIX${name.lowercase(locale = Locale.US)}"
 
         internal fun AlertType.eventAlertAdded() = "$EVENT_ALERT_ADDED_PREFIX${name.lowercase(locale = Locale.US)}"
+
+        internal fun AlertType.eventAlertEdited() = "$EVENT_ALERT_EDITED_PREFIX${name.lowercase(locale = Locale.US)}"
     }
 
     /**
@@ -94,6 +98,13 @@ interface Analytics {
      * @param alertType The type of alert that was added.
      */
     suspend fun logAlertAdded(alertType: AlertType)
+
+    /**
+     * Logs event when an alert is edited.
+     *
+     * @param alertType The type of alert that was edited.
+     */
+    suspend fun logAlertEdited(alertType: AlertType)
 
     /**
      * Logs event when an alert is sent.
@@ -193,6 +204,10 @@ class AnalyticsImpl
 
         override suspend fun logAlertAdded(alertType: AlertType) {
             firebaseAnalytics.logEvent(alertType.eventAlertAdded()) {}
+        }
+
+        override suspend fun logAlertEdited(alertType: AlertType) {
+            firebaseAnalytics.logEvent(alertType.eventAlertEdited()) {}
         }
 
         override suspend fun logAlertSent(
