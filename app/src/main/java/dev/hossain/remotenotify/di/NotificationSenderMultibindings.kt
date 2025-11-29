@@ -1,6 +1,7 @@
 package dev.hossain.remotenotify.di
 
 import androidx.annotation.Keep
+import dev.hossain.remotenotify.notifier.DiscordWebhookNotificationSender
 import dev.hossain.remotenotify.notifier.MailgunEmailNotificationSender
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.SlackWebhookRequestSender
@@ -36,4 +37,8 @@ object NotificationSenderMultibindings {
     @Provides
     @IntoSet
     fun bindMailgunEmailNotificationSender(sender: MailgunEmailNotificationSender): NotificationSender = sender
+
+    @Provides
+    @IntoSet
+    fun bindDiscordWebhookNotificationSender(sender: DiscordWebhookNotificationSender): NotificationSender = sender
 }

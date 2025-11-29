@@ -469,6 +469,7 @@ private fun NotifierType.iconResId(): Int =
         NotifierType.TELEGRAM -> R.drawable.telegram_logo_outline
         NotifierType.TWILIO -> R.drawable.twilio_logo_outline
         NotifierType.WEBHOOK_REST_API -> R.drawable.webhook_24dp
+        NotifierType.WEBHOOK_DISCORD -> R.drawable.discord_logo_outline
     }
 
 @Composable

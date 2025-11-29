@@ -33,6 +33,11 @@ class NotifierTypeTest {
     }
 
     @Test
+    fun `webhook discord notifier has correct display name`() {
+        assertThat(NotifierType.WEBHOOK_DISCORD.displayName).isEqualTo("Discord")
+    }
+
+    @Test
     fun `all notifier types have non-empty display names`() {
         NotifierType.entries.forEach { notifierType ->
             assertThat(notifierType.displayName).isNotEmpty()
@@ -42,6 +47,6 @@ class NotifierTypeTest {
     @Test
     fun `notifier types count is correct`() {
         // This test ensures we don't accidentally remove or add notifier types without updating tests
-        assertThat(NotifierType.entries.size).isEqualTo(5)
+        assertThat(NotifierType.entries.size).isEqualTo(6)
     }
 }
