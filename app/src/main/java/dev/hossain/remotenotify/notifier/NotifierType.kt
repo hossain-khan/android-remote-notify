@@ -39,4 +39,9 @@ enum class NotifierType(
      * Slack 2.0 workflow webhook to send POST request with JSON payload.
      */
     WEBHOOK_SLACK_WORKFLOW("Slack"),
+
+    /**
+     * Discord webhook to send POST request with rich embed formatting.
+     */
+    WEBHOOK_DISCORD("Discord"),
 }

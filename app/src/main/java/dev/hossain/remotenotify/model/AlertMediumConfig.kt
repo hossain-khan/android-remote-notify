@@ -43,6 +43,16 @@ sealed interface AlertMediumConfig {
         val fromEmail: String,
         val toEmail: String,
     ) : AlertMediumConfig
+
+    /**
+     * Configuration for Discord webhook alert notifications.
+     *
+     * @property webhookUrl The Discord webhook URL in format "https://discord.com/api/webhooks/{id}/{token}"
+     * @see [Discord Webhook Documentation](https://discord.com/developers/docs/resources/webhook)
+     */
+    data class DiscordConfig(
+        val webhookUrl: String,
+    ) : AlertMediumConfig
 }
 
 /**
@@ -97,6 +107,16 @@ internal fun AlertMediumConfig.configPreviewText(): String =
                     }
                 } else {
                     toEmail
+                }
+            preview
+        }
+        is AlertMediumConfig.DiscordConfig -> {
+            val restUrl = webhookUrl.removePrefix("https://").removePrefix("http://")
+            val preview =
+                if (restUrl.length > 25) {
+                    "${restUrl.take(15)}...${restUrl.takeLast(8)}"
+                } else {
+                    restUrl
                 }
             preview
         }
