@@ -5,6 +5,8 @@ import com.google.firebase.analytics.FirebaseAnalytics.Param.SCREEN_CLASS
 import com.google.firebase.analytics.FirebaseAnalytics.Param.SCREEN_NAME
 import com.google.firebase.analytics.logEvent
 import com.slack.circuit.runtime.screen.Screen
+import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_CONFIG_EXPORT
+import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_CONFIG_IMPORT
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_GOTO_SETTINGS
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_IGNORE
 import dev.hossain.remotenotify.analytics.Analytics.Companion.EVENT_OPTIMIZE_BATTERY_INFO
@@ -45,6 +47,8 @@ interface Analytics {
         internal const val EVENT_OPTIMIZE_BATTERY_INFO = "rn_battery_optimize_show_info"
         internal const val EVENT_OPTIMIZE_BATTERY_GOTO_SETTINGS = "rn_battery_optimize_go_settings"
         internal const val EVENT_OPTIMIZE_BATTERY_IGNORE = "rn_battery_optimize_ignore"
+        internal const val EVENT_CONFIG_EXPORT = "rn_config_export"
+        internal const val EVENT_CONFIG_IMPORT = "rn_config_import"
 
         // NOTE: Instead of event property, I am using unique event name for each notifier and alert type.
         internal fun NotifierType.eventConfigureNotifier() = "$EVENT_CONFIGURE_NOTIFIER_PREFIX${name.lowercase(locale = Locale.US)}"
@@ -127,6 +131,32 @@ interface Analytics {
      * Logs event when user ignores battery optimization.
      */
     suspend fun logOptimizeBatteryIgnore()
+
+    /**
+     * Logs event when configuration is exported.
+     *
+     * @param success Whether the export was successful
+     * @param alertsCount Number of alerts exported
+     * @param notifiersCount Number of notifiers exported
+     */
+    suspend fun logConfigExport(
+        success: Boolean,
+        alertsCount: Int = 0,
+        notifiersCount: Int = 0,
+    )
+
+    /**
+     * Logs event when configuration is imported.
+     *
+     * @param success Whether the import was successful
+     * @param alertsCount Number of alerts imported
+     * @param notifiersCount Number of notifiers imported
+     */
+    suspend fun logConfigImport(
+        success: Boolean,
+        alertsCount: Int = 0,
+        notifiersCount: Int = 0,
+    )
 }
 
 /**
@@ -230,5 +260,29 @@ class AnalyticsImpl
 
         override suspend fun logOptimizeBatteryIgnore() {
             firebaseAnalytics.logEvent(EVENT_OPTIMIZE_BATTERY_IGNORE) {}
+        }
+
+        override suspend fun logConfigExport(
+            success: Boolean,
+            alertsCount: Int,
+            notifiersCount: Int,
+        ) {
+            firebaseAnalytics.logEvent(EVENT_CONFIG_EXPORT) {
+                param(FirebaseAnalytics.Param.SUCCESS, if (success) 1L else 0L)
+                param("alerts_count", alertsCount.toLong())
+                param("notifiers_count", notifiersCount.toLong())
+            }
+        }
+
+        override suspend fun logConfigImport(
+            success: Boolean,
+            alertsCount: Int,
+            notifiersCount: Int,
+        ) {
+            firebaseAnalytics.logEvent(EVENT_CONFIG_IMPORT) {
+                param(FirebaseAnalytics.Param.SUCCESS, if (success) 1L else 0L)
+                param("alerts_count", alertsCount.toLong())
+                param("notifiers_count", notifiersCount.toLong())
+            }
         }
     }

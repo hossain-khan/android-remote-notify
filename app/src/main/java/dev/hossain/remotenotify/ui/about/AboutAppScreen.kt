@@ -54,6 +54,7 @@ import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertlist.AppUsageEducationSheetUi
+import dev.hossain.remotenotify.ui.backup.BackupRestoreScreen
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
@@ -77,6 +78,8 @@ data object AboutAppScreen : Screen {
         data object OpenLearnMoreSheet : Event()
 
         data object DismissLearnMoreSheet : Event()
+
+        data object OpenBackupRestore : Event()
     }
 }
 
@@ -130,6 +133,10 @@ class AboutAppPresenter
                         scope.launch {
                             analytics.logViewTutorial(isComplete = true)
                         }
+                    }
+
+                    AboutAppScreen.Event.OpenBackupRestore -> {
+                        navigator.goTo(BackupRestoreScreen)
                     }
                 }
             }
@@ -210,6 +217,10 @@ fun AboutAppScreen(
                 TextButton(onClick = {
                     state.eventSink(AboutAppScreen.Event.OpenGitHubProject)
                 }, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("View Source") }
+                Spacer(modifier = Modifier.height(16.dp))
+                TextButton(onClick = {
+                    state.eventSink(AboutAppScreen.Event.OpenBackupRestore)
+                }, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Backup & Restore") }
             }
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (BuildConfig.DEBUG) {
