@@ -563,18 +563,39 @@ fun BackupRestoreScreenUi(
 
     // Import Password Dialog
     if (state.showImportPasswordDialog) {
+        var passwordError by remember { mutableStateOf<String?>(null) }
+
+        // Clear password error when message changes
+        LaunchedEffect(state.message) {
+            state.message?.let {
+                if (it.contains("Invalid password", ignoreCase = true)) {
+                    passwordError = it
+                    importPassword = "" // Clear password field on error
+                }
+            }
+        }
+
         AlertDialog(
-            onDismissRequest = { state.eventSink(BackupRestoreScreen.Event.DismissImportPasswordDialog) },
+            onDismissRequest = {
+                importPassword = ""
+                passwordError = null
+                state.eventSink(BackupRestoreScreen.Event.DismissImportPasswordDialog)
+            },
             title = { Text("Enter Password") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Enter the password used when exporting this configuration.")
                     OutlinedTextField(
                         value = importPassword,
-                        onValueChange = { importPassword = it },
+                        onValueChange = {
+                            importPassword = it
+                            passwordError = null // Clear error when user types
+                        },
                         label = { Text("Password") },
                         visualTransformation = PasswordVisualTransformation(),
                         singleLine = true,
+                        isError = passwordError != null,
+                        supportingText = passwordError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -582,6 +603,7 @@ fun BackupRestoreScreenUi(
             confirmButton = {
                 Button(
                     onClick = {
+                        passwordError = null
                         state.eventSink(BackupRestoreScreen.Event.PasswordEntered(importPassword))
                     },
                     enabled = importPassword.isNotBlank(),
@@ -592,6 +614,7 @@ fun BackupRestoreScreenUi(
             dismissButton = {
                 TextButton(onClick = {
                     importPassword = ""
+                    passwordError = null
                     state.eventSink(BackupRestoreScreen.Event.DismissImportPasswordDialog)
                 }) {
                     Text("Cancel")
