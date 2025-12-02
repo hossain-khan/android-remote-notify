@@ -64,7 +64,7 @@ import dev.hossain.remotenotify.utils.PreformattedCodeBlock
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
-import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -116,7 +116,7 @@ data class ConfigureNotificationMediumScreen constructor(
     }
 }
 
-@Inject
+@AssistedInject
 class ConfigureNotificationMediumPresenter
     constructor(
         @Assisted private val screen: ConfigureNotificationMediumScreen,

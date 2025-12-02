@@ -69,7 +69,7 @@ import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
-import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -126,7 +126,7 @@ data object BackupRestoreScreen : Screen {
     }
 }
 
-@Inject
+@AssistedInject
 class BackupRestorePresenter
     constructor(
         @Assisted private val navigator: Navigator,
