@@ -67,7 +67,7 @@ import dev.hossain.remotenotify.worker.sendPeriodicWorkRequest
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
-import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -158,7 +158,7 @@ data object NotificationMediumListScreen : Screen {
  * @param notifiers A set of available [NotificationSender] implementations.
  * @param analytics The analytics tracker.
  */
-@Inject
+@AssistedInject
 class NotificationMediumListPresenter
     constructor(
         @Assisted private val navigator: Navigator,
