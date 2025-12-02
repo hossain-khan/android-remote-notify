@@ -3,6 +3,11 @@ name: APK Size Analysis with Diffuse
 on:
   pull_request:
     branches: [ "main" ]
+    paths:
+      - '**.kt'
+      - '**.kts'
+      - 'gradle.properties'
+      - 'gradle/libs.versions.toml'
 
 env:
   EMAIL_API_KEY: 'FAKE_KEY_TO_PASS_CI'
