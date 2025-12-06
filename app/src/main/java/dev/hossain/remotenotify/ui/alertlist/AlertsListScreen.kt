@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.semantics.contentDescription
+import androidx.compose.foundation.semantics.semantics
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -366,7 +368,12 @@ private fun DeviceCurrentStateUi(state: AlertsListScreen.State) {
     Card(
         modifier =
             Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .semantics(mergeDescendants = true) {
+                    contentDescription =
+                        "Device status: Battery at ${state.batteryPercentage} percent, " +
+                            "Storage ${state.availableStorage} of ${state.totalStorage} gigabytes available"
+                },
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -383,7 +390,7 @@ private fun DeviceCurrentStateUi(state: AlertsListScreen.State) {
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.battery_5_bar_24dp),
-                        contentDescription = "Battery Status",
+                        contentDescription = "Battery level at ${state.batteryPercentage} percent",
                         tint =
                             if (state.batteryPercentage > 20) {
                                 MaterialTheme.colorScheme.primary
@@ -431,7 +438,7 @@ private fun DeviceCurrentStateUi(state: AlertsListScreen.State) {
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.hard_disk_24dp),
-                        contentDescription = "Storage Status",
+                        contentDescription = "Storage available ${state.availableStorage} of ${state.totalStorage} gigabytes",
                         tint = MaterialTheme.colorScheme.primary,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -475,7 +482,11 @@ fun NotificationItem(
                         is RemoteAlert.StorageAlert ->
                             painterResource(id = R.drawable.hard_disk_24dp)
                     },
-                contentDescription = null,
+                contentDescription =
+                    when (remoteAlert) {
+                        is RemoteAlert.BatteryAlert -> "Battery alert icon"
+                        is RemoteAlert.StorageAlert -> "Storage alert icon"
+                    },
                 modifier = Modifier.size(36.dp),
             )
         },
@@ -524,7 +535,11 @@ fun NotificationItem(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete Alert",
+                    contentDescription =
+                        when (remoteAlert) {
+                            is RemoteAlert.BatteryAlert -> "Delete battery alert"
+                            is RemoteAlert.StorageAlert -> "Delete storage alert"
+                        },
                     modifier = Modifier.size(24.dp),
                 )
             }

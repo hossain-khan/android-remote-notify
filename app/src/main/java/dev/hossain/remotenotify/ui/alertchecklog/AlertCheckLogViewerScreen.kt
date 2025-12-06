@@ -304,7 +304,7 @@ fun AlertCheckLogViewerUi(
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate Back",
+                            contentDescription = "Navigate back",
                         )
                     }
                 },
@@ -320,7 +320,7 @@ fun AlertCheckLogViewerUi(
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.filter_alt_24dp),
-                                contentDescription = "Filter",
+                                contentDescription = if (hasActiveFilters) "Filter logs (filters active)" else "Filter logs",
                                 tint =
                                     if (hasActiveFilters) {
                                         MaterialTheme.colorScheme.primary
@@ -336,7 +336,7 @@ fun AlertCheckLogViewerUi(
                         IconButton(onClick = { showOptionsMenu = true }) {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
-                                contentDescription = "More Options",
+                                contentDescription = "More options",
                             )
                         }
                         DropdownMenu(
@@ -347,7 +347,7 @@ fun AlertCheckLogViewerUi(
                             DropdownMenuItem(
                                 text = { Text("Export Logs") },
                                 leadingIcon = {
-                                    Icon(Icons.Default.Share, contentDescription = null)
+                                    Icon(Icons.Default.Share, contentDescription = null) // Menu item has text label
                                 },
                                 onClick = {
                                     showOptionsMenu = false
@@ -364,7 +364,7 @@ fun AlertCheckLogViewerUi(
                             DropdownMenuItem(
                                 text = { Text("Clear All Filters") },
                                 leadingIcon = {
-                                    Icon(Icons.Default.Clear, contentDescription = null)
+                                    Icon(Icons.Default.Clear, contentDescription = null) // Menu item has text label
                                 },
                                 enabled = hasActiveFilters,
                                 onClick = {

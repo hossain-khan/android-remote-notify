@@ -313,7 +313,7 @@ fun AddNewRemoteAlertUi(
                 title = { Text(screenTitle) },
                 navigationIcon = {
                     IconButton(onClick = { state.eventSink(AddNewRemoteAlertScreen.Event.NavigateBack) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Navigate back")
                     }
                 },
             )
@@ -445,7 +445,11 @@ fun AddNewRemoteAlertUi(
                     leadingContent = {
                         Icon(
                             painter = painterResource(state.selectedAlertType.toIconResId()),
-                            contentDescription = null,
+                            contentDescription =
+                                when (state.selectedAlertType) {
+                                    AlertType.BATTERY -> "Battery alert"
+                                    AlertType.STORAGE -> "Storage alert"
+                                },
                         )
                     },
                 )
@@ -523,7 +527,7 @@ private fun AlertTypeSelector(
                                         AlertType.STORAGE -> R.drawable.hard_disk_24dp
                                     },
                                 ),
-                            contentDescription = null,
+                            contentDescription = null, // Button text provides context
                         )
                     }
                 },

@@ -313,7 +313,7 @@ fun NotificationMediumListUi(
                     }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = "Navigate back",
                         )
                     }
                 },
@@ -425,7 +425,7 @@ private fun NotifierCard(
             leadingContent = {
                 Icon(
                     painter = painterResource(id = notifier.notifierType.iconResId()),
-                    contentDescription = "Notification Icon",
+                    contentDescription = "${notifier.name} notification medium",
                     tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(32.dp),
                 )
@@ -435,7 +435,7 @@ private fun NotifierCard(
                     IconButton(onClick = onEditConfiguration) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Edit",
+                            contentDescription = "Configure ${notifier.name}",
                         )
                     }
                     AnimatedVisibility(
@@ -446,7 +446,7 @@ private fun NotifierCard(
                         IconButton(onClick = onResetConfiguration) {
                             Icon(
                                 painter = painterResource(id = R.drawable.reset_settings_24dp),
-                                contentDescription = "Delete",
+                                contentDescription = "Reset ${notifier.name} configuration",
                             )
                         }
                     }
