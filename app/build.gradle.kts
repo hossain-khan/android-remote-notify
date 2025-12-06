@@ -240,6 +240,7 @@ dependencies {
     testImplementation(libs.androidx.room.testing)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.core.ktx)
+    testImplementation(libs.androidx.ui.test.junit4)
     testImplementation(libs.androidx.work.testing)
     testImplementation(libs.circuit.test)
     testImplementation(libs.google.truth)

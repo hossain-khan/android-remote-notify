@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.ui.alertlist
 
+import androidx.compose.ui.test.junit4.createComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.slack.circuit.test.FakeNavigator
 import com.slack.circuit.test.test
@@ -20,12 +21,19 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+import org.robolectric.annotation.Config
+
+@Config(sdk = [34])
 @RunWith(RobolectricTestRunner::class)
 class AlertsListPresenterTest {
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
     // System under test
     private lateinit var presenter: AlertsListPresenter
 
@@ -61,147 +69,177 @@ class AlertsListPresenterTest {
     }
 
     @Test
-    fun `when presenter is initialized then state contains device info`() =
-        runTest {
-            presenter.test {
-                val state = awaitItem()
+    fun `when presenter is initialized then state contains device info`() {
+        composeTestRule.setContent {
+            runTest {
+                presenter.test {
+                    val state = awaitItem()
 
-                assertThat(state.batteryPercentage).isEqualTo(50)
-                assertThat(state.availableStorage).isEqualTo(10L)
-                assertThat(state.totalStorage).isEqualTo(100L)
-                assertThat(state.remoteAlertConfigs).isEmpty()
-                assertThat(state.isAnyNotifierConfigured).isFalse()
+                    assertThat(state.batteryPercentage).isEqualTo(50)
+                    assertThat(state.availableStorage).isEqualTo(10L)
+                    assertThat(state.totalStorage).isEqualTo(100L)
+                    assertThat(state.remoteAlertConfigs).isEmpty()
+                    assertThat(state.isAnyNotifierConfigured).isFalse()
+                }
             }
         }
+    }
 
     @Test
-    fun `when DeleteNotification event is triggered then alert is deleted from repository`() =
-        runTest {
-            val alert = RemoteAlert.BatteryAlert(alertId = 1, batteryPercentage = 20)
-            coEvery { mockRepository.deleteRemoteAlert(alert) } returns Unit
+    fun `when DeleteNotification event is triggered then alert is deleted from repository`() {
+        val alert = RemoteAlert.BatteryAlert(alertId = 1, batteryPercentage = 20)
+        coEvery { mockRepository.deleteRemoteAlert(alert) } returns Unit
 
-            presenter.test {
-                val state = awaitItem()
-                state.eventSink(AlertsListScreen.Event.DeleteNotification(alert))
+        composeTestRule.setContent {
+            runTest {
+                presenter.test {
+                    val state = awaitItem()
+                    state.eventSink(AlertsListScreen.Event.DeleteNotification(alert))
 
-                coVerify { mockRepository.deleteRemoteAlert(alert) }
+                    coVerify { mockRepository.deleteRemoteAlert(alert) }
+                }
             }
         }
+    }
 
     @Test
-    fun `when EditRemoteAlert event is triggered then navigates to edit screen with alertId`() =
-        runTest {
-            val alert = RemoteAlert.BatteryAlert(alertId = 123, batteryPercentage = 20)
+    fun `when EditRemoteAlert event is triggered then navigates to edit screen with alertId`() {
+        val alert = RemoteAlert.BatteryAlert(alertId = 123, batteryPercentage = 20)
 
-            presenter.test {
-                val state = awaitItem()
-                state.eventSink(AlertsListScreen.Event.EditRemoteAlert(alert))
+        composeTestRule.setContent {
+            runTest {
+                presenter.test {
+                    val state = awaitItem()
+                    state.eventSink(AlertsListScreen.Event.EditRemoteAlert(alert))
 
-                assertThat(mockNavigator.awaitNextScreen())
-                    .isEqualTo(AddNewRemoteAlertScreen(alertId = 123))
+                    assertThat(mockNavigator.awaitNextScreen())
+                        .isEqualTo(AddNewRemoteAlertScreen(alertId = 123))
+                }
             }
         }
+    }
 
     @Test
-    fun `when AddNotification event is triggered then navigates to add new alert screen`() =
-        runTest {
-            presenter.test {
-                val state = awaitItem()
-                state.eventSink(AlertsListScreen.Event.AddNotification)
+    fun `when AddNotification event is triggered then navigates to add new alert screen`() {
+        composeTestRule.setContent {
+            runTest {
+                presenter.test {
+                    val state = awaitItem()
+                    state.eventSink(AlertsListScreen.Event.AddNotification)
 
-                assertThat(mockNavigator.awaitNextScreen())
-                    .isEqualTo(AddNewRemoteAlertScreen())
+                    assertThat(mockNavigator.awaitNextScreen())
+                        .isEqualTo(AddNewRemoteAlertScreen())
+                }
             }
         }
+    }
 
     @Test
-    fun `when AddNotificationDestination event is triggered then navigates to notification medium list`() =
-        runTest {
-            presenter.test {
-                val state = awaitItem()
-                state.eventSink(AlertsListScreen.Event.AddNotificationDestination)
+    fun `when AddNotificationDestination event is triggered then navigates to notification medium list`() {
+        composeTestRule.setContent {
+            runTest {
+                presenter.test {
+                    val state = awaitItem()
+                    state.eventSink(AlertsListScreen.Event.AddNotificationDestination)
 
-                assertThat(mockNavigator.awaitNextScreen())
-                    .isEqualTo(NotificationMediumListScreen)
+                    assertThat(mockNavigator.awaitNextScreen())
+                        .isEqualTo(NotificationMediumListScreen)
+                }
             }
         }
+    }
 
     @Test
-    fun `when ShowEducationSheet event is triggered then showEducationSheet becomes true`() =
-        runTest {
-            coEvery { mockAppPreferencesDataStore.markEducationDialogShown() } returns Unit
+    fun `when ShowEducationSheet event is triggered then showEducationSheet becomes true`() {
+        coEvery { mockAppPreferencesDataStore.markEducationDialogShown() } returns Unit
 
-            presenter.test {
-                val initialState = awaitItem()
-                assertThat(initialState.showEducationSheet).isFalse()
+        composeTestRule.setContent {
+            runTest {
+                presenter.test {
+                    val initialState = awaitItem()
+                    assertThat(initialState.showEducationSheet).isFalse()
 
-                initialState.eventSink(AlertsListScreen.Event.ShowEducationSheet)
+                    initialState.eventSink(AlertsListScreen.Event.ShowEducationSheet)
 
-                val updatedState = awaitItem()
-                assertThat(updatedState.showEducationSheet).isTrue()
-                coVerify { mockAppPreferencesDataStore.markEducationDialogShown() }
+                    val updatedState = awaitItem()
+                    assertThat(updatedState.showEducationSheet).isTrue()
+                    coVerify { mockAppPreferencesDataStore.markEducationDialogShown() }
+                }
             }
         }
+    }
 
     @Test
-    fun `when DismissEducationSheet event is triggered then showEducationSheet becomes false`() =
-        runTest {
-            coEvery { mockAppPreferencesDataStore.markEducationDialogShown() } returns Unit
+    fun `when DismissEducationSheet event is triggered then showEducationSheet becomes false`() {
+        coEvery { mockAppPreferencesDataStore.markEducationDialogShown() } returns Unit
 
-            presenter.test {
-                val initialState = awaitItem()
-                // First show the sheet
-                initialState.eventSink(AlertsListScreen.Event.ShowEducationSheet)
-                val shownState = awaitItem()
-                assertThat(shownState.showEducationSheet).isTrue()
+        composeTestRule.setContent {
+            runTest {
+                presenter.test {
+                    val initialState = awaitItem()
+                    // First show the sheet
+                    initialState.eventSink(AlertsListScreen.Event.ShowEducationSheet)
+                    val shownState = awaitItem()
+                    assertThat(shownState.showEducationSheet).isTrue()
 
-                // Then dismiss it
-                shownState.eventSink(AlertsListScreen.Event.DismissEducationSheet)
-                val dismissedState = awaitItem()
-                assertThat(dismissedState.showEducationSheet).isFalse()
+                    // Then dismiss it
+                    shownState.eventSink(AlertsListScreen.Event.DismissEducationSheet)
+                    val dismissedState = awaitItem()
+                    assertThat(dismissedState.showEducationSheet).isFalse()
+                }
             }
         }
+    }
 
     @Test
-    fun `when ViewAllLogs event is triggered then navigates to log viewer screen`() =
-        runTest {
-            presenter.test {
-                val state = awaitItem()
-                state.eventSink(AlertsListScreen.Event.ViewAllLogs)
+    fun `when ViewAllLogs event is triggered then navigates to log viewer screen`() {
+        composeTestRule.setContent {
+            runTest {
+                presenter.test {
+                    val state = awaitItem()
+                    state.eventSink(AlertsListScreen.Event.ViewAllLogs)
 
-                assertThat(mockNavigator.awaitNextScreen())
-                    .isEqualTo(AlertCheckLogViewerScreen)
+                    assertThat(mockNavigator.awaitNextScreen())
+                        .isEqualTo(AlertCheckLogViewerScreen)
+                }
             }
         }
+    }
 
     @Test
-    fun `when repository returns alerts then state contains those alerts`() =
-        runTest {
-            val alerts =
-                listOf(
-                    RemoteAlert.BatteryAlert(alertId = 1, batteryPercentage = 20),
-                    RemoteAlert.StorageAlert(alertId = 2, storageMinSpaceGb = 10),
-                )
-            coEvery { mockRepository.getAllRemoteAlertFlow() } returns flowOf(alerts)
+    fun `when repository returns alerts then state contains those alerts`() {
+        val alerts =
+            listOf(
+                RemoteAlert.BatteryAlert(alertId = 1, batteryPercentage = 20),
+                RemoteAlert.StorageAlert(alertId = 2, storageMinSpaceGb = 10),
+            )
+        coEvery { mockRepository.getAllRemoteAlertFlow() } returns flowOf(alerts)
 
-            presenter.test {
-                val state = awaitItem()
+        composeTestRule.setContent {
+            runTest {
+                presenter.test {
+                    val state = awaitItem()
 
-                assertThat(state.remoteAlertConfigs).hasSize(2)
-                assertThat(state.remoteAlertConfigs[0]).isInstanceOf(RemoteAlert.BatteryAlert::class.java)
-                assertThat(state.remoteAlertConfigs[1]).isInstanceOf(RemoteAlert.StorageAlert::class.java)
+                    assertThat(state.remoteAlertConfigs).hasSize(2)
+                    assertThat(state.remoteAlertConfigs[0]).isInstanceOf(RemoteAlert.BatteryAlert::class.java)
+                    assertThat(state.remoteAlertConfigs[1]).isInstanceOf(RemoteAlert.StorageAlert::class.java)
+                }
             }
         }
+    }
 
     @Test
-    fun `when notifiers are configured then isAnyNotifierConfigured is true`() =
-        runTest {
-            coEvery { mockNotifiers.any { it.hasValidConfig() } } returns true
+    fun `when notifiers are configured then isAnyNotifierConfigured is true`() {
+        coEvery { mockNotifiers.any { it.hasValidConfig() } } returns true
 
-            presenter.test {
-                val state = awaitItem()
+        composeTestRule.setContent {
+            runTest {
+                presenter.test {
+                    val state = awaitItem()
 
-                assertThat(state.isAnyNotifierConfigured).isTrue()
+                    assertThat(state.isAnyNotifierConfigured).isTrue()
+                }
             }
         }
+    }
 }
