@@ -465,11 +465,11 @@ private fun NotifierCard(
 private fun NotifierType.iconResId(): Int =
     when (this) {
         NotifierType.EMAIL -> R.drawable.mail_24dp
-        NotifierType.WEBHOOK_SLACK_WORKFLOW -> R.drawable.slack_logo_outline
         NotifierType.TELEGRAM -> R.drawable.telegram_logo_outline
         NotifierType.TWILIO -> R.drawable.twilio_logo_outline
-        NotifierType.WEBHOOK_REST_API -> R.drawable.webhook_24dp
         NotifierType.WEBHOOK_DISCORD -> R.drawable.discord_logo_outline
+        NotifierType.WEBHOOK_REST_API -> R.drawable.webhook_24dp
+        NotifierType.WEBHOOK_SLACK_WORKFLOW -> R.drawable.slack_logo_outline
     }
 
 @Composable
@@ -493,6 +493,12 @@ private fun PreviewNotificationMediumListUi() {
                                 notifierType = NotifierType.WEBHOOK_SLACK_WORKFLOW,
                                 name = "Slack",
                                 isConfigured = false,
+                            ),
+                            NotificationMediumListScreen.NotifierMediumInfo(
+                                notifierType = NotifierType.WEBHOOK_DISCORD,
+                                name = "Discord",
+                                isConfigured = true,
+                                configPreviewText = "https://discord.com/api/webhooks/...",
                             ),
                             NotificationMediumListScreen.NotifierMediumInfo(
                                 notifierType = NotifierType.TELEGRAM,
