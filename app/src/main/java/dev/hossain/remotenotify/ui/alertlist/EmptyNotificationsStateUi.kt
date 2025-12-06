@@ -33,7 +33,7 @@ internal fun EmptyNotificationsState(onLearnMoreClick: () -> Unit) {
     ) {
         Icon(
             Icons.Default.Notifications,
-            contentDescription = null,
+            contentDescription = "No alerts configured",
             modifier =
                 Modifier
                     .size(72.dp)
