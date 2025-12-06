@@ -2,9 +2,54 @@
 
 This directory contains comprehensive unit tests for UI/Presenter layer using Circuit testing utilities.
 
+## Current Status
+
+**Tests Compile:** ✅ All 45+ test cases compile successfully  
+**Tests Run:** ❌ Tests fail at runtime due to missing Compose context (LocalContext)
+
+### Issue
+
+Circuit presenters use `LocalContext.current` which requires a proper Compose runtime environment. Unit tests with Robolectric need additional setup to provide this context.
+
+### Root Cause
+
+The `presenter.test()` method from Circuit testing utilities internally calls the Composable `present()` method, which accesses `LocalContext.current`. In unit tests, this composition local is not available by default.
+
+### Error Message
+
+```
+app.cash.turbine.TurbineAssertionError: Expected item but found Error(IllegalStateException)
+Caused by: java.lang.IllegalStateException: CompositionLocal LocalContext not present
+```
+
+### Solution Approaches Investigated
+
+1. **Using ComposeTestRule** - Doesn't work in unit tests with suspend functions
+2. **Using runComposeUiTest** - API incompatibility with test structure  
+3. **Using @Config annotation** - Not sufficient to provide LocalContext
+4. **Mocking LocalContext** - Complex due to Compose internals
+
+### Recommended Solution
+
+**Option A (Recommended)**: Refactor the presenters to inject `Context` as a constructor dependency instead of using `LocalContext.current`. This would:
+- Make presenters more testable
+- Remove Compose-specific requirements from unit tests
+- Allow standard Robolectric testing without Compose environment
+- Follow dependency injection best practices
+
+**Option B**: Convert to instrumentation tests
+- Move tests to `androidTest` directory  
+- Use full Compose environment
+- Slower execution but guaranteed Compose support
+
+**Option C**: Deep Compose mocking
+- Mock CompositionLocalProvider
+- Provide test Context through composition
+- Complex and fragile solution
+
 ## Test Coverage
 
-### Implemented Tests
+### Implemented Tests (45+ Total)
 
 1. **AlertsListPresenterTest** (10 test cases)
    - State initialization and device info
@@ -66,58 +111,22 @@ This directory contains comprehensive unit tests for UI/Presenter layer using Ci
 EMAIL_API_KEY=test_api_key_for_unit_tests
 ```
 
-### Run All UI Tests
+### Run All UI Tests (Currently Failing)
 
 ```bash
 ./gradlew testDebugUnitTest --tests "dev.hossain.remotenotify.ui.*"
 ```
 
-### Run Specific Test Class
+### Expected Failure
 
-```bash
-./gradlew testDebugUnitTest --tests "dev.hossain.remotenotify.ui.alertlist.AlertsListPresenterTest"
-```
-
-### Run Single Test
-
-```bash
-./gradlew testDebugUnitTest --tests "dev.hossain.remotenotify.ui.alertlist.AlertsListPresenterTest.when presenter is initialized then state contains device info"
-```
-
-## Known Issues
-
-### LocalContext Requirement
-
-The current tests encounter `CompositionLocal LocalContext not present` errors because the presenters use `LocalContext.current` to access Android context. This requires additional setup:
-
-#### Solution Options
-
-1. **Use Robolectric Application Context** (Recommended)
-   - Provide a proper Android context through Robolectric
-   - May require wrapping presenter.test() with Compose test environment
-
-2. **Mock Context Dependencies**
-   - Refactor presenters to inject Context as a dependency instead of using LocalContext
-   - This would be a larger refactor of the presenter architecture
-
-3. **Use Circuit Test Utilities**
-   - Circuit may provide test helpers for this scenario
-   - Check Circuit documentation for testing best practices
-
-### Current Status
-
-- ✅ All test files compile successfully
-- ✅ Test structure follows existing patterns
-- ✅ Uses MockK for mocking
-- ✅ Uses Truth for assertions
-- ⚠️ Tests fail at runtime due to missing Compose context
-- 🔄 Requires additional setup to provide LocalContext in tests
+All tests will fail with `CompositionLocal LocalContext not present` error.
 
 ## Test Structure
 
 All tests follow this pattern:
 
 ```kotlin
+@Config(sdk = [34])
 @RunWith(RobolectricTestRunner::class)
 class SomePresenterTest {
     private lateinit var presenter: SomePresenter
@@ -148,17 +157,45 @@ class SomePresenterTest {
 - **truth**: Fluent assertions
 - **robolectric**: Android unit testing framework
 - **kotlinx-coroutines-test**: Coroutine testing utilities
+- **androidx.ui.test.junit4**: Compose UI testing (added but insufficient alone)
 
 ## Next Steps
 
-1. Add proper Compose test context setup
-2. Add remaining test cases for ConfigureNotificationMediumPresenter
-3. Increase coverage to >80% for all presenter classes
-4. Add integration tests for complete user flows
+To make these tests functional:
+
+1. **Option A (Recommended)**: Refactor presenters to inject Context as dependency
+   ```kotlin
+   // Before
+   @Composable
+   override fun present(): State {
+       val context = LocalContext.current
+       // use context...
+   }
+   
+   // After
+   class SomePresenter(
+       private val context: Context,
+       // other dependencies...
+   ) : Presenter<State> {
+       @Composable
+       override fun present(): State {
+           // use context directly...
+       }
+   }
+   ```
+
+2. **Option B**: Convert to instrumentation tests
+   - Move tests from `test/` to `androidTest/`
+   - Use `@get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()`
+   - Full Compose environment available
+
+3. **Option C**: Investigate Circuit-specific test utilities
+   - Check if Circuit provides test context providers
+   - Review Circuit testing documentation for LocalContext handling
 
 ## Contributing
 
-When adding new presenter tests:
+When fixing or adding presenter tests:
 
 1. Follow the established naming convention using backticks
 2. Use descriptive test names that explain the scenario
@@ -166,3 +203,17 @@ When adding new presenter tests:
 4. Test both success and failure scenarios
 5. Verify state transitions and navigation events
 6. Use Truth assertions for readable test output
+
+## Technical Notes
+
+- All tests compile successfully with proper imports and annotations
+- Test structure and assertions are correct
+- Only runtime Compose context initialization prevents execution
+- This is a known limitation of testing Composables in unit tests
+- Consider this technical debt to be addressed in future refactoring
+
+## References
+
+- [Circuit Testing Documentation](https://slackhq.github.io/circuit/testing/)
+- [Compose Testing Guide](https://developer.android.com/jetpack/compose/testing)
+- [Robolectric Documentation](http://robolectric.org/)
