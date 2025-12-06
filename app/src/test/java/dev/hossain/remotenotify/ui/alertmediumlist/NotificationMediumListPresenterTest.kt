@@ -41,12 +41,12 @@ class NotificationMediumListPresenterTest {
 
         // Setup mock notifiers
         every { mockNotifier1.notifierType } returns NotifierType.EMAIL
-        every { mockNotifier1.hasValidConfig() } returns false
-        every { mockNotifier1.getConfig() } returns AlertMediumConfig.Email(email = "")
+        coEvery { mockNotifier1.hasValidConfig() } returns false
+        coEvery { mockNotifier1.getConfig() } returns AlertMediumConfig.EmailConfig(apiKey = "", domain = "", fromEmail = "", toEmail = "")
 
         every { mockNotifier2.notifierType } returns NotifierType.TELEGRAM
-        every { mockNotifier2.hasValidConfig() } returns true
-        every { mockNotifier2.getConfig() } returns AlertMediumConfig.Telegram(botToken = "test-token", chatId = "123")
+        coEvery { mockNotifier2.hasValidConfig() } returns true
+        coEvery { mockNotifier2.getConfig() } returns AlertMediumConfig.TelegramConfig(botToken = "test-token", chatId = "123")
     }
 
     @Test
@@ -227,9 +227,9 @@ class NotificationMediumListPresenterTest {
         runTest {
             val mockNotifier3 = mockk<NotificationSender>()
             every { mockNotifier3.notifierType } returns NotifierType.TWILIO
-            every { mockNotifier3.hasValidConfig() } returns false
-            every { mockNotifier3.getConfig() } returns
-                AlertMediumConfig.Twilio(accountSid = "", authToken = "", fromNumber = "", toNumber = "")
+            coEvery { mockNotifier3.hasValidConfig() } returns false
+            coEvery { mockNotifier3.getConfig() } returns
+                AlertMediumConfig.TwilioConfig(accountSid = "", authToken = "", fromPhone = "", toPhone = "")
 
             val notifiers = setOf(mockNotifier1, mockNotifier2, mockNotifier3)
             presenter =
