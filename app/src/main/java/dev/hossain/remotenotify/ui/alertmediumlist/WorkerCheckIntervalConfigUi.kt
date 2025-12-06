@@ -72,7 +72,7 @@ internal fun WorkerConfigCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = null,
+                    contentDescription = "Check frequency configuration",
                     tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(32.dp),
                 )

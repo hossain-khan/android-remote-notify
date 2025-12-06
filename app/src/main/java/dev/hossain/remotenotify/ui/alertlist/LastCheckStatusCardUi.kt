@@ -63,7 +63,7 @@ internal fun LastCheckStatusCardUi(
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.pending_actions_24dp),
-                        contentDescription = null,
+                        contentDescription = "Pending check",
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.primary,
                     )
@@ -80,7 +80,11 @@ internal fun LastCheckStatusCardUi(
                 ) {
                     Icon(
                         painter = painterResource(lastCheckLog.alertType.toIconResId()),
-                        contentDescription = null,
+                        contentDescription =
+                            when (lastCheckLog.alertType) {
+                                AlertType.BATTERY -> "Battery alert"
+                                AlertType.STORAGE -> "Storage alert"
+                            },
                         modifier = Modifier.size(20.dp),
                         tint =
                             if (lastCheckLog.isAlertSent) {
@@ -122,7 +126,7 @@ internal fun LastCheckStatusCardUi(
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.schedule_24dp),
-                        contentDescription = null,
+                        contentDescription = "Worker schedule",
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.primary,
                     )

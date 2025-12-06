@@ -50,7 +50,7 @@ internal fun NoNotifierConfiguredCard(
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.notification_settings_24dp),
-                        contentDescription = null,
+                        contentDescription = null, // Button already has text label
                         modifier = Modifier.size(16.dp),
                     )
                     Spacer(modifier = Modifier.size(8.dp))
