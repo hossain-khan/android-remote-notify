@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.semantics.contentDescription
-import androidx.compose.foundation.semantics.semantics
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -46,6 +44,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.work.WorkManager
@@ -372,7 +372,7 @@ private fun DeviceCurrentStateUi(state: AlertsListScreen.State) {
                 .semantics(mergeDescendants = true) {
                     contentDescription =
                         "Device status: Battery at ${state.batteryPercentage} percent, " +
-                            "Storage ${state.availableStorage} of ${state.totalStorage} gigabytes available"
+                        "Storage ${state.availableStorage} of ${state.totalStorage} gigabytes available"
                 },
         colors =
             CardDefaults.cardColors(
