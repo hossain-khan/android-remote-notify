@@ -133,6 +133,7 @@ class ConfigureNotificationMediumPresenter
             var snackbarMessage by remember { mutableStateOf<String?>(null) }
             var isConfigured by remember { mutableStateOf(false) }
             var shouldShowValidationError by remember { mutableStateOf(false) }
+            var useBatteryAlert by remember { mutableStateOf(true) }
             val sampleJsonPayload by remember {
                 mutableStateOf(
                     listOf(
@@ -223,7 +224,14 @@ class ConfigureNotificationMediumPresenter
 
                                 val success =
                                     withContext(Dispatchers.IO) {
-                                        val testNotification = RemoteAlert.BatteryAlert(batteryPercentage = 5)
+                                        val testNotification =
+                                            if (useBatteryAlert) {
+                                                RemoteAlert.BatteryAlert(batteryPercentage = 5)
+                                            } else {
+                                                RemoteAlert.StorageAlert(storageMinSpaceGb = 2)
+                                            }
+                                        // Toggle for next test
+                                        useBatteryAlert = !useBatteryAlert
                                         notificationSender.sendNotification(testNotification)
                                     }
                                 snackbarMessage =
