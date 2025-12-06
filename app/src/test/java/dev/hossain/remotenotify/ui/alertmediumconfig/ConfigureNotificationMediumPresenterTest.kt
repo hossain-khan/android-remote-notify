@@ -12,7 +12,6 @@ import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.notifier.of
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -46,7 +45,8 @@ class ConfigureNotificationMediumPresenterTest {
         // Setup default mock behaviors
         every { mockNotificationSender.notifierType } returns NotifierType.EMAIL
         coEvery { mockNotificationSender.hasValidConfig() } returns false
-        coEvery { mockNotificationSender.getConfig() } returns AlertMediumConfig.EmailConfig(apiKey = "", domain = "", fromEmail = "", toEmail = "")
+        coEvery { mockNotificationSender.getConfig() } returns
+            AlertMediumConfig.EmailConfig(apiKey = "", domain = "", fromEmail = "", toEmail = "")
         coEvery { mockNotificationSender.validateConfig(any()) } returns ConfigValidationResult(false, emptyMap())
     }
 
@@ -83,7 +83,13 @@ class ConfigureNotificationMediumPresenterTest {
     fun `when notifier is configured then isConfigured is true`() =
         runTest {
             coEvery { mockNotificationSender.hasValidConfig() } returns true
-            coEvery { mockNotificationSender.getConfig() } returns AlertMediumConfig.EmailConfig(apiKey = "test", domain = "example.com", fromEmail = "from@example.com", toEmail = "test@example.com")
+            coEvery { mockNotificationSender.getConfig() } returns
+                AlertMediumConfig.EmailConfig(
+                    apiKey = "test",
+                    domain = "example.com",
+                    fromEmail = "from@example.com",
+                    toEmail = "test@example.com",
+                )
 
             val screen = ConfigureNotificationMediumScreen(NotifierType.EMAIL)
             mockNavigator = FakeNavigator(screen)

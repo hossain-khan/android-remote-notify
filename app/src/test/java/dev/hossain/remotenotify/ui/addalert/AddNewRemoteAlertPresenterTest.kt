@@ -115,7 +115,7 @@ class AddNewRemoteAlertPresenterTest {
                 coVerify { mockRepository.saveRemoteAlert(any()) }
                 assertThat(savedSlot.captured).isInstanceOf(RemoteAlert.BatteryAlert::class.java)
                 assertThat((savedSlot.captured as RemoteAlert.BatteryAlert).batteryPercentage).isEqualTo(15)
-                assertThat(mockNavigator.awaitPop()).isTrue()
+                mockNavigator.awaitPop()
             }
         }
 
@@ -150,7 +150,7 @@ class AddNewRemoteAlertPresenterTest {
                 val updated = updatedSlot.captured as RemoteAlert.BatteryAlert
                 assertThat(updated.alertId).isEqualTo(123)
                 assertThat(updated.batteryPercentage).isEqualTo(30)
-                assertThat(mockNavigator.awaitPop()).isTrue()
+                mockNavigator.awaitPop()
             }
         }
 
@@ -172,7 +172,7 @@ class AddNewRemoteAlertPresenterTest {
                 val state = awaitItem()
                 state.eventSink(AddNewRemoteAlertScreen.Event.NavigateBack)
 
-                assertThat(mockNavigator.awaitPop()).isTrue()
+                mockNavigator.awaitPop()
             }
         }
 

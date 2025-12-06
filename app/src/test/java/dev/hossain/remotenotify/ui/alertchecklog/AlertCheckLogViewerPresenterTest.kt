@@ -193,7 +193,7 @@ class AlertCheckLogViewerPresenterTest {
                 val state = awaitItem()
                 state.eventSink(AlertCheckLogViewerScreen.Event.NavigateBack)
 
-                assertThat(mockNavigator.awaitPop()).isTrue()
+                mockNavigator.awaitPop()
             }
         }
 

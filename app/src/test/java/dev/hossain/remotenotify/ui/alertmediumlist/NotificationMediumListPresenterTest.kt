@@ -175,7 +175,7 @@ class NotificationMediumListPresenterTest {
                 val state = awaitItem()
                 state.eventSink(NotificationMediumListScreen.Event.NavigateBack)
 
-                assertThat(mockNavigator.awaitPop()).isTrue()
+                mockNavigator.awaitPop()
             }
         }
 

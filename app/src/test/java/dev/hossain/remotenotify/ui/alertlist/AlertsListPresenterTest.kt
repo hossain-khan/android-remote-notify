@@ -46,7 +46,7 @@ class AlertsListPresenterTest {
         every { mockStorageMonitor.getTotalStorageInGB() } returns 100L
         coEvery { mockRepository.getAllRemoteAlertFlow() } returns flowOf(emptyList())
         coEvery { mockRepository.getLatestCheckLog() } returns flowOf(null)
-        every { mockNotifiers.any { it.hasValidConfig() } } returns false
+        coEvery { mockNotifiers.any { it.hasValidConfig() } } returns false
 
         presenter =
             AlertsListPresenter(
@@ -196,7 +196,7 @@ class AlertsListPresenterTest {
     @Test
     fun `when notifiers are configured then isAnyNotifierConfigured is true`() =
         runTest {
-            every { mockNotifiers.any { it.hasValidConfig() } } returns true
+            coEvery { mockNotifiers.any { it.hasValidConfig() } } returns true
 
             presenter.test {
                 val state = awaitItem()
