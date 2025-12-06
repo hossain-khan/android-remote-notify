@@ -102,11 +102,19 @@ internal fun DiscordWebhookConfigInputUi(
                     modifier = Modifier.size(24.dp),
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = "Discord webhooks are free and support rich embeds with colors.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
+                Column {
+                    Text(
+                        text = "Discord webhooks are free and support rich embeds with colors.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Note: You need 'Manage Webhooks' permission to create webhook URLs.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                    )
+                }
             }
         }
 

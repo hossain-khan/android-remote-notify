@@ -77,10 +77,10 @@ class DiscordWebhookNotificationSender
                         color = COLOR_BATTERY_CRITICAL,
                         fields =
                             listOf(
+                                Field("🔋 Current Level", "$currentLevel%"),
+                                Field("⚠️ Alert Threshold", "$threshold%"),
                                 Field("📱 Device", deviceName, inline = true),
                                 Field("📍 Android", android.os.Build.VERSION.RELEASE, inline = true),
-                                Field("🔋 Current Level", "$currentLevel%", inline = true),
-                                Field("⚠️ Threshold", "$threshold%", inline = true),
                             ),
                         footerText = "Remote Alert Notifier",
                         timestamp = timestamp,
@@ -96,10 +96,10 @@ class DiscordWebhookNotificationSender
                         color = COLOR_STORAGE_CRITICAL,
                         fields =
                             listOf(
+                                Field("💿 Available Space", String.format(Locale.US, "%.1f GB", currentStorage)),
+                                Field("⚠️ Alert Threshold", "$threshold GB"),
                                 Field("📱 Device", deviceName, inline = true),
                                 Field("📍 Android", android.os.Build.VERSION.RELEASE, inline = true),
-                                Field("💿 Available", String.format(Locale.US, "%.1f GB", currentStorage), inline = true),
-                                Field("⚠️ Threshold", "$threshold GB", inline = true),
                             ),
                         footerText = "Remote Alert Notifier",
                         timestamp = timestamp,
