@@ -10,12 +10,19 @@
 
 -----------------------------------------------------------------------------
 
-## Release v1.16 (Unreleased)
-- Initial 1.x release of 'Remote Notify'! 🎉
+## Release v1.16
 - Monitor battery 🔋 and storage 💾 levels of your remote Android devices.
-- Set up custom alerts and receive notifications via Email, Twilio SMS, Slack, Telegram, and REST webhooks.
-- ⚒️ Maintenance - TBA
-- 🆕 Feature - TBA
+- Set up custom alerts and receive notifications via Email, Twilio SMS, Slack, Telegram, Discord, and REST webhooks.
+- 🆕 Added Discord 💬 webhook integration for rich embed notifications with color-coded alerts.
+- 🆕 Added Export/Import configuration feature with password-based encryption for secure backup and restore.
+- 🆕 Added alert editing capability - modify existing alert thresholds and configurations.
+- 🆕 Added GitHub Codespaces dev container support for easier development.
+- ⚒️ Updated Metro DI library to version 0.8.0 with @AssistedInject support.
+- ⚒️ Improved testing UX with alternating battery/storage test alerts.
+- ⚒️ Enhanced Discord notification layout for better readability.
+- ⚒️ Updated dependencies to latest stable versions.
+- 🐞 Fixed password error display in configuration import dialog.
+- 🐞 Fixed storage threshold bug and improved validation.
 
 Full changelog: https://github.com/hossain-khan/android-remote-notify/releases/tag/v1.16
 
