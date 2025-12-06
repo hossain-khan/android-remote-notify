@@ -1,6 +1,5 @@
 package dev.hossain.remotenotify.ui.alertlist
 
-import androidx.compose.runtime.Composable
 import com.google.common.truth.Truth.assertThat
 import com.slack.circuit.test.FakeNavigator
 import com.slack.circuit.test.test

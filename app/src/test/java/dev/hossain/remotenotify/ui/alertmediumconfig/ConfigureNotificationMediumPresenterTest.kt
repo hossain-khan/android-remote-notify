@@ -1,7 +1,6 @@
 package dev.hossain.remotenotify.ui.alertmediumconfig
 
 import com.google.common.truth.Truth.assertThat
-import com.slack.circuit.runtime.screen.PopResult
 import com.slack.circuit.test.FakeNavigator
 import com.slack.circuit.test.test
 import dev.hossain.remotenotify.analytics.Analytics
@@ -17,7 +16,6 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.slot
 import io.mockk.unmockkStatic
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -183,7 +181,8 @@ class ConfigureNotificationMediumPresenterTest {
                 )
 
             val invalidConfig = AlertMediumConfig.Email(email = "invalid")
-            every { mockNotificationSender.validateConfig(invalidConfig) } returns ConfigValidationResult(false, mapOf("email" to "Invalid email"))
+            every { mockNotificationSender.validateConfig(invalidConfig) } returns
+                ConfigValidationResult(false, mapOf("email" to "Invalid email"))
 
             presenter.test {
                 val initialState = awaitItem()

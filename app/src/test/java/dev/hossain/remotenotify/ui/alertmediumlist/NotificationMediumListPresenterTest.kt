@@ -228,7 +228,8 @@ class NotificationMediumListPresenterTest {
             val mockNotifier3 = mockk<NotificationSender>()
             every { mockNotifier3.notifierType } returns NotifierType.TWILIO
             every { mockNotifier3.hasValidConfig() } returns false
-            every { mockNotifier3.getConfig() } returns AlertMediumConfig.Twilio(accountSid = "", authToken = "", fromNumber = "", toNumber = "")
+            every { mockNotifier3.getConfig() } returns
+                AlertMediumConfig.Twilio(accountSid = "", authToken = "", fromNumber = "", toNumber = "")
 
             val notifiers = setOf(mockNotifier1, mockNotifier2, mockNotifier3)
             presenter =
@@ -245,11 +246,12 @@ class NotificationMediumListPresenterTest {
                 assertThat(state.notifiers).hasSize(3)
                 // Verify they're sorted alphabetically by displayName
                 val notifierTypes = state.notifiers.map { it.notifierType }
-                assertThat(notifierTypes).containsExactly(
-                    NotifierType.EMAIL,
-                    NotifierType.TELEGRAM,
-                    NotifierType.TWILIO,
-                ).inOrder()
+                assertThat(notifierTypes)
+                    .containsExactly(
+                        NotifierType.EMAIL,
+                        NotifierType.TELEGRAM,
+                        NotifierType.TWILIO,
+                    ).inOrder()
             }
         }
 }
