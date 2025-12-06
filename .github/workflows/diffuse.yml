@@ -45,7 +45,7 @@ jobs:
       - name: Save base APK
         run: |
           mkdir -p /tmp/diffuse
-          cp app/build/outputs/apk/release/app-release-unsigned.apk /tmp/diffuse/base.apk
+          cp app/build/outputs/apk/release/app-release.apk /tmp/diffuse/base.apk
           echo "Base APK saved from ${{ github.base_ref }} branch"
 
       # Clean build directory before building PR APK
@@ -75,7 +75,7 @@ jobs:
         continue-on-error: true
         with:
           old-file-path: /tmp/diffuse/base.apk
-          new-file-path: app/build/outputs/apk/release/app-release-unsigned.apk
+          new-file-path: app/build/outputs/apk/release/app-release.apk
 
       # Post or update comment on PR
       - name: Find existing Diffuse comment
@@ -117,5 +117,5 @@ jobs:
         if: always()
         with:
           name: pr-apk
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          path: app/build/outputs/apk/release/app-release.apk
           retention-days: 7
