@@ -49,6 +49,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewDynamicColors
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
 import com.slack.circuit.runtime.CircuitUiState
@@ -69,6 +71,9 @@ import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.addalert.BatteryOptimizationBottomSheet
 import dev.hossain.remotenotify.ui.alertlist.AlertsListScreen
 import dev.hossain.remotenotify.utils.BatteryOptimizationHelper
+import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_DEBUG_WORKER_ID
+import dev.hossain.remotenotify.worker.DEVICE_VITALS_CHECKER_WORKER_ID
+import dev.hossain.remotenotify.worker.sendOneTimeWorkRequest
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
@@ -99,6 +104,8 @@ data object DeveloperPortalScreen : Screen {
         val showClearLogsDialog: Boolean,
         val isBatteryOptimizationEnabled: Boolean,
         val showBatteryOptSheet: Boolean,
+        val oneTimeWorkState: String?,
+        val periodicWorkState: String?,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -132,6 +139,8 @@ data object DeveloperPortalScreen : Screen {
         data object ResetBatteryOptPreference : Event()
 
         data object OpenBatterySettings : Event()
+
+        data object TriggerOneTimeWork : Event()
     }
 }
 
@@ -157,6 +166,8 @@ class DeveloperPortalPresenter
             var showClearLogsDialog by remember { mutableStateOf(false) }
             var showBatteryOptSheet by remember { mutableStateOf(false) }
             var isBatteryOptimizationEnabled by remember { mutableStateOf(false) }
+            var oneTimeWorkState by remember { mutableStateOf<String?>(null) }
+            var periodicWorkState by remember { mutableStateOf<String?>(null) }
 
             LaunchedImpressionEffect {
                 analytics.logScreenView(DeveloperPortalScreen::class)
@@ -177,6 +188,38 @@ class DeveloperPortalPresenter
                         .map { it.notifierType }
                         .toSet()
                 isBatteryOptimizationEnabled = BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context)
+
+                // Observe WorkManager status
+                val workManager = WorkManager.getInstance(context)
+                workManager
+                    .getWorkInfosForUniqueWorkFlow(DEVICE_VITALS_CHECKER_DEBUG_WORKER_ID)
+                    .collect { workInfos ->
+                        oneTimeWorkState = workInfos.firstOrNull()?.let { workInfo ->
+                            when (workInfo.state) {
+                                WorkInfo.State.ENQUEUED -> "⏳ Enqueued"
+                                WorkInfo.State.RUNNING -> "🔄 Running"
+                                WorkInfo.State.SUCCEEDED -> "✅ Succeeded"
+                                WorkInfo.State.FAILED -> "❌ Failed"
+                                WorkInfo.State.BLOCKED -> "🚫 Blocked"
+                                WorkInfo.State.CANCELLED -> "🛑 Cancelled"
+                            }
+                        } ?: "Not scheduled"
+                    }
+            }
+
+            LaunchedEffect(Unit) {
+                val workManager = WorkManager.getInstance(context)
+                workManager
+                    .getWorkInfosForUniqueWorkFlow(DEVICE_VITALS_CHECKER_WORKER_ID)
+                    .collect { workInfos ->
+                        periodicWorkState = workInfos.firstOrNull()?.let { workInfo ->
+                            when (workInfo.state) {
+                                WorkInfo.State.ENQUEUED -> "⏳ Scheduled"
+                                WorkInfo.State.RUNNING -> "🔄 Running"
+                                else -> workInfo.state.name
+                            }
+                        } ?: "Not scheduled"
+                    }
             }
 
             // Get log statistics
@@ -223,6 +266,8 @@ class DeveloperPortalPresenter
                 showClearLogsDialog = showClearLogsDialog,
                 isBatteryOptimizationEnabled = isBatteryOptimizationEnabled,
                 showBatteryOptSheet = showBatteryOptSheet,
+                oneTimeWorkState = oneTimeWorkState,
+                periodicWorkState = periodicWorkState,
             ) { event ->
                 when (event) {
                     DeveloperPortalScreen.Event.GoBack -> {
@@ -455,6 +500,20 @@ class DeveloperPortalPresenter
                             }
                         }
                     }
+
+                    DeveloperPortalScreen.Event.TriggerOneTimeWork -> {
+                        scope.launch {
+                            try {
+                                Timber.d("Triggering one-time WorkManager request")
+                                sendOneTimeWorkRequest(context)
+                                simulationResult = "✓ One-time work request triggered"
+                                analytics.logScreenView(DeveloperPortalScreen::class)
+                            } catch (e: Exception) {
+                                Timber.e(e, "Failed to trigger work request")
+                                simulationResult = "✗ Failed: ${e.message}"
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -586,46 +645,11 @@ fun DeveloperPortalUi(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            // Placeholder cards for upcoming features
-            Card(
+            // WorkManager Testing Section
+            WorkManagerTestingCard(
+                state = state,
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "⚙️ WorkManager Testing",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Monitor periodic health checks and trigger immediate runs",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = "\ud83d\udea7 Implementation in progress",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
-            }
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "🚧 Coming Soon",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "More features coming in future updates!",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-            }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -675,6 +699,96 @@ fun DeveloperPortalUi(
                 state.eventSink(DeveloperPortalScreen.Event.DismissBatteryOptSheet)
             },
         )
+    }
+}
+
+@Composable
+private fun WorkManagerTestingCard(
+    state: DeveloperPortalScreen.State,
+    modifier: Modifier = Modifier,
+) {
+    Card(modifier = modifier) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "⚙️ WorkManager Testing",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = "Monitor periodic health checks and trigger immediate runs",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Work Status
+            Text(
+                text = "📊 Work Status",
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "One-Time Work:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = state.oneTimeWorkState ?: "Not scheduled",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Periodic Work:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = state.periodicWorkState ?: "Not scheduled",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Testing Controls
+            Text(
+                text = "🧪 Testing Controls",
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { state.eventSink(DeveloperPortalScreen.Event.TriggerOneTimeWork) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("🚀 Trigger One-Time Check")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "ℹ️ This will trigger an immediate health check. Check status above and Alert Logs to see results.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -1173,6 +1287,8 @@ private fun DeveloperPortalScreenPreview() {
             showClearLogsDialog = false,
             isBatteryOptimizationEnabled = true,
             showBatteryOptSheet = false,
+            oneTimeWorkState = "✅ Succeeded",
+            periodicWorkState = "⏳ Scheduled",
             eventSink = {},
         )
     ComposeAppTheme {
