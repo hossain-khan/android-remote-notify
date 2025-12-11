@@ -497,20 +497,41 @@ class NetworkRepository @Inject constructor(
 
 ## Deployment & Release
 
+### Release Process
+**IMPORTANT**: All release changes must be made on a dedicated release branch, NOT on `main`.
+
+1. **Create Release Branch**: `git checkout -b release/vX.Y.Z` (e.g., `release/v1.17`)
+2. **Update Version**: Increment `versionCode` and `versionName` in `app/build.gradle.kts`
+3. **Update Release Notes**: Add new release section in `project-resources/google-play/release-notes.md`
+4. **Build & Test**: Run `./gradlew clean assembleRelease bundleRelease`
+5. **Commit Changes**: Commit version bump and release notes on the release branch
+6. **Create PR**: Open pull request from release branch to `main`
+7. **Merge & Tag**: After PR approval, merge to `main` and create git tag `vX.Y.Z`
+8. **Upload to Play Store**: Upload AAB to Google Play Console
+
 ### Version Management
-- Update `versionCode` and `versionName` in `app/build.gradle.kts`
+- Update `versionCode` (increment by 1) and `versionName` in `app/build.gradle.kts`
 - Update release notes in `project-resources/google-play/release-notes.md`
 - Follow semantic versioning (MAJOR.MINOR.PATCH)
+- Create git tag matching the version (e.g., `v1.17`)
 
 ### Release Checklist
-- [ ] Update version code and name
-- [ ] Update release notes
+- [ ] Create release branch (e.g., `release/v1.17`)
+- [ ] Update version code and name in `app/build.gradle.kts`
+- [ ] Update `release-notes.md` with new release section
+- [ ] Check `local.properties` for correct keystore path and password
+- [ ] Build release: `./gradlew clean assembleRelease bundleRelease`
 - [ ] Test release build locally
-- [ ] Run full test suite
+- [ ] Run full test suite: `./gradlew test`
 - [ ] Check ProGuard/R8 obfuscation
 - [ ] Verify Firebase integration
-- [ ] Upload to Firebase Test Lab
-- [ ] Submit to Google Play Console
+- [ ] Commit and push release branch
+- [ ] Create pull request to `main`
+- [ ] After merge, create git tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
+- [ ] Push tag: `git push origin vX.Y.Z`
+- [ ] Upload AAB to Firebase Test Lab
+- [ ] Upload AAB to Google Play Console
+- [ ] Create GitHub release from tag with release notes
 
 ## Troubleshooting
 
