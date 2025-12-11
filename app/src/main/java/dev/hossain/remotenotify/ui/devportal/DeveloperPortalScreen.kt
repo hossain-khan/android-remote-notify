@@ -29,6 +29,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +55,7 @@ import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.monitor.BatteryMonitor
 import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
+import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
@@ -76,6 +78,9 @@ data object DeveloperPortalScreen : Screen {
         val buildVersion: String,
         val isSimulating: Boolean,
         val simulationResult: String?,
+        val testingChannel: NotifierType?,
+        val channelTestResults: Map<NotifierType, Boolean?>,
+        val configuredChannels: Set<NotifierType>,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -88,6 +93,10 @@ data object DeveloperPortalScreen : Screen {
 
         data class SimulateStorageAlert(
             val simulatedStorageGb: Int,
+        ) : Event()
+
+        data class TestNotificationChannel(
+            val channelType: NotifierType,
         ) : Event()
     }
 }
@@ -107,6 +116,8 @@ class DeveloperPortalPresenter
             val scope = rememberCoroutineScope()
             var isSimulating by remember { mutableStateOf(false) }
             var simulationResult by remember { mutableStateOf<String?>(null) }
+            var testingChannel by remember { mutableStateOf<NotifierType?>(null) }
+            var channelTestResults by remember { mutableStateOf<Map<NotifierType, Boolean?>>(emptyMap()) }
 
             LaunchedImpressionEffect {
                 analytics.logScreenView(DeveloperPortalScreen::class)
@@ -116,6 +127,17 @@ class DeveloperPortalPresenter
             val currentBatteryLevel = batteryMonitor.getBatteryLevel()
             val currentStorageGb = storageMonitor.getAvailableStorageInGB()
             val maxStorageGb = remember { ((currentStorageGb + 9) / 10) * 10 } // Round up to nearest 10
+
+            // Get configured notification channels
+            var configuredChannels by remember { mutableStateOf<Set<NotifierType>>(emptySet()) }
+
+            LaunchedEffect(Unit) {
+                configuredChannels =
+                    notifiers
+                        .filter { it.hasValidConfig() }
+                        .map { it.notifierType }
+                        .toSet()
+            }
 
             val buildVersion =
                 buildString {
@@ -133,6 +155,9 @@ class DeveloperPortalPresenter
                 buildVersion = buildVersion,
                 isSimulating = isSimulating,
                 simulationResult = simulationResult,
+                testingChannel = testingChannel,
+                channelTestResults = channelTestResults,
+                configuredChannels = configuredChannels,
             ) { event ->
                 when (event) {
                     DeveloperPortalScreen.Event.GoBack -> {
@@ -229,6 +254,60 @@ class DeveloperPortalPresenter
                                 simulationResult = "✗ Error: ${e.message}"
                             } finally {
                                 isSimulating = false
+                            }
+                        }
+                    }
+
+                    is DeveloperPortalScreen.Event.TestNotificationChannel -> {
+                        scope.launch {
+                            testingChannel = event.channelType
+                            simulationResult = null
+                            try {
+                                Timber.d("Testing notification channel: ${event.channelType}")
+
+                                // Find the notifier for this channel type
+                                val notifier = notifiers.firstOrNull { it.notifierType == event.channelType }
+
+                                if (notifier == null) {
+                                    channelTestResults = channelTestResults + (event.channelType to false)
+                                    simulationResult = "✗ ${event.channelType.displayName} notifier not found"
+                                    return@launch
+                                }
+
+                                if (!notifier.hasValidConfig()) {
+                                    channelTestResults = channelTestResults + (event.channelType to false)
+                                    simulationResult =
+                                        "✗ ${event.channelType.displayName} not configured. " +
+                                        "Please set it up first."
+                                    return@launch
+                                }
+
+                                // Create test battery alert
+                                val testAlert =
+                                    RemoteAlert.BatteryAlert(
+                                        alertId = -1L, // Test ID
+                                        batteryPercentage = 20,
+                                        currentBatteryLevel = 15,
+                                    )
+
+                                // Send test notification
+                                val result = notifier.sendNotification(testAlert)
+                                channelTestResults = channelTestResults + (event.channelType to result)
+
+                                simulationResult =
+                                    if (result) {
+                                        "✓ ${event.channelType.displayName} test sent successfully!"
+                                    } else {
+                                        "✗ ${event.channelType.displayName} test failed"
+                                    }
+
+                                analytics.logScreenView(DeveloperPortalScreen::class)
+                            } catch (e: Exception) {
+                                Timber.e(e, "Failed to test channel: ${event.channelType}")
+                                channelTestResults = channelTestResults + (event.channelType to false)
+                                simulationResult = "✗ Error testing ${event.channelType.displayName}: ${e.message}"
+                            } finally {
+                                testingChannel = null
                             }
                         }
                     }
@@ -345,6 +424,12 @@ fun DeveloperPortalUi(
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            // Notification Channel Testing Section
+            NotificationChannelTestingCard(
+                state = state,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
             // Placeholder cards for upcoming features
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -381,16 +466,121 @@ fun DeveloperPortalUi(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text =
-                            "\u2022 Notification Channel Testing\\n" +
-                                "\u2022 Alert Configuration Overview\\n" +
-                                "\u2022 Log Management\\n" +
-                                "\u2022 Battery Optimization Testing",
+                            "• Alert Configuration Overview\n" +
+                                "• Log Management\n" +
+                                "• Battery Optimization Testing",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun NotificationChannelTestingCard(
+    state: DeveloperPortalScreen.State,
+    modifier: Modifier = Modifier,
+) {
+    Card(modifier = modifier) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "📣 Notification Channel Testing",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = "Test each notification channel individually",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // List all notification channels
+            val allChannels =
+                listOf(
+                    NotifierType.EMAIL to "📧",
+                    NotifierType.TELEGRAM to "📱",
+                    NotifierType.TWILIO to "📞",
+                    NotifierType.WEBHOOK_SLACK_WORKFLOW to "💬",
+                    NotifierType.WEBHOOK_DISCORD to "🎮",
+                    NotifierType.WEBHOOK_REST_API to "🔗",
+                )
+
+            allChannels.forEach { (channelType, icon) ->
+                val isConfigured = state.configuredChannels.contains(channelType)
+                val isTesting = state.testingChannel == channelType
+                val testResult = state.channelTestResults[channelType]
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "$icon ${channelType.displayName}",
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            Spacer(modifier = Modifier.padding(4.dp))
+                            if (!isConfigured) {
+                                Text(
+                                    text = "Not configured",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        }
+
+                        // Show test result
+                        testResult?.let { success ->
+                            Text(
+                                text = if (success) "✓ Test passed" else "✗ Test failed",
+                                style = MaterialTheme.typography.bodySmall,
+                                color =
+                                    if (success) {
+                                        MaterialTheme.colorScheme.secondary
+                                    } else {
+                                        MaterialTheme.colorScheme.error
+                                    },
+                            )
+                        }
+                    }
+
+                    Button(
+                        onClick = {
+                            state.eventSink(
+                                DeveloperPortalScreen.Event.TestNotificationChannel(channelType),
+                            )
+                        },
+                        enabled = isConfigured && !isTesting && !state.isSimulating,
+                        modifier = Modifier.padding(start = 8.dp),
+                    ) {
+                        if (isTesting) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                        } else {
+                            Text("Test")
+                        }
+                    }
+                }
+
+                if (channelType != allChannels.last().first) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
+            if (state.configuredChannels.isEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "⚠️ No channels configured. Set up at least one to test.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
         }
     }
 }
@@ -526,6 +716,18 @@ private fun DeveloperPortalScreenPreview() {
             buildVersion = "v1.17.0 (abc1234)",
             isSimulating = false,
             simulationResult = null,
+            testingChannel = null,
+            channelTestResults =
+                mapOf(
+                    NotifierType.EMAIL to true,
+                    NotifierType.TELEGRAM to false,
+                ),
+            configuredChannels =
+                setOf(
+                    NotifierType.EMAIL,
+                    NotifierType.TELEGRAM,
+                    NotifierType.WEBHOOK_SLACK_WORKFLOW,
+                ),
             eventSink = {},
         )
     ComposeAppTheme {
