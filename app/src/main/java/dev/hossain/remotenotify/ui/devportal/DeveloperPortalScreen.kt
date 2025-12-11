@@ -1,5 +1,8 @@
 package dev.hossain.remotenotify.ui.devportal
 
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +33,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,6 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewDynamicColors
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -53,6 +58,7 @@ import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
 import dev.hossain.remotenotify.BuildConfig
 import dev.hossain.remotenotify.analytics.Analytics
+import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.monitor.BatteryMonitor
@@ -60,7 +66,9 @@ import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
+import dev.hossain.remotenotify.ui.addalert.BatteryOptimizationBottomSheet
 import dev.hossain.remotenotify.ui.alertlist.AlertsListScreen
+import dev.hossain.remotenotify.utils.BatteryOptimizationHelper
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
@@ -89,6 +97,8 @@ data object DeveloperPortalScreen : Screen {
         val totalChecks: Int,
         val triggeredAlerts: Int,
         val showClearLogsDialog: Boolean,
+        val isBatteryOptimizationEnabled: Boolean,
+        val showBatteryOptSheet: Boolean,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -114,6 +124,14 @@ data object DeveloperPortalScreen : Screen {
         data object DismissClearLogsDialog : Event()
 
         data object ConfirmClearLogs : Event()
+
+        data object ShowBatteryOptSheet : Event()
+
+        data object DismissBatteryOptSheet : Event()
+
+        data object ResetBatteryOptPreference : Event()
+
+        data object OpenBatterySettings : Event()
     }
 }
 
@@ -126,15 +144,19 @@ class DeveloperPortalPresenter
         private val storageMonitor: StorageMonitor,
         private val repository: RemoteAlertRepository,
         private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
+        private val appPreferencesDataStore: AppPreferencesDataStore,
     ) : Presenter<DeveloperPortalScreen.State> {
         @Composable
         override fun present(): DeveloperPortalScreen.State {
+            val context = LocalContext.current
             val scope = rememberCoroutineScope()
             var isSimulating by remember { mutableStateOf(false) }
             var simulationResult by remember { mutableStateOf<String?>(null) }
             var testingChannel by remember { mutableStateOf<NotifierType?>(null) }
             var channelTestResults by remember { mutableStateOf<Map<NotifierType, Boolean?>>(emptyMap()) }
             var showClearLogsDialog by remember { mutableStateOf(false) }
+            var showBatteryOptSheet by remember { mutableStateOf(false) }
+            var isBatteryOptimizationEnabled by remember { mutableStateOf(false) }
 
             LaunchedImpressionEffect {
                 analytics.logScreenView(DeveloperPortalScreen::class)
@@ -154,6 +176,7 @@ class DeveloperPortalPresenter
                         .filter { it.hasValidConfig() }
                         .map { it.notifierType }
                         .toSet()
+                isBatteryOptimizationEnabled = BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context)
             }
 
             // Get log statistics
@@ -198,6 +221,8 @@ class DeveloperPortalPresenter
                 totalChecks = logStats.first,
                 triggeredAlerts = logStats.second,
                 showClearLogsDialog = showClearLogsDialog,
+                isBatteryOptimizationEnabled = isBatteryOptimizationEnabled,
+                showBatteryOptSheet = showBatteryOptSheet,
             ) { event ->
                 when (event) {
                     DeveloperPortalScreen.Event.GoBack -> {
@@ -384,6 +409,52 @@ class DeveloperPortalPresenter
                             }
                         }
                     }
+
+                    DeveloperPortalScreen.Event.ShowBatteryOptSheet -> {
+                        showBatteryOptSheet = true
+                        scope.launch {
+                            analytics.logScreenView(DeveloperPortalScreen::class)
+                        }
+                    }
+
+                    DeveloperPortalScreen.Event.DismissBatteryOptSheet -> {
+                        showBatteryOptSheet = false
+                    }
+
+                    DeveloperPortalScreen.Event.ResetBatteryOptPreference -> {
+                        scope.launch {
+                            try {
+                                Timber.d("Resetting battery optimization reminder preference")
+                                appPreferencesDataStore.setHideBatteryOptReminder(false)
+                                simulationResult = "✓ Battery optimization reminder preference reset"
+                                analytics.logScreenView(DeveloperPortalScreen::class)
+                            } catch (e: Exception) {
+                                Timber.e(e, "Failed to reset preference")
+                                simulationResult = "✗ Failed to reset: ${e.message}"
+                            }
+                        }
+                    }
+
+                    DeveloperPortalScreen.Event.OpenBatterySettings -> {
+                        scope.launch {
+                            try {
+                                Timber.d("Opening battery optimization settings")
+                                val intent =
+                                    Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                                        data = Uri.parse("package:${context.packageName}")
+                                    }
+                                context.startActivity(intent)
+                                analytics.logScreenView(DeveloperPortalScreen::class)
+                                // Refresh status after opening settings
+                                kotlinx.coroutines.delay(500) // Small delay
+                                isBatteryOptimizationEnabled =
+                                    BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context)
+                            } catch (e: Exception) {
+                                Timber.e(e, "Failed to open battery settings")
+                                simulationResult = "✗ Failed to open settings: ${e.message}"
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -509,6 +580,12 @@ fun DeveloperPortalUi(
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            // Battery Optimization Testing Section
+            BatteryOptimizationTestingCard(
+                state = state,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
             // Placeholder cards for upcoming features
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -539,13 +616,12 @@ fun DeveloperPortalUi(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "\ud83d\udea7 Coming Soon",
+                        text = "🚧 Coming Soon",
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text =
-                            "• Battery Optimization Testing",
+                        text = "More features coming in future updates!",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -580,6 +656,136 @@ fun DeveloperPortalUi(
                 }
             },
         )
+    }
+
+    // Battery optimization bottom sheet
+    if (state.showBatteryOptSheet) {
+        val sheetState = rememberModalBottomSheetState()
+        BatteryOptimizationBottomSheet(
+            sheetState = sheetState,
+            onSettingsClick = {
+                state.eventSink(DeveloperPortalScreen.Event.OpenBatterySettings)
+                state.eventSink(DeveloperPortalScreen.Event.DismissBatteryOptSheet)
+            },
+            onDontRemindAgain = {
+                // Just dismiss, don't actually set the preference in dev portal
+                state.eventSink(DeveloperPortalScreen.Event.DismissBatteryOptSheet)
+            },
+            onDismiss = {
+                state.eventSink(DeveloperPortalScreen.Event.DismissBatteryOptSheet)
+            },
+        )
+    }
+}
+
+@Composable
+private fun BatteryOptimizationTestingCard(
+    state: DeveloperPortalScreen.State,
+    modifier: Modifier = Modifier,
+) {
+    Card(modifier = modifier) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "🔋 Battery Optimization Testing",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = "Test battery optimization status and controls",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Current Status
+            Text(
+                text = "📊 Current Status",
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Battery Optimization:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = if (state.isBatteryOptimizationEnabled) "Disabled ✓" else "Enabled",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color =
+                        if (state.isBatteryOptimizationEnabled) {
+                            MaterialTheme.colorScheme.secondary
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        },
+                )
+            }
+
+            if (!state.isBatteryOptimizationEnabled) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "⚠️ For reliable background monitoring, disable battery optimization",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Testing Controls
+            Text(
+                text = "🧪 Testing Controls",
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Show Reminder Sheet button
+            Button(
+                onClick = { state.eventSink(DeveloperPortalScreen.Event.ShowBatteryOptSheet) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Show Reminder Sheet")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Reset Preference button
+            Button(
+                onClick = { state.eventSink(DeveloperPortalScreen.Event.ResetBatteryOptPreference) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Reset 'Don't Remind' Preference")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Open Settings button
+            Button(
+                onClick = { state.eventSink(DeveloperPortalScreen.Event.OpenBatterySettings) },
+                modifier = Modifier.fillMaxWidth(),
+                colors =
+                    androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
+            ) {
+                Text("⚙️ Open Battery Settings")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "ℹ️ Status updates automatically after changing settings",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -965,6 +1171,8 @@ private fun DeveloperPortalScreenPreview() {
             totalChecks = 45,
             triggeredAlerts = 8,
             showClearLogsDialog = false,
+            isBatteryOptimizationEnabled = true,
+            showBatteryOptSheet = false,
             eventSink = {},
         )
     ComposeAppTheme {
