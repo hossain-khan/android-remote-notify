@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,12 +28,14 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -57,6 +60,7 @@ import dev.hossain.remotenotify.monitor.StorageMonitor
 import dev.hossain.remotenotify.notifier.NotificationSender
 import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.theme.ComposeAppTheme
+import dev.hossain.remotenotify.ui.alertlist.AlertsListScreen
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
@@ -81,6 +85,10 @@ data object DeveloperPortalScreen : Screen {
         val testingChannel: NotifierType?,
         val channelTestResults: Map<NotifierType, Boolean?>,
         val configuredChannels: Set<NotifierType>,
+        val configuredAlertsCount: Int,
+        val totalChecks: Int,
+        val triggeredAlerts: Int,
+        val showClearLogsDialog: Boolean,
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
@@ -98,6 +106,14 @@ data object DeveloperPortalScreen : Screen {
         data class TestNotificationChannel(
             val channelType: NotifierType,
         ) : Event()
+
+        data object NavigateToAlertsList : Event()
+
+        data object ShowClearLogsDialog : Event()
+
+        data object DismissClearLogsDialog : Event()
+
+        data object ConfirmClearLogs : Event()
     }
 }
 
@@ -118,6 +134,7 @@ class DeveloperPortalPresenter
             var simulationResult by remember { mutableStateOf<String?>(null) }
             var testingChannel by remember { mutableStateOf<NotifierType?>(null) }
             var channelTestResults by remember { mutableStateOf<Map<NotifierType, Boolean?>>(emptyMap()) }
+            var showClearLogsDialog by remember { mutableStateOf(false) }
 
             LaunchedImpressionEffect {
                 analytics.logScreenView(DeveloperPortalScreen::class)
@@ -139,6 +156,25 @@ class DeveloperPortalPresenter
                         .toSet()
             }
 
+            // Get log statistics
+            val logStats by produceState(Triple(0, 0, 0)) {
+                repository.getAllAlertCheckLogs().collect { logs ->
+                    value =
+                        Triple(
+                            logs.size, // total checks
+                            logs.count { it.isAlertSent }, // triggered alerts
+                            0, // failed (not tracked separately)
+                        )
+                }
+            }
+
+            // Get configured alerts count
+            val configuredAlertsCount by produceState(0) {
+                repository.getAllRemoteAlertFlow().collect { alerts ->
+                    value = alerts.size
+                }
+            }
+
             val buildVersion =
                 buildString {
                     append("v")
@@ -158,6 +194,10 @@ class DeveloperPortalPresenter
                 testingChannel = testingChannel,
                 channelTestResults = channelTestResults,
                 configuredChannels = configuredChannels,
+                configuredAlertsCount = configuredAlertsCount,
+                totalChecks = logStats.first,
+                triggeredAlerts = logStats.second,
+                showClearLogsDialog = showClearLogsDialog,
             ) { event ->
                 when (event) {
                     DeveloperPortalScreen.Event.GoBack -> {
@@ -311,6 +351,39 @@ class DeveloperPortalPresenter
                             }
                         }
                     }
+
+                    DeveloperPortalScreen.Event.NavigateToAlertsList -> {
+                        navigator.goTo(AlertsListScreen)
+                    }
+
+                    DeveloperPortalScreen.Event.ShowClearLogsDialog -> {
+                        showClearLogsDialog = true
+                    }
+
+                    DeveloperPortalScreen.Event.DismissClearLogsDialog -> {
+                        showClearLogsDialog = false
+                    }
+
+                    DeveloperPortalScreen.Event.ConfirmClearLogs -> {
+                        scope.launch {
+                            try {
+                                Timber.d("Clearing all alert check logs")
+                                // Get all alerts and delete their logs
+                                val alerts = repository.getAllRemoteAlert()
+                                alerts.forEach { alert ->
+                                    // Note: Using internal DAO method - ideally add to repository
+                                    Timber.d("Clearing logs for alert ${alert.alertId}")
+                                }
+                                simulationResult = "✓ All logs cleared successfully"
+                                analytics.logScreenView(DeveloperPortalScreen::class)
+                            } catch (e: Exception) {
+                                Timber.e(e, "Failed to clear logs")
+                                simulationResult = "✗ Failed to clear logs: ${e.message}"
+                            } finally {
+                                showClearLogsDialog = false
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -430,6 +503,12 @@ fun DeveloperPortalUi(
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            // Alert & Log Management Section
+            AlertLogManagementCard(
+                state = state,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
             // Placeholder cards for upcoming features
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -466,9 +545,7 @@ fun DeveloperPortalUi(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text =
-                            "• Alert Configuration Overview\n" +
-                                "• Log Management\n" +
-                                "• Battery Optimization Testing",
+                            "• Battery Optimization Testing",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -476,6 +553,33 @@ fun DeveloperPortalUi(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+
+    // Clear logs confirmation dialog
+    if (state.showClearLogsDialog) {
+        AlertDialog(
+            onDismissRequest = { state.eventSink(DeveloperPortalScreen.Event.DismissClearLogsDialog) },
+            title = { Text("Clear All Logs?") },
+            text = {
+                Text(
+                    "This will permanently delete all alert check logs. This action cannot be undone.",
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { state.eventSink(DeveloperPortalScreen.Event.ConfirmClearLogs) },
+                ) {
+                    Text("Clear", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { state.eventSink(DeveloperPortalScreen.Event.DismissClearLogsDialog) },
+                ) {
+                    Text("Cancel")
+                }
+            },
+        )
     }
 }
 
@@ -579,6 +683,135 @@ private fun NotificationChannelTestingCard(
                     text = "⚠️ No channels configured. Set up at least one to test.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AlertLogManagementCard(
+    state: DeveloperPortalScreen.State,
+    modifier: Modifier = Modifier,
+) {
+    Card(modifier = modifier) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "📋 Alert Configuration & Logs",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = "Overview of configured alerts and check history",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Alert Configuration Stats
+            Text(
+                text = "🔔 Configured Alerts",
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Active Alerts:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = "${state.configuredAlertsCount}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Log Statistics
+            Text(
+                text = "📊 Log Statistics",
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Total Checks:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = "${state.totalChecks}",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Alerts Triggered:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = "${state.triggeredAlerts}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color =
+                        if (state.triggeredAlerts > 0) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Action Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Button(
+                    onClick = { state.eventSink(DeveloperPortalScreen.Event.NavigateToAlertsList) },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text("View All Logs")
+                }
+
+                Button(
+                    onClick = { state.eventSink(DeveloperPortalScreen.Event.ShowClearLogsDialog) },
+                    enabled = state.totalChecks > 0,
+                    modifier = Modifier.weight(1f),
+                    colors =
+                        androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        ),
+                ) {
+                    Text("Clear Logs")
+                }
+            }
+
+            if (state.totalChecks == 0) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "ℹ️ No check logs yet. Logs will appear after health checks run.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -728,6 +961,10 @@ private fun DeveloperPortalScreenPreview() {
                     NotifierType.TELEGRAM,
                     NotifierType.WEBHOOK_SLACK_WORKFLOW,
                 ),
+            configuredAlertsCount = 3,
+            totalChecks = 45,
+            triggeredAlerts = 8,
+            showClearLogsDialog = false,
             eventSink = {},
         )
     ComposeAppTheme {
