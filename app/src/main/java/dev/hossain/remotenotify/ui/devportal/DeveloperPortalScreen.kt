@@ -352,12 +352,39 @@ fun DeveloperPortalUi(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "🚧 Coming Soon",
+                        text = "⚙️ WorkManager Testing",
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "• WorkManager Testing\n• Notification Channel Testing\n• Alert Configuration Overview\n• Log Management",
+                        text = "Monitor periodic health checks and trigger immediate runs",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "\ud83d\udea7 Implementation in progress",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "\ud83d\udea7 Coming Soon",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text =
+                            "\u2022 Notification Channel Testing\\n" +
+                                "\u2022 Alert Configuration Overview\\n" +
+                                "\u2022 Log Management\\n" +
+                                "\u2022 Battery Optimization Testing",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
