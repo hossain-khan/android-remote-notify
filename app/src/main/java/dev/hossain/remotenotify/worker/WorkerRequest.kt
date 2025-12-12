@@ -10,6 +10,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 /**
@@ -25,6 +26,7 @@ internal const val DEVICE_VITALS_CHECKER_WORKER_ID = "periodic-health-check"
  * @see sendPeriodicWorkRequest
  */
 fun sendOneTimeWorkRequest(context: Context) {
+    Timber.d("Scheduling one-time work request for device health check")
     val workRequest: WorkRequest =
         OneTimeWorkRequestBuilder<ObserveDeviceHealthWorker>()
             .setConstraints(
@@ -42,6 +44,7 @@ fun sendOneTimeWorkRequest(context: Context) {
         existingWorkPolicy = ExistingWorkPolicy.REPLACE,
         request = workRequest as OneTimeWorkRequest,
     )
+    Timber.i("One-time work request scheduled successfully")
 }
 
 /**
@@ -57,6 +60,7 @@ fun sendPeriodicWorkRequest(
 ) {
     // Ensure minimum interval of 15 minutes based on Android's WorkManager documentation.
     val intervalMinutes = repeatIntervalMinutes.coerceAtLeast(15)
+    Timber.d("Scheduling periodic work request with interval: $intervalMinutes minutes")
 
     val workRequest =
         PeriodicWorkRequestBuilder<ObserveDeviceHealthWorker>(
@@ -82,4 +86,5 @@ fun sendPeriodicWorkRequest(
             existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.UPDATE,
             request = workRequest,
         )
+    Timber.i("Periodic work request scheduled successfully with interval: $intervalMinutes minutes")
 }

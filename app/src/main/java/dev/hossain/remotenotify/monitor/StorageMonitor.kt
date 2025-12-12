@@ -7,6 +7,7 @@ import android.os.StatFs
 import android.os.storage.StorageManager
 import androidx.core.content.ContextCompat
 import dev.zacsweers.metro.Inject
+import timber.log.Timber
 import java.util.UUID
 
 @Inject
@@ -16,13 +17,17 @@ class StorageMonitor(
     fun getAvailableStorageInGBStatFs(): Long {
         val stat = StatFs(Environment.getExternalStorageDirectory().path)
         val bytesAvailable = stat.blockSizeLong * stat.availableBlocksLong
-        return bytesAvailable / (1024 * 1024 * 1024) // Convert to GB
+        val gbAvailable = bytesAvailable / (1024 * 1024 * 1024)
+        Timber.d("Storage check (StatFs): ${gbAvailable}GB available")
+        return gbAvailable // Convert to GB
     }
 
     fun getTotalStorageInGBStatFs(): Long {
         val stat = StatFs(Environment.getExternalStorageDirectory().path)
         val bytesTotal = stat.blockSizeLong * stat.blockCountLong
-        return bytesTotal / (1024 * 1024 * 1024) // Convert to GB
+        val gbTotal = bytesTotal / (1024 * 1024 * 1024)
+        Timber.d("Storage check (StatFs): ${gbTotal}GB total")
+        return gbTotal // Convert to GB
     }
 
     fun getAvailableStorageInGB(): Long {
@@ -31,7 +36,9 @@ class StorageMonitor(
         val storageVolume = storageManager.primaryStorageVolume
         val uuid = storageVolume.uuid?.let { UUID.fromString(it) } ?: StorageManager.UUID_DEFAULT
         val bytesAvailable = storageStatsManager.getFreeBytes(uuid)
-        return bytesAvailable / (1024 * 1024 * 1024) // Convert to GB
+        val gbAvailable = bytesAvailable / (1024 * 1024 * 1024)
+        Timber.d("Storage check: ${gbAvailable}GB available")
+        return gbAvailable // Convert to GB
     }
 
     fun getTotalStorageInGB(): Long {
@@ -40,6 +47,8 @@ class StorageMonitor(
         val storageVolume = storageManager.primaryStorageVolume
         val uuid = storageVolume.uuid?.let { UUID.fromString(it) } ?: StorageManager.UUID_DEFAULT
         val bytesTotal = storageStatsManager.getTotalBytes(uuid)
-        return bytesTotal / (1024 * 1024 * 1024) // Convert to GB
+        val gbTotal = bytesTotal / (1024 * 1024 * 1024)
+        Timber.d("Storage check: ${gbTotal}GB total")
+        return gbTotal // Convert to GB
     }
 }

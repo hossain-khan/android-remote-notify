@@ -2,6 +2,7 @@ package dev.hossain.remotenotify.utils
 
 import android.content.Context
 import android.os.PowerManager
+import timber.log.Timber
 
 /**
  * Helper class to check if app is ignoring battery optimizations.
@@ -14,6 +15,8 @@ object BatteryOptimizationHelper {
      */
     fun isIgnoringBatteryOptimizations(context: Context): Boolean {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        return powerManager.isIgnoringBatteryOptimizations(context.packageName)
+        val isIgnoring = powerManager.isIgnoringBatteryOptimizations(context.packageName)
+        Timber.d("Battery optimization status check: isIgnoring=$isIgnoring")
+        return isIgnoring
     }
 }

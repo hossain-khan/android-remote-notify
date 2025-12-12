@@ -16,6 +16,7 @@ import dev.zacsweers.metro.ContributesBinding
 import dev.zacsweers.metro.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 
 interface RemoteAlertRepository {
     suspend fun saveRemoteAlert(remoteAlert: RemoteAlert)
@@ -65,13 +66,18 @@ class RemoteAlertRepositoryImpl
         private val alertCheckLogDao: AlertCheckLogDao,
     ) : RemoteAlertRepository {
         override suspend fun saveRemoteAlert(remoteAlert: RemoteAlert) {
+            Timber.d("Saving remote alert: $remoteAlert")
             val entity = remoteAlert.toAlertConfigEntity()
             alertConfigDao.insert(entity)
+            Timber.i("Remote alert saved successfully with ID: ${entity.id}")
         }
 
         override suspend fun updateRemoteAlert(remoteAlert: RemoteAlert): Int {
+            Timber.d("Updating remote alert with ID: ${remoteAlert.alertId}")
             val entity = remoteAlert.toAlertConfigEntity()
-            return alertConfigDao.update(entity)
+            val rowsUpdated = alertConfigDao.update(entity)
+            Timber.i("Remote alert updated: $rowsUpdated rows affected")
+            return rowsUpdated
         }
 
         override suspend fun getRemoteAlertById(alertId: Long): RemoteAlert? = alertConfigDao.getById(alertId)?.toRemoteAlert()
@@ -86,8 +92,10 @@ class RemoteAlertRepositoryImpl
             }
 
         override suspend fun deleteRemoteAlert(remoteAlert: RemoteAlert) {
+            Timber.d("Deleting remote alert with ID: ${remoteAlert.alertId}")
             val entity = remoteAlert.toAlertConfigEntity()
             alertConfigDao.delete(entity)
+            Timber.i("Remote alert deleted successfully")
         }
 
         override suspend fun insertAlertCheckLog(
@@ -97,6 +105,7 @@ class RemoteAlertRepositoryImpl
             alertTriggered: Boolean,
             notifierType: NotifierType?,
         ) {
+            Timber.d("Inserting alert check log for alertId=$alertId, type=$alertType, triggered=$alertTriggered")
             alertCheckLogDao.insert(
                 AlertCheckLogEntity(
                     alertConfigId = alertId,

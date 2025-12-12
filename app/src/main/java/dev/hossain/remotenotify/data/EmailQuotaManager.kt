@@ -13,6 +13,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 import java.time.Instant
 
 private val Context.emailQuotaDataStore: DataStore<Preferences> by preferencesDataStore(name = "email_quota")
@@ -48,11 +49,14 @@ class EmailQuotaManager
 
             // Reset counter if it's a new day
             if (!isSameDay(lastDate, today)) {
+                Timber.d("New day detected, resetting email quota")
                 resetQuota()
                 return true
             }
 
-            return count < MAX_EMAILS_PER_DAY
+            val canSend = count < MAX_EMAILS_PER_DAY
+            Timber.d("Email quota check: $count/$MAX_EMAILS_PER_DAY sent today, canSend=$canSend")
+            return canSend
         }
 
         suspend fun validateQuota(): ConfigValidationResult =
@@ -77,16 +81,19 @@ class EmailQuotaManager
                 if (!isSameDay(lastDate, now)) {
                     // New day, reset counter
                     preferences[EMAIL_COUNT_TODAY] = 1
+                    Timber.d("Email sent: Starting new day count (1/$MAX_EMAILS_PER_DAY)")
                 } else {
                     // Increment counter
                     val currentCount = preferences[EMAIL_COUNT_TODAY] ?: 0
                     preferences[EMAIL_COUNT_TODAY] = currentCount + 1
+                    Timber.d("Email sent: Updated count (${currentCount + 1}/$MAX_EMAILS_PER_DAY)")
                 }
                 preferences[LAST_EMAIL_DATE] = now.toEpochMilli()
             }
         }
 
         suspend fun resetQuota() {
+            Timber.d("Resetting email quota")
             context.emailQuotaDataStore.edit { preferences ->
                 preferences[EMAIL_COUNT_TODAY] = 0
                 preferences[LAST_EMAIL_DATE] = Instant.now().toEpochMilli()
