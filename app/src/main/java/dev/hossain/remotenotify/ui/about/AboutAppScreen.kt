@@ -62,6 +62,7 @@ import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
 
 @Parcelize
 data object AboutAppScreen : Screen {
@@ -117,14 +118,17 @@ class AboutAppPresenter
             ) { event ->
                 when (event) {
                     AboutAppScreen.Event.GoBack -> {
+                        Timber.d("Navigating back from About screen")
                         navigator.pop()
                     }
 
                     AboutAppScreen.Event.OpenGitHubProject -> {
+                        Timber.d("Opening GitHub project page")
                         uriHandler.openUri("https://github.com/hossain-khan/android-remote-notify")
                     }
 
                     AboutAppScreen.Event.OpenLearnMoreSheet -> {
+                        Timber.d("Opening learn more education sheet")
                         showEducationSheet = true
                         scope.launch {
                             analytics.logViewTutorial(isComplete = false)
@@ -132,6 +136,7 @@ class AboutAppPresenter
                     }
 
                     AboutAppScreen.Event.DismissLearnMoreSheet -> {
+                        Timber.d("Dismissing learn more education sheet")
                         showEducationSheet = false
                         scope.launch {
                             analytics.logViewTutorial(isComplete = true)
@@ -139,10 +144,12 @@ class AboutAppPresenter
                     }
 
                     AboutAppScreen.Event.OpenBackupRestore -> {
+                        Timber.d("Navigating to Backup & Restore screen")
                         navigator.goTo(BackupRestoreScreen)
                     }
 
                     AboutAppScreen.Event.OpenDeveloperPortal -> {
+                        Timber.d("Navigating to Developer Portal")
                         navigator.goTo(DeveloperPortalScreen)
                     }
                 }

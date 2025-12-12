@@ -14,6 +14,7 @@ import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 
 private val Context.emailConfigDataStore: DataStore<Preferences> by preferencesDataStore(name = "email_config")
 
@@ -44,27 +45,34 @@ class EmailConfigDataStore
             )
 
         suspend fun saveConfig(config: AlertMediumConfig.EmailConfig) {
+            Timber.d("Saving email configuration")
             context.emailConfigDataStore.edit { preferences ->
                 preferences[TO_EMAIL] = config.toEmail
             }
+            Timber.i("Email config saved successfully")
         }
 
         override suspend fun clearConfig() {
+            Timber.d("Clearing email configuration")
             context.emailConfigDataStore.edit { preferences ->
                 preferences.clear()
             }
+            Timber.i("Email configuration cleared")
         }
 
         override suspend fun hasValidConfig(): Boolean {
             val toEmail = toEmail.first() ?: return false
-            return validateConfig(
-                AlertMediumConfig.EmailConfig(
-                    apiKey = MailgunConfig.API_KEY,
-                    domain = MailgunConfig.DOMAIN,
-                    fromEmail = MailgunConfig.FROM_EMAIL,
-                    toEmail = toEmail,
-                ),
-            ).isValid
+            val isValid =
+                validateConfig(
+                    AlertMediumConfig.EmailConfig(
+                        apiKey = MailgunConfig.API_KEY,
+                        domain = MailgunConfig.DOMAIN,
+                        fromEmail = MailgunConfig.FROM_EMAIL,
+                        toEmail = toEmail,
+                    ),
+                ).isValid
+            Timber.d("Email config validation: isValid=$isValid")
+            return isValid
         }
 
         override suspend fun validateConfig(config: AlertMediumConfig): ConfigValidationResult {

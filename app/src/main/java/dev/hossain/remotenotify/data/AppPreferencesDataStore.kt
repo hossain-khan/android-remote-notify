@@ -13,6 +13,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 
 private val Context.appPreferencesDataStore: DataStore<Preferences> by preferencesDataStore(name = "app_preferences")
 
@@ -30,18 +31,22 @@ class AppPreferencesDataStore
         }
 
         suspend fun resetAll() {
+            Timber.d("Resetting all app preferences")
             context.appPreferencesDataStore.edit { preferences ->
                 preferences.clear()
             }
+            Timber.i("All app preferences reset successfully")
         }
 
         suspend fun saveWorkerInterval(intervalMinutes: Long) {
+            Timber.d("Saving worker interval: $intervalMinutes minutes")
             context.appPreferencesDataStore.edit { preferences ->
                 preferences[WORKER_INTERVAL_KEY] = intervalMinutes
             }
         }
 
         suspend fun saveLastReviewRequestTime(timestamp: Long) {
+            Timber.d("Saving last review request time: $timestamp")
             context.appPreferencesDataStore.edit { preferences ->
                 preferences[LAST_REVIEW_REQUEST_KEY] = timestamp
             }
@@ -66,6 +71,7 @@ class AppPreferencesDataStore
                 }
 
         suspend fun markEducationDialogShown() {
+            Timber.d("Marking education dialog as shown")
             context.appPreferencesDataStore.edit { preferences ->
                 preferences[FIRST_TIME_DIALOG_SHOWN] = true
             }
@@ -78,6 +84,7 @@ class AppPreferencesDataStore
                 }
 
         suspend fun setHideBatteryOptReminder(hide: Boolean) {
+            Timber.d("Setting hide battery optimization reminder: $hide")
             context.appPreferencesDataStore.edit { preferences ->
                 preferences[HIDE_BATTERY_OPTIMIZATION_REMINDER] = hide
             }
