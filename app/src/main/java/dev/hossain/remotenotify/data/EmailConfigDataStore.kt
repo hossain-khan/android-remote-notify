@@ -62,14 +62,15 @@ class EmailConfigDataStore
 
         override suspend fun hasValidConfig(): Boolean {
             val toEmail = toEmail.first() ?: return false
-            val isValid = validateConfig(
-                AlertMediumConfig.EmailConfig(
-                    apiKey = MailgunConfig.API_KEY,
-                    domain = MailgunConfig.DOMAIN,
-                    fromEmail = MailgunConfig.FROM_EMAIL,
-                    toEmail = toEmail,
-                ),
-            ).isValid
+            val isValid =
+                validateConfig(
+                    AlertMediumConfig.EmailConfig(
+                        apiKey = MailgunConfig.API_KEY,
+                        domain = MailgunConfig.DOMAIN,
+                        fromEmail = MailgunConfig.FROM_EMAIL,
+                        toEmail = toEmail,
+                    ),
+                ).isValid
             Timber.d("Email config validation: isValid=$isValid")
             return isValid
         }
