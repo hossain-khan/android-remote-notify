@@ -45,7 +45,7 @@ class EmailConfigDataStore
             )
 
         suspend fun saveConfig(config: AlertMediumConfig.EmailConfig) {
-            Timber.d("Saving email config for: ${config.toEmail}")
+            Timber.d("Saving email configuration")
             context.emailConfigDataStore.edit { preferences ->
                 preferences[TO_EMAIL] = config.toEmail
             }

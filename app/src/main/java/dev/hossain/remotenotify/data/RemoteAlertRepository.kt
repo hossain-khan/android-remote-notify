@@ -66,7 +66,7 @@ class RemoteAlertRepositoryImpl
         private val alertCheckLogDao: AlertCheckLogDao,
     ) : RemoteAlertRepository {
         override suspend fun saveRemoteAlert(remoteAlert: RemoteAlert) {
-            Timber.d("Saving remote alert: $remoteAlert")
+            Timber.d("Saving remote alert with type: ${remoteAlert::class.simpleName}")
             val entity = remoteAlert.toAlertConfigEntity()
             alertConfigDao.insert(entity)
             Timber.i("Remote alert saved successfully with ID: ${entity.id}")
