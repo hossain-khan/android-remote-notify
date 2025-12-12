@@ -21,9 +21,10 @@ For example:
 
 ### Workflows
 
-GitHub Actions workflows are available for building releases:
+GitHub Actions workflows are available for building releases and testing keystore configuration:
 
 - **[android-release.yml](https://github.com/hossain-khan/android-remote-notify/actions/workflows/android-release.yml)**: Builds release APK and AAB on main branch pushes and GitHub releases
+- **[test-keystore-apk-signing.yml](https://github.com/hossain-khan/android-remote-notify/actions/workflows/test-keystore-apk-signing.yml)**: Tests production keystore configuration and validates signing (manual trigger only)
 
 ### Setting Up Release Signing (for maintainers)
 

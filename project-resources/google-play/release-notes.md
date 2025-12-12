@@ -10,6 +10,17 @@
 
 -----------------------------------------------------------------------------
 
+## Release v1.17
+- Monitor battery 🔋 and storage 💾 levels of your remote Android devices.
+- Set up custom alerts and receive notifications via Email, Twilio SMS, Slack, Telegram, Discord, and REST webhooks.
+- ♿ Enhanced accessibility support with comprehensive content descriptions for screen readers.
+- 🔧 Added keystore signing verification workflow for build integrity.
+- 🐞 Fixed Diffuse workflow APK path issue.
+- ⚒️ Maintenance - improved CI/CD workflows and documentation.
+
+Full changelog: https://github.com/hossain-khan/android-remote-notify/releases/tag/v1.17
+
+
 ## Release v1.16
 - Monitor battery 🔋 and storage 💾 levels of your remote Android devices.
 - Set up custom alerts and receive notifications via Email, Twilio SMS, Slack, Telegram, Discord, and REST webhooks.

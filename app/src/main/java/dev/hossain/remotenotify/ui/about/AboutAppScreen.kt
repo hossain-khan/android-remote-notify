@@ -55,12 +55,14 @@ import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertlist.AppUsageEducationSheetUi
 import dev.hossain.remotenotify.ui.backup.BackupRestoreScreen
+import dev.hossain.remotenotify.ui.devportal.DeveloperPortalScreen
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
 
 @Parcelize
 data object AboutAppScreen : Screen {
@@ -80,6 +82,8 @@ data object AboutAppScreen : Screen {
         data object DismissLearnMoreSheet : Event()
 
         data object OpenBackupRestore : Event()
+
+        data object OpenDeveloperPortal : Event()
     }
 }
 
@@ -114,14 +118,17 @@ class AboutAppPresenter
             ) { event ->
                 when (event) {
                     AboutAppScreen.Event.GoBack -> {
+                        Timber.d("Navigating back from About screen")
                         navigator.pop()
                     }
 
                     AboutAppScreen.Event.OpenGitHubProject -> {
+                        Timber.d("Opening GitHub project page")
                         uriHandler.openUri("https://github.com/hossain-khan/android-remote-notify")
                     }
 
                     AboutAppScreen.Event.OpenLearnMoreSheet -> {
+                        Timber.d("Opening learn more education sheet")
                         showEducationSheet = true
                         scope.launch {
                             analytics.logViewTutorial(isComplete = false)
@@ -129,6 +136,7 @@ class AboutAppPresenter
                     }
 
                     AboutAppScreen.Event.DismissLearnMoreSheet -> {
+                        Timber.d("Dismissing learn more education sheet")
                         showEducationSheet = false
                         scope.launch {
                             analytics.logViewTutorial(isComplete = true)
@@ -136,7 +144,13 @@ class AboutAppPresenter
                     }
 
                     AboutAppScreen.Event.OpenBackupRestore -> {
+                        Timber.d("Navigating to Backup & Restore screen")
                         navigator.goTo(BackupRestoreScreen)
+                    }
+
+                    AboutAppScreen.Event.OpenDeveloperPortal -> {
+                        Timber.d("Navigating to Developer Portal")
+                        navigator.goTo(DeveloperPortalScreen)
                     }
                 }
             }
@@ -221,6 +235,13 @@ fun AboutAppScreen(
                 TextButton(onClick = {
                     state.eventSink(AboutAppScreen.Event.OpenBackupRestore)
                 }, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Backup & Restore") }
+                if (BuildConfig.DEBUG) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextButton(
+                        onClick = { state.eventSink(AboutAppScreen.Event.OpenDeveloperPortal) },
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    ) { Text("🔧 Developer Portal") }
+                }
             }
             Column(modifier = Modifier.fillMaxWidth()) {
                 if (BuildConfig.DEBUG) {

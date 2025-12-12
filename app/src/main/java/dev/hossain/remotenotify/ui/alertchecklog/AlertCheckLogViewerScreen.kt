@@ -103,6 +103,7 @@ import dev.zacsweers.metro.AssistedFactory
 import dev.zacsweers.metro.AssistedInject
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -216,21 +217,29 @@ class AlertCheckLogViewerPresenter
                 dateRange = Pair(startDate, endDate),
                 eventSink = { event ->
                     when (event) {
-                        AlertCheckLogViewerScreen.Event.NavigateBack -> navigator.pop()
+                        AlertCheckLogViewerScreen.Event.NavigateBack -> {
+                            Timber.d("Navigating back from alert check logs viewer")
+                            navigator.pop()
+                        }
                         AlertCheckLogViewerScreen.Event.ToggleTriggeredOnly -> {
                             showTriggeredOnly = !showTriggeredOnly
+                            Timber.d("Toggled triggered only filter: $showTriggeredOnly")
                         }
                         is AlertCheckLogViewerScreen.Event.FilterByAlertType -> {
                             selectedAlertType = event.alertType
+                            Timber.d("Applied alert type filter: ${event.alertType}")
                         }
                         is AlertCheckLogViewerScreen.Event.FilterByNotifierType -> {
                             selectedNotifierType = event.notifierType
+                            Timber.d("Applied notifier type filter: ${event.notifierType}")
                         }
                         is AlertCheckLogViewerScreen.Event.FilterByDateRange -> {
                             startDate = event.startDate
                             endDate = event.endDate
+                            Timber.d("Applied date range filter: ${event.startDate} to ${event.endDate}")
                         }
                         AlertCheckLogViewerScreen.Event.ClearFilters -> {
+                            Timber.d("Clearing all log filters")
                             showTriggeredOnly = false
                             selectedAlertType = null
                             selectedNotifierType = null
@@ -238,6 +247,7 @@ class AlertCheckLogViewerPresenter
                             endDate = null
                         }
                         is AlertCheckLogViewerScreen.Event.ExportLogs -> {
+                            Timber.d("Exporting ${event.logs.size} logs")
                             // Export functionality would be implemented here
                         }
                     }

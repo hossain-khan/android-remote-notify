@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
 import dev.zacsweers.metro.Inject
+import timber.log.Timber
 
 @Inject
 class BatteryMonitor(
@@ -15,7 +16,9 @@ class BatteryMonitor(
         val batteryIntent: Intent? = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
         val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
-        return if (level >= 0 && scale > 0) (level * 100) / scale else -1
+        val batteryLevel = if (level >= 0 && scale > 0) (level * 100) / scale else -1
+        Timber.d("Battery level check: $batteryLevel%")
+        return batteryLevel
     }
 
     fun registerBatteryLevelReceiver(receiver: BroadcastReceiver) {
