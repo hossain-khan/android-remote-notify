@@ -44,21 +44,27 @@ internal fun formatTimeElapsed(
 
     val timeString =
         when {
-            absoluteDiff < 60_000 -> "just now"
+            absoluteDiff < 60_000 -> {
+                "just now"
+            }
+
             absoluteDiff < 3600_000 -> {
                 val minutes = absoluteDiff / 60_000
                 pluralize(minutes, "minute")
             }
+
             absoluteDiff < 86400_000 -> {
                 val hours = absoluteDiff / 3600_000
                 val minutes = (absoluteDiff % 3600_000) / 60_000
                 buildTimeString(hours to "hour", minutes to "minute")
             }
+
             absoluteDiff < 2592000000 -> { // 30 days
                 val days = absoluteDiff / 86400_000
                 val hours = (absoluteDiff % 86400_000) / 3600_000
                 buildTimeString(days to "day", hours to "hour")
             }
+
             else -> {
                 val days = absoluteDiff / 86400_000
                 pluralize(days, "day")
@@ -66,8 +72,12 @@ internal fun formatTimeElapsed(
         }
 
     return when {
-        diff > 0 -> "in $timeString" // Future
-        diff < 0 -> "$timeString ago" // Past
+        diff > 0 -> "in $timeString"
+
+        // Future
+        diff < 0 -> "$timeString ago"
+
+        // Past
         else -> timeString // Now
     }
 }
@@ -77,11 +87,15 @@ internal fun formatTimeElapsed(
  */
 internal fun formatDuration(minutes: Int): String =
     when {
-        minutes < 60 -> "$minutes ${if (minutes == 1) "minute" else "minutes"}"
+        minutes < 60 -> {
+            "$minutes ${if (minutes == 1) "minute" else "minutes"}"
+        }
+
         minutes % 60 == 0 -> {
             val hours = minutes / 60
             "$hours ${if (hours == 1) "hour" else "hours"}"
         }
+
         else -> {
             val hours = minutes / 60
             val remainingMinutes = minutes % 60

@@ -73,16 +73,19 @@ class ConfigurationExporter
             val alerts = remoteAlertRepository.getAllRemoteAlert()
             return alerts.map { alert ->
                 when (alert) {
-                    is RemoteAlert.BatteryAlert ->
+                    is RemoteAlert.BatteryAlert -> {
                         AlertConfig(
                             type = AlertType.BATTERY,
                             batteryPercentage = alert.batteryPercentage,
                         )
-                    is RemoteAlert.StorageAlert ->
+                    }
+
+                    is RemoteAlert.StorageAlert -> {
                         AlertConfig(
                             type = AlertType.STORAGE,
                             storageMinSpaceGb = alert.storageMinSpaceGb,
                         )
+                    }
                 }
             }
         }

@@ -477,10 +477,13 @@ fun NotificationItem(
             Icon(
                 painter =
                     when (remoteAlert) {
-                        is RemoteAlert.BatteryAlert ->
+                        is RemoteAlert.BatteryAlert -> {
                             painterResource(id = R.drawable.battery_3_bar_24dp)
-                        is RemoteAlert.StorageAlert ->
+                        }
+
+                        is RemoteAlert.StorageAlert -> {
                             painterResource(id = R.drawable.hard_disk_24dp)
+                        }
                     },
                 contentDescription =
                     when (remoteAlert) {
@@ -520,6 +523,7 @@ fun NotificationItem(
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
+
                     is RemoteAlert.StorageAlert -> {
                         Text(
                             text = "Min Storage: ${remoteAlert.storageMinSpaceGb} GB",

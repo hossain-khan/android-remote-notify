@@ -221,23 +221,28 @@ class AlertCheckLogViewerPresenter
                             Timber.d("Navigating back from alert check logs viewer")
                             navigator.pop()
                         }
+
                         AlertCheckLogViewerScreen.Event.ToggleTriggeredOnly -> {
                             showTriggeredOnly = !showTriggeredOnly
                             Timber.d("Toggled triggered only filter: $showTriggeredOnly")
                         }
+
                         is AlertCheckLogViewerScreen.Event.FilterByAlertType -> {
                             selectedAlertType = event.alertType
                             Timber.d("Applied alert type filter: ${event.alertType}")
                         }
+
                         is AlertCheckLogViewerScreen.Event.FilterByNotifierType -> {
                             selectedNotifierType = event.notifierType
                             Timber.d("Applied notifier type filter: ${event.notifierType}")
                         }
+
                         is AlertCheckLogViewerScreen.Event.FilterByDateRange -> {
                             startDate = event.startDate
                             endDate = event.endDate
                             Timber.d("Applied date range filter: ${event.startDate} to ${event.endDate}")
                         }
+
                         AlertCheckLogViewerScreen.Event.ClearFilters -> {
                             Timber.d("Clearing all log filters")
                             showTriggeredOnly = false
@@ -246,6 +251,7 @@ class AlertCheckLogViewerPresenter
                             startDate = null
                             endDate = null
                         }
+
                         is AlertCheckLogViewerScreen.Event.ExportLogs -> {
                             Timber.d("Exporting ${event.logs.size} logs")
                             // Export functionality would be implemented here
@@ -712,17 +718,23 @@ private fun ActiveFiltersSection(
                     label = {
                         val dateText =
                             when {
-                                dateRange.first != null && dateRange.second != null -> "Date Range"
-                                dateRange.first != null ->
+                                dateRange.first != null && dateRange.second != null -> {
+                                    "Date Range"
+                                }
+
+                                dateRange.first != null -> {
                                     "From ${
                                         SimpleDateFormat("MMM dd", Locale.getDefault())
                                             .format(Date(dateRange.first!!))
                                     }"
-                                else ->
+                                }
+
+                                else -> {
                                     "Until ${
                                         SimpleDateFormat("MMM dd", Locale.getDefault())
                                             .format(Date(dateRange.second!!))
                                     }"
+                                }
                             }
                         Text(dateText)
                     },
@@ -777,16 +789,19 @@ private fun LogItemCard(
                     Text(
                         text =
                             when (log.alertType) {
-                                AlertType.BATTERY ->
+                                AlertType.BATTERY -> {
                                     buildString {
                                         append("${log.stateValue}% battery")
                                         append(" (Alert threshold: ${log.configBatteryPercentage}%)")
                                     }
-                                AlertType.STORAGE ->
+                                }
+
+                                AlertType.STORAGE -> {
                                     buildString {
                                         append("${log.stateValue} GB storage")
                                         append(" (Alert threshold: ${log.configStorageMinSpaceGb} GB)")
                                     }
+                                }
                             },
                         style = MaterialTheme.typography.bodyMedium,
                     )

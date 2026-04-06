@@ -8,7 +8,6 @@ import dev.hossain.remotenotify.model.RemoteAlert
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.Named
 import okhttp3.Credentials
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
@@ -16,7 +15,6 @@ import okhttp3.Request
 import timber.log.Timber
 
 @ContributesIntoSet(AppScope::class)
-@Named("twilio")
 @Inject
 class TwilioNotificationSender
     constructor(

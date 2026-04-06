@@ -203,6 +203,7 @@ class ConfigureNotificationMediumPresenter
                             }
                         }
                     }
+
                     is ConfigureNotificationMediumScreen.Event.TestConfig -> {
                         scope.launch {
                             try {
@@ -366,53 +367,59 @@ private fun NotifierConfigInputUi(state: ConfigureNotificationMediumScreen.State
 
     val configInputUi: @Composable () -> Unit = {
         when (state.notifierType) {
-            NotifierType.EMAIL ->
+            NotifierType.EMAIL -> {
                 EmailConfigInputUi(
                     state.alertMediumConfig,
                     state.configValidationResult,
                     state.showValidationError,
                     onConfigUpdate,
                 )
+            }
 
-            NotifierType.WEBHOOK_SLACK_WORKFLOW ->
+            NotifierType.WEBHOOK_SLACK_WORKFLOW -> {
                 SlackWebhookConfigInputUi(
                     state.alertMediumConfig,
                     state.configValidationResult,
                     state.showValidationError,
                     onConfigUpdate,
                 )
+            }
 
-            NotifierType.TELEGRAM ->
+            NotifierType.TELEGRAM -> {
                 TelegramConfigInputUi(
                     state.alertMediumConfig,
                     state.configValidationResult,
                     state.showValidationError,
                     onConfigUpdate,
                 )
+            }
 
-            NotifierType.WEBHOOK_REST_API ->
+            NotifierType.WEBHOOK_REST_API -> {
                 WebhookConfigInputUi(
                     state.alertMediumConfig,
                     state.configValidationResult,
                     state.showValidationError,
                     onConfigUpdate,
                 )
+            }
 
-            NotifierType.TWILIO ->
+            NotifierType.TWILIO -> {
                 TwilioConfigInputUi(
                     state.alertMediumConfig,
                     state.configValidationResult,
                     state.showValidationError,
                     onConfigUpdate,
                 )
+            }
 
-            NotifierType.WEBHOOK_DISCORD ->
+            NotifierType.WEBHOOK_DISCORD -> {
                 DiscordWebhookConfigInputUi(
                     state.alertMediumConfig,
                     state.configValidationResult,
                     state.showValidationError,
                     onConfigUpdate,
                 )
+            }
         }
     }
     configInputUi()
@@ -438,6 +445,7 @@ private fun NotifierConfigSuffixUi(
                 }
             }
         }
+
         else -> {
             // No suffix for other notifiers
         }

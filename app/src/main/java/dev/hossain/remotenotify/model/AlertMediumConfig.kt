@@ -69,6 +69,7 @@ internal fun AlertMediumConfig.configPreviewText(): String =
                 }
             preview
         }
+
         is AlertMediumConfig.WebhookConfig -> {
             val restUrl = url.removePrefix("https://").removePrefix("http://")
             val preview =
@@ -79,6 +80,7 @@ internal fun AlertMediumConfig.configPreviewText(): String =
                 }
             preview
         }
+
         is AlertMediumConfig.TwilioConfig -> {
             val preview =
                 if (toPhone.length > 12) {
@@ -88,6 +90,7 @@ internal fun AlertMediumConfig.configPreviewText(): String =
                 }
             preview
         }
+
         is AlertMediumConfig.EmailConfig -> {
             val preview =
                 if (toEmail.length > 20) {
@@ -110,6 +113,7 @@ internal fun AlertMediumConfig.configPreviewText(): String =
                 }
             preview
         }
+
         is AlertMediumConfig.DiscordConfig -> {
             val restUrl = webhookUrl.removePrefix("https://").removePrefix("http://")
             val preview =

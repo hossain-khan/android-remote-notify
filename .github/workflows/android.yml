@@ -15,15 +15,15 @@ jobs:
 
     strategy:
       matrix:
-        # Java JDK versions (LTS: 17, 21 & Non-LTS: 23)
-        java-version: [ '17', '21', '23' ]
+        # Java JDK versions (LTS: 21 & Non-LTS: 23)
+        java-version: [ '21', '23' ]
         # https://adoptium.net/temurin/releases/
         distribution: [ 'temurin' ]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.java-version }}
           distribution: ${{ matrix.distribution }}
@@ -34,7 +34,7 @@ jobs:
       # Automatic gradle caching using `actions/cache@v4`
       # https://github.com/gradle/actions/tree/main/setup-gradle
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Run test
         run: ./gradlew testDebugUnitTest --parallel --daemon

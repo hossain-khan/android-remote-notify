@@ -201,6 +201,7 @@ class NotificationMediumListPresenter
                                 sendPeriodicWorkRequest(context, intervalMinutes)
                             }
                         }
+
                         ConfigureNotificationMediumScreen.ConfigurationResult.NotConfigured -> {
                             // Do nothing
                         }
@@ -250,6 +251,7 @@ class NotificationMediumListPresenter
                     is NotificationMediumListScreen.Event.EditMediumConfig -> {
                         configureMediumNavigator.goTo(ConfigureNotificationMediumScreen(event.notifierType))
                     }
+
                     is NotificationMediumListScreen.Event.ResetMediumConfig -> {
                         scope.launch {
                             notifiers.find { it.notifierType == event.notifierType }?.clearConfig()
@@ -257,6 +259,7 @@ class NotificationMediumListPresenter
                             updateNotifierList()
                         }
                     }
+
                     NotificationMediumListScreen.Event.NavigateBack -> {
                         navigator.pop()
                     }

@@ -34,7 +34,7 @@ object WorkerBindings {
                         .forName(workerClassName)
                         .asSubclass(CoroutineWorker::class.java)
                 return when (workerClass) {
-                    ObserveDeviceHealthWorker::class.java ->
+                    ObserveDeviceHealthWorker::class.java -> {
                         ObserveDeviceHealthWorker(
                             context = appContext,
                             workerParams = workerParameters,
@@ -44,7 +44,11 @@ object WorkerBindings {
                             notifiers = notifiers,
                             analytics = analytics,
                         )
-                    else -> null
+                    }
+
+                    else -> {
+                        null
+                    }
                 }
             }
         }
