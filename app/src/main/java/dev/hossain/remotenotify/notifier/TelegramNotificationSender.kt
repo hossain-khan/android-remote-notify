@@ -82,7 +82,10 @@ class TelegramNotificationSender
                     telegramConfigDataStore.saveBotToken(alertMediumConfig.botToken)
                     telegramConfigDataStore.saveChatId(alertMediumConfig.chatId)
                 }
-                else -> throw IllegalArgumentException("Invalid configuration type: $alertMediumConfig")
+
+                else -> {
+                    throw IllegalArgumentException("Invalid configuration type: $alertMediumConfig")
+                }
             }
         }
 

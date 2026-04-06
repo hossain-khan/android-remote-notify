@@ -86,6 +86,7 @@ class DiscordWebhookNotificationSender
                         timestamp = timestamp,
                     )
                 }
+
                 is RemoteAlert.StorageAlert -> {
                     val currentStorage = remoteAlert.currentStorageGb ?: remoteAlert.storageMinSpaceGb.toDouble()
                     val threshold = remoteAlert.storageMinSpaceGb
