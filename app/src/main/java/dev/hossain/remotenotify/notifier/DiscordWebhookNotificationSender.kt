@@ -7,7 +7,6 @@ import dev.hossain.remotenotify.model.RemoteAlert
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
-import dev.zacsweers.metro.Named
 import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -20,7 +19,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @ContributesIntoSet(AppScope::class)
-@Named("discord")
 @Inject
 class DiscordWebhookNotificationSender
     constructor(
