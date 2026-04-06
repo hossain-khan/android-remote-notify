@@ -23,7 +23,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.binding
 
 @ContributesIntoMap(AppScope::class, binding<Activity>())
-@ActivityKey(MainActivity::class)
+@ActivityKey
 @Inject
 class MainActivity
     constructor(

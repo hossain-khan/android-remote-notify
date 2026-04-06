@@ -182,7 +182,6 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 
-    implementation(libs.circuit.codegen.annotations)
     implementation(libs.circuit.foundation)
     implementation(libs.circuit.overlay)
     implementation(libs.circuitx.android)
@@ -190,7 +189,6 @@ dependencies {
     implementation(libs.circuitx.gestureNav)
     implementation(libs.circuitx.overlays)
     implementation(libs.androidx.junit.ktx)
-    ksp(libs.circuit.codegen)
 
     implementation(libs.timber)
 
@@ -251,16 +249,15 @@ dependencies {
     testImplementation(libs.robolectric)
 }
 
-ksp {
-    // Circuit-KSP for Metro
-    // https://slackhq.github.io/circuit/code-gen/
-    arg("circuit.codegen.mode", "metro")
-}
-
 metro {
     // Enable Metro code generation for assisted injection factories.
     // https://zacsweers.github.io/metro/injection-types/#automatic-assisted-factory-generation
     // generateAssistedFactories.set(true)
+
+    // Enable Metro's built-in Circuit code generation (replaces the circuit-codegen KSP processor).
+    // Requires Kotlin 2.3.20+. Generates Presenter.Factory and Ui.Factory from @CircuitInject annotations.
+    // https://zacsweers.github.io/metro/latest/circuit/
+    enableCircuitCodegen.set(true)
 
     enableKotlinVersionCompatibilityChecks = true
 
