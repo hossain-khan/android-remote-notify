@@ -229,7 +229,6 @@ class NotificationSenderImpl(
         AppBindings::class,
         DatabaseBindings::class,
         NetworkBindings::class,
-        NotificationSenderMultibindings::class,
         WorkerBindings::class,
     ],
 )

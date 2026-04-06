@@ -10,6 +10,9 @@
 
 -----------------------------------------------------------------------------
 
+## Release v1.19
+- Fix DI multi-binding issue causing app crash on launch for some users.
+
 ## Release v1.18
 - 📚 Updated library dependencies to latest stable versions.
 - Monitor battery 🔋 and storage 💾 levels of your remote Android devices.

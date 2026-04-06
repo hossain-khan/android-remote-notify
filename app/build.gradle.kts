@@ -1,3 +1,4 @@
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import java.util.Properties
 
 plugins {
@@ -23,9 +24,9 @@ android {
         applicationId = "dev.hossain.remotenotify"
         minSdk = 30
         targetSdk = 35
-        versionCode = 22
+        versionCode = 23
         // 📣 Don't forget to update release notes! 🤓
-        versionName = "1.18"
+        versionName = "1.19"
 
         // Read key or other properties from local.properties
         val localProperties =
@@ -84,12 +85,13 @@ android {
                 "proguard-rules.pro",
             )
             signingConfig = signingConfigs.getByName("release")
-            firebaseCrashlytics {
-                // https://firebase.google.com/docs/crashlytics/get-deobfuscated-reports?platform=android
-                // https://developer.android.com/studio/debug/stacktraces
-                // https://developer.android.com/tools/retrace
-                // https://www.guardsquare.com/manual/tools/retrace
-                mappingFileUploadEnabled = true
+
+            // https://firebase.google.com/docs/crashlytics/get-deobfuscated-reports?platform=android
+            // https://developer.android.com/studio/debug/stacktraces
+            // https://developer.android.com/tools/retrace
+            // https://www.guardsquare.com/manual/tools/retrace
+            configure<CrashlyticsExtension> {
+                mappingFileUploadEnabled = false
             }
         }
     }

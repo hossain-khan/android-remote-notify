@@ -1,7 +1,6 @@
 package dev.hossain.remotenotify.notifier
 
 import androidx.annotation.Keep
-import dev.hossain.remotenotify.di.NotificationSenderMultibindings
 
 /**
  * List of supported medium to send alert notification.
@@ -9,7 +8,7 @@ import dev.hossain.remotenotify.di.NotificationSenderMultibindings
  * ℹ️ Steps to take to add new notifier:
  * 1. Add new enum value here.
  * 2. Create a new class that implements [NotificationSender] interface.
- * 3. Add new class to [NotificationSenderMultibindings] Metro Bindings.
+ * 3. Add the @ContributesIntoSet(AppScope::class) annotation to the class.
  */
 @Keep
 enum class NotifierType(
