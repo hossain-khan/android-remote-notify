@@ -144,10 +144,12 @@ class AddNewRemoteAlertPresenter
 
             /**
              * Round up to nearest 10 for slider max value.
+             * Ensure minimum value of 10 to accommodate slider range 1..max.
              */
             val storageSliderMax =
                 remember(availableStorage) {
-                    ((availableStorage + 9) / 10) * 10
+                    val rounded = ((availableStorage + 9) / 10) * 10
+                    maxOf(rounded, 10)  // Ensure at least 10 for valid range
                 }
 
             LaunchedImpressionEffect {

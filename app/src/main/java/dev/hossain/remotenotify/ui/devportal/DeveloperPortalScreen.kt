@@ -176,7 +176,10 @@ class DeveloperPortalPresenter
             // Get current device status
             val currentBatteryLevel = batteryMonitor.getBatteryLevel()
             val currentStorageGb = storageMonitor.getAvailableStorageInGB()
-            val maxStorageGb = remember { ((currentStorageGb + 9) / 10) * 10 } // Round up to nearest 10
+            val maxStorageGb = remember {
+                val rounded = ((currentStorageGb + 9) / 10) * 10
+                maxOf(rounded, 10)  // Ensure at least 10 for valid slider range
+            }
 
             // Get configured notification channels
             var configuredChannels by remember { mutableStateOf<Set<NotifierType>>(emptySet()) }
