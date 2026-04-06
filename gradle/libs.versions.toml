@@ -177,7 +177,7 @@ moshi-kotlin-codegen = { group = "com.squareup.moshi", name = "moshi-kotlin-code
 eithernet = { group = "com.slack.eithernet", name = "eithernet", version.ref = "eithernet" }
 eithernet-integration-retrofit = { group = "com.slack.eithernet", name = "eithernet-integration-retrofit", version.ref = "eithernet" }
 
-robolectric = { group = "org.robolectric", name = "robolectric", version = "4.16" }
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.16.1" }
 
 # MockK mocking library for Kotlin
 # https://mockk.io
@@ -233,10 +233,10 @@ metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 kotlinter = { id = "org.jmailen.kotlinter", version.ref = "kotlinter" }
 
 # Google Services plugin
-google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
+google-services = { id = "com.google.gms.google-services", version = "4.4.4" }
 # https://firebase.google.com/docs/crashlytics/get-started?platform=android#add-sdk
-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.3" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.6" }
 
 # Kover is a set of solutions for collecting test coverage of Kotlin code compiled for JVM and Android platforms.
 # https://github.com/Kotlin/kotlinx-kover?tab=readme-ov-file#kover-gradle-plugin
-kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.3" }
+kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.8" }
