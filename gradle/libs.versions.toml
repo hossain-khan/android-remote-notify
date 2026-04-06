@@ -1,70 +1,70 @@
 [versions]
-activityCompose = "1.10.1"
+activityCompose = "1.13.0"
 
 # Adaptive library to create adaptive UIs
 # https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive
-adaptiveAndroid = "1.1.0"
+adaptiveAndroid = "1.2.0"
 
 # Android Studio version and AGP version compatibility
 # https://developer.android.com/studio/releases#android_gradle_plugin_and_android_studio_compatibility
-agp = "8.13.0"
+agp = "8.13.2"
 
 # Metro - A multiplatform dependency injection framework for Kotlin
 # https://zacsweers.github.io/metro/
-metro = "0.8.0"
+metro = "0.13.1"
 
 # https://github.com/slackhq/circuit/releases
-circuit = "0.30.0"
+circuit = "0.33.1"
 
-composeBom = "2025.06.00"
+composeBom = "2026.03.01"
 composeLintChecks = "1.4.2"
-composeMaterial3 = "1.3.2"
-coreKtx = "1.16.0"
+composeMaterial3 = "1.4.0"
+coreKtx = "1.18.0"
 coroutinesTest = "1.10.2"
 
-dataStore = "1.1.7"
+dataStore = "1.2.1"
 
 # API result type for modeling network API responses.
 # https://github.com/slackhq/EitherNet
 eithernet = "2.0.0"
-espressoCore = "3.6.1"
-firebaseBom = "34.4.0"
+espressoCore = "3.7.0"
+firebaseBom = "34.11.0"
 
 # https://developer.android.com/develop/ui/compose/text/fonts
-googleFonts = "1.8.2"
+googleFonts = "1.10.6"
 
 googlePlayReview = "2.0.2"
 
 # Fluent assertions for Java and Android
 # https://truth.dev/ | https://github.com/google/truth
-googleTruth = "1.4.4"
+googleTruth = "1.4.5"
 
 junit = "4.13.2"
-junitKtx = "1.2.1"
+junitKtx = "1.3.0"
 
 # https://developer.android.com/jetpack/androidx/releases/test
-junitVersion = "1.2.1"
+junitVersion = "1.3.0"
 
-kotlin = "2.2.20"
+kotlin = "2.3.20"
 
 # MockK mocking library for Kotlin
 # https://mockk.io
-mockk = "1.14.6"
+mockk = "1.14.9"
 
 # Kotlin linter with built-in formatter
 # https://github.com/jeremymailen/kotlinter-gradle
 # https://github.com/pinterest/ktlint
-kotlinter = "5.1.1"
+kotlinter = "5.4.2"
 
-kotlinxSerializationJson = "1.9.0"
-kotlinxSerializationProperties = "1.9.0"
+kotlinxSerializationJson = "1.10.0"
+kotlinxSerializationProperties = "1.10.0"
 
 # Kotlin Symbol Processing API
 # https://kotlinlang.org/docs/ksp-overview.html
 # https://github.com/google/ksp/releases
-ksp = "2.2.20-2.0.4"
+ksp = "2.3.6"
 
-lifecycleRuntimeKtx = "2.9.4"
+lifecycleRuntimeKtx = "2.10.0"
 
 # A modern JSON library for Kotlin and Java.
 # https://github.com/square/moshi
@@ -72,24 +72,24 @@ moshi = "1.15.2"
 
 # Navigation for Jetpack Compose
 # https://developer.android.com/develop/ui/compose/navigation
-navigationCompose = "2.9.5"
+navigationCompose = "2.9.7"
 
 # Http client for Android
 # https://square.github.io/okhttp/
-okhttp = "4.12.0"
+okhttp = "5.3.2"
 retrofit = "3.0.0"
 
 # Room Database
 # https://developer.android.com/training/data-storage/room
-roomDb = "2.8.2"
+roomDb = "2.8.4"
 
-testCore = "1.6.1"
+testCore = "1.7.0"
 
 # https://github.com/JakeWharton/timber
 timber = "5.0.1"
 
 # https://developer.android.com/jetpack/androidx/releases/work
-workManager = "2.11.0"
+workManager = "2.11.2"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
@@ -147,6 +147,7 @@ circuit-codegen = { group = "com.slack.circuit", name = "circuit-codegen", versi
 
 # https://mvnrepository.com/artifact/androidx.compose.ui/ui-text-google-fonts
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googleFonts" }
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 
 # https://github.com/JakeWharton/timber
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber"}

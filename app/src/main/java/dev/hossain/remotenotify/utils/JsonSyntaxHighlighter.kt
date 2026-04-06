@@ -156,7 +156,9 @@ internal fun highlightJsonSyntax(
                     }
 
                     // Skip unrecognized characters
-                    else -> currentIndex++
+                    else -> {
+                        currentIndex++
+                    }
                 }
             }
         }

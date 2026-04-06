@@ -221,6 +221,7 @@ class BackupRestorePresenter
                                         pendingImportUri = event.uri
                                         showImportPasswordDialog = true
                                     }
+
                                     is ImportValidationResult.Invalid -> {
                                         message = "Invalid configuration: ${validationResult.errors.joinToString(separator = "; ")}"
                                     }
@@ -275,6 +276,7 @@ class BackupRestorePresenter
                                             notifiersCount = notifierCount,
                                         )
                                     }
+
                                     is ConfigOperationResult.Error -> {
                                         message = "Import failed: ${result.message}"
                                         analytics.logConfigImport(success = false)

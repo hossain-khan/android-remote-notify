@@ -151,6 +151,7 @@ class ConfigurationImporter
                             errors.add("Invalid battery percentage: ${alert.batteryPercentage}")
                         }
                     }
+
                     AlertType.STORAGE -> {
                         if (alert.storageMinSpaceGb == null) {
                             errors.add("Storage alert missing storageMinSpaceGb")
@@ -184,14 +185,17 @@ class ConfigurationImporter
             alerts.forEach { alertConfig ->
                 val remoteAlert =
                     when (alertConfig.type) {
-                        AlertType.BATTERY ->
+                        AlertType.BATTERY -> {
                             RemoteAlert.BatteryAlert(
                                 batteryPercentage = alertConfig.batteryPercentage ?: 20,
                             )
-                        AlertType.STORAGE ->
+                        }
+
+                        AlertType.STORAGE -> {
                             RemoteAlert.StorageAlert(
                                 storageMinSpaceGb = alertConfig.storageMinSpaceGb ?: 1,
                             )
+                        }
                     }
                 remoteAlertRepository.saveRemoteAlert(remoteAlert)
             }

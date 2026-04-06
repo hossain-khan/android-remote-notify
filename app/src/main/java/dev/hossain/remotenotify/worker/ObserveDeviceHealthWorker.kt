@@ -84,6 +84,7 @@ class ObserveDeviceHealthWorker(
                             stateValue = deviceCurrentBatteryLevel,
                         )
                     }
+
                     is RemoteAlert.StorageAlert -> {
                         val triggered = deviceCurrentAvailableStorage <= userConfiguredAlert.storageMinSpaceGb
                         checkAndProcessAlert(
@@ -150,18 +151,21 @@ class ObserveDeviceHealthWorker(
                     // and set the current value from the actual device state measurement
                     val triggeredRemoteAlert =
                         when (remoteAlert) {
-                            is RemoteAlert.BatteryAlert ->
+                            is RemoteAlert.BatteryAlert -> {
                                 RemoteAlert.BatteryAlert(
                                     alertId = remoteAlert.alertId,
                                     batteryPercentage = remoteAlert.batteryPercentage, // Threshold from DB
                                     currentBatteryLevel = stateValue, // Current measured battery level
                                 )
-                            is RemoteAlert.StorageAlert ->
+                            }
+
+                            is RemoteAlert.StorageAlert -> {
                                 RemoteAlert.StorageAlert(
                                     alertId = remoteAlert.alertId,
                                     storageMinSpaceGb = remoteAlert.storageMinSpaceGb, // Threshold from DB
                                     currentStorageGb = stateValue.toDouble(), // Current measured storage
                                 )
+                            }
                         }
 
                     Timber.tag(WORKER_LOG_TAG).d("Sending alert - Configured: $remoteAlert, Triggered: $triggeredRemoteAlert")

@@ -32,7 +32,7 @@ class AlertFormatter
         ): String {
             val deviceAlert =
                 when (remoteAlert) {
-                    is RemoteAlert.BatteryAlert ->
+                    is RemoteAlert.BatteryAlert -> {
                         DeviceAlert(
                             alertType = AlertType.BATTERY,
                             // Use current battery level if available, otherwise fall back to threshold for backward compatibility
@@ -45,7 +45,9 @@ class AlertFormatter
                                     null
                                 },
                         )
-                    is RemoteAlert.StorageAlert ->
+                    }
+
+                    is RemoteAlert.StorageAlert -> {
                         DeviceAlert(
                             alertType = AlertType.STORAGE,
                             // Use current storage if available, otherwise fall back to threshold for backward compatibility
@@ -60,6 +62,7 @@ class AlertFormatter
                                     null
                                 },
                         )
+                    }
                 }
             return when (formatType) {
                 FormatType.EXTENDED_TEXT -> deviceAlert.toExtendedText()

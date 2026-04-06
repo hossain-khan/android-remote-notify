@@ -169,6 +169,7 @@ class AddNewRemoteAlertPresenter
                             selectedType = AlertType.BATTERY
                             threshold = existingAlert.batteryPercentage
                         }
+
                         is RemoteAlert.StorageAlert -> {
                             selectedType = AlertType.STORAGE
                             threshold = existingAlert.storageMinSpaceGb
@@ -225,10 +226,13 @@ class AddNewRemoteAlertPresenter
                                     // Update existing alert
                                     val updatedAlert =
                                         when (event.notification) {
-                                            is RemoteAlert.BatteryAlert ->
+                                            is RemoteAlert.BatteryAlert -> {
                                                 event.notification.copy(alertId = alertIdForUpdate)
-                                            is RemoteAlert.StorageAlert ->
+                                            }
+
+                                            is RemoteAlert.StorageAlert -> {
                                                 event.notification.copy(alertId = alertIdForUpdate)
+                                            }
                                         }
                                     analytics.logAlertEdited(updatedAlert.toAlertType())
                                     val rowsUpdated = remoteAlertRepository.updateRemoteAlert(updatedAlert)
@@ -246,18 +250,22 @@ class AddNewRemoteAlertPresenter
                             }
                         }
                     }
+
                     AddNewRemoteAlertScreen.Event.NavigateBack -> {
                         navigator.pop()
                     }
+
                     AddNewRemoteAlertScreen.Event.ShowBatteryOptimizationSheet -> {
                         showBatteryOptimizeSheet = true
                         scope.launch {
                             analytics.logOptimizeBatteryInfoShown()
                         }
                     }
+
                     AddNewRemoteAlertScreen.Event.DismissBatteryOptimizationSheet -> {
                         showBatteryOptimizeSheet = false
                     }
+
                     AddNewRemoteAlertScreen.Event.OpenBatterySettings -> {
                         scope.launch {
                             analytics.logOptimizeBatteryGoToSettings()
@@ -269,12 +277,15 @@ class AddNewRemoteAlertPresenter
                             }
                         context.startActivity(intent)
                     }
+
                     is AddNewRemoteAlertScreen.Event.UpdateAlertType -> {
                         selectedType = event.alertType
                     }
+
                     is AddNewRemoteAlertScreen.Event.UpdateThreshold -> {
                         threshold = event.value
                     }
+
                     AddNewRemoteAlertScreen.Event.HideBatteryOptimizationReminder -> {
                         scope.launch {
                             analytics.logOptimizeBatteryIgnore()
@@ -396,7 +407,9 @@ fun AddNewRemoteAlertUi(
                                 },
                             steps =
                                 when (state.selectedAlertType) {
-                                    AlertType.BATTERY -> 44 // Total steps: (50-5) - 1 = 44 steps
+                                    AlertType.BATTERY -> 44
+
+                                    // Total steps: (50-5) - 1 = 44 steps
                                     AlertType.STORAGE -> (state.storageSliderMax - 1) // From 1 to max, so max-1 steps
                                 },
                         )
@@ -425,12 +438,16 @@ fun AddNewRemoteAlertUi(
                         Column {
                             Text(
                                 when (state.selectedAlertType) {
-                                    AlertType.BATTERY -> "Will notify when battery is below ${state.threshold}%"
-                                    AlertType.STORAGE ->
+                                    AlertType.BATTERY -> {
+                                        "Will notify when battery is below ${state.threshold}%"
+                                    }
+
+                                    AlertType.STORAGE -> {
                                         buildString {
                                             append("Will notify when storage is below ${state.threshold}GB")
                                             append(" (Currently: ${state.availableStorage}GB available)")
                                         }
+                                    }
                                 },
                             )
                             Spacer(modifier = Modifier.height(2.dp))

@@ -52,20 +52,23 @@ sealed interface RemoteAlert {
  */
 internal fun RemoteAlert.toAlertConfigEntity(): AlertConfigEntity =
     when (this) {
-        is RemoteAlert.BatteryAlert ->
+        is RemoteAlert.BatteryAlert -> {
             AlertConfigEntity(
                 id = alertId,
                 batteryPercentage = batteryPercentage,
                 type = AlertType.BATTERY,
                 storageMinSpaceGb = 0,
             )
-        is RemoteAlert.StorageAlert ->
+        }
+
+        is RemoteAlert.StorageAlert -> {
             AlertConfigEntity(
                 id = alertId,
                 storageMinSpaceGb = storageMinSpaceGb,
                 type = AlertType.STORAGE,
                 batteryPercentage = 0,
             )
+        }
     }
 
 /**

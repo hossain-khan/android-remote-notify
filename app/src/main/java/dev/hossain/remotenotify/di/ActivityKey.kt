@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
 /**
  * A Metro multi-binding [MapKey] used for registering a [Activity] into the top level graphs.
  */
-@Target(AnnotationTarget.CLASS)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @MapKey
 annotation class ActivityKey(
     val value: KClass<out Activity>,

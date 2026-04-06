@@ -82,24 +82,37 @@ data class DeviceAlert(
         val formattedTimestamp = timestamp.format(formatter)
         val alertMessage =
             when (alertType) {
-                AlertType.BATTERY ->
+                AlertType.BATTERY -> {
                     when {
-                        batteryThresholdPercent != null && batteryLevel != null ->
+                        batteryThresholdPercent != null && batteryLevel != null -> {
                             "Battery Critical: Current $batteryLevel% (Threshold: $batteryThresholdPercent%)"
-                        batteryLevel != null ->
+                        }
+
+                        batteryLevel != null -> {
                             "Battery Level is at $batteryLevel%"
-                        else ->
+                        }
+
+                        else -> {
                             "Battery Level is low"
+                        }
                     }
-                AlertType.STORAGE ->
+                }
+
+                AlertType.STORAGE -> {
                     when {
-                        storageThresholdGb != null && availableStorageGb != null ->
+                        storageThresholdGb != null && availableStorageGb != null -> {
                             "Storage Space Critical: Current $availableStorageGb GB (Threshold: $storageThresholdGb GB)"
-                        availableStorageGb != null ->
+                        }
+
+                        availableStorageGb != null -> {
                             "Storage Space Available: $availableStorageGb GB"
-                        else ->
+                        }
+
+                        else -> {
                             "Storage Space is low"
+                        }
                     }
+                }
             }
 
         return buildString {
@@ -116,30 +129,43 @@ data class DeviceAlert(
         val formattedTimestamp = timestamp.format(formatter)
         val (message, action) =
             when (alertType) {
-                AlertType.BATTERY ->
+                AlertType.BATTERY -> {
                     Pair(
                         when {
-                            batteryThresholdPercent != null && batteryLevel != null ->
+                            batteryThresholdPercent != null && batteryLevel != null -> {
                                 "Device battery is critically low (Current: $batteryLevel%, Threshold: $batteryThresholdPercent%)"
-                            batteryLevel != null ->
+                            }
+
+                            batteryLevel != null -> {
                                 "Device battery is critically low at $batteryLevel%"
-                            else ->
+                            }
+
+                            else -> {
                                 "Device battery is critically low"
+                            }
                         },
                         "Please connect your device to a charger to prevent shutdown.",
                     )
-                AlertType.STORAGE ->
+                }
+
+                AlertType.STORAGE -> {
                     Pair(
                         when {
-                            storageThresholdGb != null && availableStorageGb != null ->
+                            storageThresholdGb != null && availableStorageGb != null -> {
                                 "Available storage space is critically low (Current: $availableStorageGb GB, Threshold: $storageThresholdGb GB)"
-                            availableStorageGb != null ->
+                            }
+
+                            availableStorageGb != null -> {
                                 "Available storage space is low ($availableStorageGb GB)"
-                            else ->
+                            }
+
+                            else -> {
                                 "Available storage space is low"
+                            }
                         },
                         "Consider removing unused apps or media files to free up space.",
                     )
+                }
             }
 
         return buildString {
@@ -157,30 +183,43 @@ data class DeviceAlert(
         val formattedTimestamp = timestamp.format(formatter)
         val (message, action) =
             when (alertType) {
-                AlertType.BATTERY ->
+                AlertType.BATTERY -> {
                     Pair(
                         when {
-                            batteryThresholdPercent != null && batteryLevel != null ->
+                            batteryThresholdPercent != null && batteryLevel != null -> {
                                 "Device battery is critically low (Current: $batteryLevel%, Threshold: $batteryThresholdPercent%)"
-                            batteryLevel != null ->
+                            }
+
+                            batteryLevel != null -> {
                                 "Device battery is critically low at $batteryLevel%"
-                            else ->
+                            }
+
+                            else -> {
                                 "Device battery is critically low"
+                            }
                         },
                         "Please connect your device to a charger to prevent shutdown.",
                     )
-                AlertType.STORAGE ->
+                }
+
+                AlertType.STORAGE -> {
                     Pair(
                         when {
-                            storageThresholdGb != null && availableStorageGb != null ->
+                            storageThresholdGb != null && availableStorageGb != null -> {
                                 "Available storage space is critically low (Current: $availableStorageGb GB, Threshold: $storageThresholdGb GB)"
-                            availableStorageGb != null ->
+                            }
+
+                            availableStorageGb != null -> {
                                 "Available storage space is low ($availableStorageGb GB)"
-                            else ->
+                            }
+
+                            else -> {
                                 "Available storage space is low"
+                            }
                         },
                         "Consider removing unused apps or media files to free up space.",
                     )
+                }
             }
 
         return """

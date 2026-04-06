@@ -2,14 +2,14 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.androidx.room)
-    alias(libs.plugins.metro)
-    alias(libs.plugins.firebase.crashlytics)
-    alias(libs.plugins.google.services)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.androidx.room)
+    alias(libs.plugins.metro)
+    alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.google.services)
     alias(libs.plugins.kotlinter)
     alias(libs.plugins.kotlinx.kover)
     alias(libs.plugins.ksp)
@@ -17,7 +17,7 @@ plugins {
 
 android {
     namespace = "dev.hossain.remotenotify"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "dev.hossain.remotenotify"
@@ -173,6 +173,7 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.serialization.properties)
