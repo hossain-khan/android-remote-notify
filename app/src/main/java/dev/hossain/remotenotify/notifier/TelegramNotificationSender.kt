@@ -6,7 +6,10 @@ import dev.hossain.remotenotify.data.TelegramConfigDataStore
 import dev.hossain.remotenotify.model.AlertMediumConfig
 import dev.hossain.remotenotify.model.DeviceAlert.FormatType
 import dev.hossain.remotenotify.model.RemoteAlert
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoSet
 import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.Named
 import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -14,6 +17,8 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import timber.log.Timber
 
+@ContributesIntoSet(AppScope::class)
+@Named("telegram") // Could not use `NotifierType.TELEGRAM.name` as it's not a constant.
 @Inject
 class TelegramNotificationSender
     constructor(
@@ -77,10 +82,7 @@ class TelegramNotificationSender
                     telegramConfigDataStore.saveBotToken(alertMediumConfig.botToken)
                     telegramConfigDataStore.saveChatId(alertMediumConfig.chatId)
                 }
-
-                else -> {
-                    throw IllegalArgumentException("Invalid configuration type: $alertMediumConfig")
-                }
+                else -> throw IllegalArgumentException("Invalid configuration type: $alertMediumConfig")
             }
         }
 
