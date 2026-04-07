@@ -24,7 +24,7 @@ android {
         applicationId = "dev.hossain.remotenotify"
         minSdk = 30
         targetSdk = 35
-        versionCode = 23
+        versionCode = 24
         // 📣 Don't forget to update release notes! 🤓
         versionName = "1.19"
 
