@@ -11,7 +11,7 @@ agp = "9.1.1"
 
 # Metro - A multiplatform dependency injection framework for Kotlin
 # https://zacsweers.github.io/metro/
-metro = "0.13.2"
+metro = "1.0.0-RC2"
 
 # https://github.com/slackhq/circuit/releases
 circuit = "0.33.1"
