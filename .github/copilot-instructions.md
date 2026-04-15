@@ -502,11 +502,31 @@ class NetworkRepository @Inject constructor(
 1. **Create Release Branch**: `git checkout -b release/vX.Y.Z` (e.g., `release/v1.17`)
 2. **Update Version**: Increment `versionCode` and `versionName` in `app/build.gradle.kts`
 3. **Update Release Notes**: Add new release section in `project-resources/google-play/release-notes.md`
-4. **Build & Test**: Run `./gradlew clean assembleRelease bundleRelease`
+4. **Build & Test**: Run `./gradlew clean assembleRelease bundleRelease` **on your local machine**
 5. **Commit Changes**: Commit version bump and release notes on the release branch
 6. **Create PR**: Open pull request from release branch to `main`
 7. **Merge & Tag**: After PR approval, merge to `main` and create git tag `vX.Y.Z`
-8. **Upload to Play Store**: Upload AAB to Google Play Console
+8. **Upload to Play Store**: Upload the locally-built AAB (`app/release/app-release.aab`) to Google Play Console
+
+### ⚠️ Critical: App Bundle Signing
+
+**DO NOT upload release builds from GitHub Actions.** The release AAB must be built locally with the correct signing certificate registered in Google Play Console.
+
+**Why:** GitHub Actions builds and local builds use different keystores, which causes signing key mismatch errors when uploading to Google Play Console. See [Issue #438](https://github.com/hossain-khan/android-remote-notify/issues/438) for details.
+
+**Correct Process:**
+- Build release bundle locally on your machine with correct `local.properties` keystore path
+- Verify `local.properties` contains the correct keystore location and password
+- Upload the generated `app/release/app-release.aab` directly from your local machine
+- This ensures the bundle is signed with the certificate registered in Google Play
+
+**Troubleshooting Signing Errors:**
+If you encounter "Your App Bundle is signed with the wrong key" error:
+1. Verify the SHA1 fingerprint in Google Play Console
+2. Check that `local.properties` points to the correct keystore file
+3. Ensure the keystore password is correct
+4. Rebuild locally: `./gradlew clean bundleRelease`
+5. Re-upload the newly generated AAB
 
 ### Version Management
 - Update `versionCode` (increment by 1) and `versionName` in `app/build.gradle.kts`
@@ -519,7 +539,7 @@ class NetworkRepository @Inject constructor(
 - [ ] Update version code and name in `app/build.gradle.kts`
 - [ ] Update `release-notes.md` with new release section
 - [ ] Check `local.properties` for correct keystore path and password
-- [ ] Build release: `./gradlew clean assembleRelease bundleRelease`
+- [ ] Build release **locally**: `./gradlew clean assembleRelease bundleRelease`
 - [ ] Test release build locally
 - [ ] Run full test suite: `./gradlew test`
 - [ ] Check ProGuard/R8 obfuscation
@@ -528,17 +548,19 @@ class NetworkRepository @Inject constructor(
 - [ ] Create pull request to `main`
 - [ ] After merge, create git tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
 - [ ] Push tag: `git push origin vX.Y.Z`
-- [ ] Upload AAB to Firebase Test Lab
-- [ ] Upload AAB to Google Play Console
+- [ ] **Upload AAB to Google Play Console from your local machine** (not from GitHub Actions)
+  - Verify keystore SHA1 matches Google Play Console certificate fingerprint
+  - Upload from `app/release/app-release.aab`
 - [ ] Create GitHub release from tag with release notes
 
 ## Troubleshooting
 
 ### Common Issues
 1. **Build Failures**: Ensure `local.properties` contains required API keys
-2. **WorkManager Issues**: Check device battery optimization settings
-3. **Firebase Issues**: Verify `google-services.json` is present and valid
-4. **Compose Issues**: Clean and rebuild project, check Compose compiler version
+2. **Signing Key Mismatch**: If Google Play rejects your bundle with "signed with the wrong key" error, ensure you built locally with the correct keystore. Never upload AAB from GitHub Actions (see Issue #438)
+3. **WorkManager Issues**: Check device battery optimization settings
+4. **Firebase Issues**: Verify `google-services.json` is present and valid
+5. **Compose Issues**: Clean and rebuild project, check Compose compiler version
 
 ### Debugging Tools
 - Use `Timber.d()` for debug logging

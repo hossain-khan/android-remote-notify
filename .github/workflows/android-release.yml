@@ -4,11 +4,25 @@ name: Android Release Build
 # 1. Snapshot builds: Each time code changes on main branch
 # 2. Release builds: When a GitHub release is published (automatically attaches APK and AAB to release)
 # This allows developers and testers to easily download the latest release APK.
-# AAB (Android App Bundle) is provided for Google Play Store distribution.
+# AAB (Android App Bundle) is provided for GitHub release artifacts.
 #
-# See:
+# ⚠️ IMPORTANT: App Bundle Signing for Google Play Store
+# =====================================================
+# The AAB built in this workflow is signed with a CI keystore, NOT the keystore registered
+# in Google Play Console. DO NOT upload this AAB directly to Google Play Store.
+#
+# For Play Store releases, you MUST:
+# 1. Build locally: ./gradlew bundleRelease
+# 2. Verify local.properties has the correct keystore path and password
+# 3. Upload app/release/app-release.aab from your local machine to Google Play Console
+#
+# See Issue #438 for more details on signing key mismatches:
+# https://github.com/hossain-khan/android-remote-notify/issues/438
+#
+# References:
 # - https://github.com/hossain-khan/android-remote-notify/tree/main/keystore
-# - https://github.com/hossain-khan/android-remote-notify/blob/main/app/build.gradle.kts (signing configuration)
+# - https://github.com/hossain-khan/android-remote-notify/blob/main/app/build.gradle.kts (signing config)
+# - https://github.com/hossain-khan/android-remote-notify/.github/copilot-instructions.md (release process)
 
 on:
   push:
@@ -62,20 +76,48 @@ jobs:
         id: keystore
         run: |
           if [ -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "⚠️ KEYSTORE_BASE64 secret is not set, using debug keystore for signing"
+            echo "⚠️ WARNING: KEYSTORE_BASE64 secret is not set"
+            echo "Using debug keystore for signing instead of release keystore"
+            echo "This build should NOT be uploaded to Google Play Store"
             echo "USE_RELEASE_KEYSTORE=false" >> $GITHUB_OUTPUT
           else
+            echo "📝 Attempting to decode release keystore from base64..."
             echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore/remote-notify-release.keystore
             if [ ! -s keystore/remote-notify-release.keystore ]; then
-              echo "❌ Failed to decode keystore file"
+              echo "❌ ERROR: Failed to decode keystore file or keystore is empty"
               exit 1
             fi
-            echo "✅ Release keystore decoded successfully"
+            # Verify keystore file
+            KEYSTORE_SIZE=$(stat -f%z keystore/remote-notify-release.keystore 2>/dev/null || stat -c%s keystore/remote-notify-release.keystore 2>/dev/null)
+            echo "✅ Release keystore decoded successfully (size: $KEYSTORE_SIZE bytes)"
+            echo "⚠️ NOTE: AAB signed with CI keystore, not Google Play registr​ed keystore"
+            echo "For Play Store uploads, use locally-built AAB with correct keystore"
             echo "USE_RELEASE_KEYSTORE=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Build Release APK and AAB
-        run: ./gradlew assembleRelease bundleRelease --parallel --daemon
+        run: |
+          echo "🏗️ Building Release APK and AAB..."
+          if [ "${{ steps.keystore.outputs.USE_RELEASE_KEYSTORE }}" = "true" ]; then
+            echo "📦 Signing with CI release keystore (NOT Google Play registered keystore)"
+          else
+            echo "📦 Signing with debug keystore (development only)"
+          fi
+          
+          ./gradlew assembleRelease bundleRelease --parallel --daemon
+          
+          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+            APK_SIZE=$(stat -f%z app/build/outputs/apk/release/app-release.apk 2>/dev/null || stat -c%s app/build/outputs/apk/release/app-release.apk 2>/dev/null)
+            echo "✅ APK built successfully (size: $APK_SIZE bytes)"
+          fi
+          
+          if [ -f app/build/outputs/bundle/release/app-release.aab ]; then
+            AAB_SIZE=$(stat -f%z app/build/outputs/bundle/release/app-release.aab 2>/dev/null || stat -c%s app/build/outputs/bundle/release/app-release.aab 2>/dev/null)
+            echo "✅ AAB built successfully (size: $AAB_SIZE bytes)"
+            echo "⚠️ REMINDER: This AAB is signed with CI keystore"
+            echo "⚠️ DO NOT upload this AAB to Google Play Store"
+            echo "✅ For Play Store, build locally: ./gradlew bundleRelease"
+          fi
         env:
           # Only set KEYSTORE_FILE when release keystore was decoded successfully
           # Otherwise, build.gradle.kts will fall back to debug keystore
@@ -112,6 +154,20 @@ jobs:
           name: remote-notify-aab
           path: artifact/remote-notify-v${{ steps.version.outputs.VERSION }}.aab
           retention-days: 30
+
+      # ⚠️ IMPORTANT: Signing & Google Play Store Upload
+      # ================================================
+      # The APK and AAB built here are for GitHub releases and testing ONLY.
+      # They are signed with the CI keystore, NOT the keystore registered in Google Play Console.
+      #
+      # FOR GOOGLE PLAY STORE RELEASES:
+      # 1. Do NOT use the AAB from this workflow
+      # 2. Build locally on your machine: ./gradlew bundleRelease
+      # 3. Verify local.properties has correct keystore path and password
+      # 4. Verify keystore SHA1 fingerprint matches Google Play Console
+      # 5. Upload app/release/app-release.aab to Google Play Console from your local machine
+      #
+      # See Issue #438 and copilot-instructions.md for detailed release process.
 
       # If this is running due to a GitHub release, attach the APK and AAB to the release
       - name: Attach APK and AAB to GitHub Release
@@ -182,3 +238,20 @@ jobs:
             cat upload_response_aab.json
             exit 1
           fi
+          
+          echo ""
+          echo "=================================="
+          echo "🔐 SIGNING NOTICE"
+          echo "=================================="
+          echo "✅ APK and AAB successfully built and attached to GitHub release"
+          echo "⚠️  These artifacts are signed with the CI keystore"
+          echo "⚠️  They are for testing and GitHub releases ONLY"
+          echo "❌ DO NOT upload to Google Play Store from this workflow"
+          echo ""
+          echo "📝 For Google Play Store releases:"
+          echo "   1. Build locally: ./gradlew bundleRelease"
+          echo "   2. Upload from local machine: app/release/app-release.aab"
+          echo ""
+          echo "📖 See .github/copilot-instructions.md for detailed release process"
+          echo "🔗 Issue #438: https://github.com/hossain-khan/android-remote-notify/issues/438"
+          echo "=================================="
