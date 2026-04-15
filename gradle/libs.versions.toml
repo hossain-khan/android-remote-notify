@@ -7,11 +7,11 @@ adaptiveAndroid = "1.2.0"
 
 # Android Studio version and AGP version compatibility
 # https://developer.android.com/studio/releases#android_gradle_plugin_and_android_studio_compatibility
-agp = "8.13.2"
+agp = "9.1.1"
 
 # Metro - A multiplatform dependency injection framework for Kotlin
 # https://zacsweers.github.io/metro/
-metro = "0.13.1"
+metro = "0.13.2"
 
 # https://github.com/slackhq/circuit/releases
 circuit = "0.33.1"
@@ -28,12 +28,28 @@ dataStore = "1.2.1"
 # https://github.com/slackhq/EitherNet
 eithernet = "2.0.0"
 espressoCore = "3.7.0"
-firebaseBom = "34.11.0"
+firebaseBom = "34.12.0"
 
 # https://developer.android.com/develop/ui/compose/text/fonts
 googleFonts = "1.10.6"
 
 googlePlayReview = "2.0.2"
+
+# Google Services plugin
+# https://developers.google.com/android/guides/google-services-plugin
+googleServices = "4.4.4"
+
+# Firebase Crashlytics plugin
+# https://firebase.google.com/docs/crashlytics/get-started?platform=android#add-sdk
+firebaseCrashlytics = "3.0.7"
+
+# Robolectric for Android testing
+# https://robolectric.org/
+robolectric = "4.16.1"
+
+# Kover - Kotlin code coverage
+# https://github.com/Kotlin/kotlinx-kover
+koverPlugin = "0.9.8"
 
 # Fluent assertions for Java and Android
 # https://truth.dev/ | https://github.com/google/truth
@@ -56,8 +72,8 @@ mockk = "1.14.9"
 # https://github.com/pinterest/ktlint
 kotlinter = "5.4.2"
 
-kotlinxSerializationJson = "1.10.0"
-kotlinxSerializationProperties = "1.10.0"
+kotlinxSerializationJson = "1.11.0"
+kotlinxSerializationProperties = "1.11.0"
 
 # Kotlin Symbol Processing API
 # https://kotlinlang.org/docs/ksp-overview.html
@@ -177,7 +193,7 @@ moshi-kotlin-codegen = { group = "com.squareup.moshi", name = "moshi-kotlin-code
 eithernet = { group = "com.slack.eithernet", name = "eithernet", version.ref = "eithernet" }
 eithernet-integration-retrofit = { group = "com.slack.eithernet", name = "eithernet-integration-retrofit", version.ref = "eithernet" }
 
-robolectric = { group = "org.robolectric", name = "robolectric", version = "4.16.1" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 # MockK mocking library for Kotlin
 # https://mockk.io
@@ -200,11 +216,6 @@ compose-lint-checks = { module = "com.slack.lint.compose:compose-lint-checks", v
 # Plugin for Android Applications
 # https://developer.android.com/build
 android-application = { id = "com.android.application", version.ref = "agp" }
-
-# Plugin for Android Libraries
-# https://developer.android.com/studio/projects/android-library
-# https://developer.android.com/build
-android-library = { id = "com.android.library", version.ref = "agp" }
 
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
@@ -233,10 +244,10 @@ metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 kotlinter = { id = "org.jmailen.kotlinter", version.ref = "kotlinter" }
 
 # Google Services plugin
-google-services = { id = "com.google.gms.google-services", version = "4.4.4" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 # https://firebase.google.com/docs/crashlytics/get-started?platform=android#add-sdk
-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.6" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlytics" }
 
 # Kover is a set of solutions for collecting test coverage of Kotlin code compiled for JVM and Android platforms.
 # https://github.com/Kotlin/kotlinx-kover?tab=readme-ov-file#kover-gradle-plugin
-kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.8" }
+kotlinx-kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "koverPlugin" }
