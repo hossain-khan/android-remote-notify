@@ -10,6 +10,11 @@
 
 -----------------------------------------------------------------------------
 
+## Release v1.20
+- ⚒️ Upgraded Metro DI framework to 1.0.0-RC2 for improved API stability and performance.
+- 🎯 Improved stability with latest dependency updates (AGP 9.1.1, Gradle 9.4.1).
+- 🐞 Fixed DI multi-binding issue from previous release.
+
 ## Release v1.19
 - Fix DI multi-binding issue causing app crash on launch for some users.
 
