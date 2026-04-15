@@ -11,7 +11,7 @@ agp = "9.1.1"
 
 # Metro - A multiplatform dependency injection framework for Kotlin
 # https://zacsweers.github.io/metro/
-metro = "0.13.1"
+metro = "0.13.2"
 
 # https://github.com/slackhq/circuit/releases
 circuit = "0.33.1"
@@ -28,7 +28,7 @@ dataStore = "1.2.1"
 # https://github.com/slackhq/EitherNet
 eithernet = "2.0.0"
 espressoCore = "3.7.0"
-firebaseBom = "34.11.0"
+firebaseBom = "34.12.0"
 
 # https://developer.android.com/develop/ui/compose/text/fonts
 googleFonts = "1.10.6"
@@ -41,7 +41,7 @@ googleServices = "4.4.4"
 
 # Firebase Crashlytics plugin
 # https://firebase.google.com/docs/crashlytics/get-started?platform=android#add-sdk
-firebaseCrashlytics = "3.0.6"
+firebaseCrashlytics = "3.0.7"
 
 # Robolectric for Android testing
 # https://robolectric.org/
@@ -72,8 +72,8 @@ mockk = "1.14.9"
 # https://github.com/pinterest/ktlint
 kotlinter = "5.4.2"
 
-kotlinxSerializationJson = "1.10.0"
-kotlinxSerializationProperties = "1.10.0"
+kotlinxSerializationJson = "1.11.0"
+kotlinxSerializationProperties = "1.11.0"
 
 # Kotlin Symbol Processing API
 # https://kotlinlang.org/docs/ksp-overview.html
@@ -216,11 +216,6 @@ compose-lint-checks = { module = "com.slack.lint.compose:compose-lint-checks", v
 # Plugin for Android Applications
 # https://developer.android.com/build
 android-application = { id = "com.android.application", version.ref = "agp" }
-
-# Plugin for Android Libraries
-# https://developer.android.com/studio/projects/android-library
-# https://developer.android.com/build
-android-library = { id = "com.android.library", version.ref = "agp" }
 
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
