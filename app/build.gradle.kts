@@ -1,4 +1,7 @@
+@file:OptIn(DelicateMetroGradleApi::class)
+
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
+import dev.zacsweers.metro.gradle.DelicateMetroGradleApi
 import java.util.Properties
 
 plugins {
@@ -259,13 +262,9 @@ ksp {
 }
 
 metro {
-    // Enable Metro code generation for assisted injection factories.
-    // https://zacsweers.github.io/metro/injection-types/#automatic-assisted-factory-generation
-    // generateAssistedFactories.set(true)
-
-    enableKotlinVersionCompatibilityChecks = true
-
-    reportsDestination = layout.buildDirectory.asFile.get().resolve("reports/metro")
+    // Report destination for Metro debugging and analysis
+    // https://zacsweers.github.io/metro/0.13.2/debugging/?h=reportsdestination#reports
+    reportsDestination.set(layout.buildDirectory.dir("metro/reports"))
 }
 
 
