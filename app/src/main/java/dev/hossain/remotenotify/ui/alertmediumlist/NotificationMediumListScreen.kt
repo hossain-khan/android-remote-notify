@@ -113,14 +113,14 @@ data object NotificationMediumListScreen : Screen {
     /**
      * Represents events that can occur on the [NotificationMediumListScreen].
      */
-    sealed class Event : CircuitUiEvent {
+    sealed interface Event : CircuitUiEvent {
         /**
          * Event triggered when the user wants to edit the configuration of a notification medium.
          * @property notifierType The type of the notifier to edit.
          */
         data class EditMediumConfig(
             val notifierType: NotifierType,
-        ) : Event()
+        ) : Event
 
         /**
          * Event triggered when the user wants to reset the configuration of a notification medium.
@@ -128,7 +128,7 @@ data object NotificationMediumListScreen : Screen {
          */
         data class ResetMediumConfig(
             val notifierType: NotifierType,
-        ) : Event()
+        ) : Event
 
         /**
          * Event triggered when the worker interval is updated.
@@ -136,17 +136,17 @@ data object NotificationMediumListScreen : Screen {
          */
         data class OnWorkerIntervalUpdated(
             val minutes: Long,
-        ) : Event()
+        ) : Event
 
         /**
          * Event triggered when the user wants to share feedback.
          */
-        data object ShareFeedback : Event()
+        data object ShareFeedback : Event
 
         /**
          * Event triggered when the user wants to navigate back.
          */
-        data object NavigateBack : Event()
+        data object NavigateBack : Event
     }
 }
 

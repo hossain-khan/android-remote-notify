@@ -72,18 +72,18 @@ data object AboutAppScreen : Screen {
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
-        data object GoBack : Event()
+    sealed interface Event : CircuitUiEvent {
+        data object GoBack : Event
 
-        data object OpenGitHubProject : Event()
+        data object OpenGitHubProject : Event
 
-        data object OpenLearnMoreSheet : Event()
+        data object OpenLearnMoreSheet : Event
 
-        data object DismissLearnMoreSheet : Event()
+        data object DismissLearnMoreSheet : Event
 
-        data object OpenBackupRestore : Event()
+        data object OpenBackupRestore : Event
 
-        data object OpenDeveloperPortal : Event()
+        data object OpenDeveloperPortal : Event
     }
 }
 

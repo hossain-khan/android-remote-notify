@@ -109,38 +109,38 @@ data object DeveloperPortalScreen : Screen {
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
-        data object GoBack : Event()
+    sealed interface Event : CircuitUiEvent {
+        data object GoBack : Event
 
         data class SimulateBatteryAlert(
             val simulatedLevel: Int,
-        ) : Event()
+        ) : Event
 
         data class SimulateStorageAlert(
             val simulatedStorageGb: Int,
-        ) : Event()
+        ) : Event
 
         data class TestNotificationChannel(
             val channelType: NotifierType,
-        ) : Event()
+        ) : Event
 
-        data object NavigateToAlertsList : Event()
+        data object NavigateToAlertsList : Event
 
-        data object ShowClearLogsDialog : Event()
+        data object ShowClearLogsDialog : Event
 
-        data object DismissClearLogsDialog : Event()
+        data object DismissClearLogsDialog : Event
 
-        data object ConfirmClearLogs : Event()
+        data object ConfirmClearLogs : Event
 
-        data object ShowBatteryOptSheet : Event()
+        data object ShowBatteryOptSheet : Event
 
-        data object DismissBatteryOptSheet : Event()
+        data object DismissBatteryOptSheet : Event
 
-        data object ResetBatteryOptPreference : Event()
+        data object ResetBatteryOptPreference : Event
 
-        data object OpenBatterySettings : Event()
+        data object OpenBatterySettings : Event
 
-        data object TriggerOneTimeWork : Event()
+        data object TriggerOneTimeWork : Event
     }
 }
 

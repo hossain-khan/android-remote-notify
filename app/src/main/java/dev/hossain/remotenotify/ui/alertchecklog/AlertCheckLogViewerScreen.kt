@@ -126,29 +126,29 @@ data object AlertCheckLogViewerScreen : Screen {
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
-        data object NavigateBack : Event()
+    sealed interface Event : CircuitUiEvent {
+        data object NavigateBack : Event
 
-        data object ToggleTriggeredOnly : Event()
+        data object ToggleTriggeredOnly : Event
 
         data class FilterByAlertType(
             val alertType: AlertType?,
-        ) : Event()
+        ) : Event
 
         data class FilterByNotifierType(
             val notifierType: NotifierType?,
-        ) : Event()
+        ) : Event
 
         data class FilterByDateRange(
             val startDate: Long?,
             val endDate: Long?,
-        ) : Event()
+        ) : Event
 
-        data object ClearFilters : Event()
+        data object ClearFilters : Event
 
         data class ExportLogs(
             val logs: List<AlertCheckLog>,
-        ) : Event()
+        ) : Event
     }
 }
 
