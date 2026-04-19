@@ -90,28 +90,28 @@ data class AddNewRemoteAlertScreen(
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
+    sealed interface Event : CircuitUiEvent {
         data class SaveNotification(
             val notification: RemoteAlert,
-        ) : Event()
+        ) : Event
 
-        data object NavigateBack : Event()
+        data object NavigateBack : Event
 
-        data object ShowBatteryOptimizationSheet : Event()
+        data object ShowBatteryOptimizationSheet : Event
 
-        data object DismissBatteryOptimizationSheet : Event()
+        data object DismissBatteryOptimizationSheet : Event
 
-        data object OpenBatterySettings : Event()
+        data object OpenBatterySettings : Event
 
-        data object HideBatteryOptimizationReminder : Event()
+        data object HideBatteryOptimizationReminder : Event
 
         data class UpdateAlertType(
             val alertType: AlertType,
-        ) : Event()
+        ) : Event
 
         data class UpdateThreshold(
             val value: Int,
-        ) : Event()
+        ) : Event
     }
 }
 

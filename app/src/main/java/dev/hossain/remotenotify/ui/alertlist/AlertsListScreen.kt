@@ -96,26 +96,26 @@ data object AlertsListScreen : Screen {
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
+    sealed interface Event : CircuitUiEvent {
         data class DeleteNotification(
             val notification: RemoteAlert,
-        ) : Event()
+        ) : Event
 
         data class EditRemoteAlert(
             val notification: RemoteAlert,
-        ) : Event()
+        ) : Event
 
-        data object AddNotification : Event()
+        data object AddNotification : Event
 
-        data object AddNotificationDestination : Event()
+        data object AddNotificationDestination : Event
 
-        data object NavigateToAbout : Event()
+        data object NavigateToAbout : Event
 
-        data object ShowEducationSheet : Event()
+        data object ShowEducationSheet : Event
 
-        data object DismissEducationSheet : Event()
+        data object DismissEducationSheet : Event
 
-        data object ViewAllLogs : Event()
+        data object ViewAllLogs : Event
     }
 }
 

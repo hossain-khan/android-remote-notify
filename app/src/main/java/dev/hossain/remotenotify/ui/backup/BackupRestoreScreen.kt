@@ -96,33 +96,33 @@ data object BackupRestoreScreen : Screen {
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
-        data object GoBack : Event()
+    sealed interface Event : CircuitUiEvent {
+        data object GoBack : Event
 
-        data object ShowExportDialog : Event()
+        data object ShowExportDialog : Event
 
-        data object DismissExportDialog : Event()
+        data object DismissExportDialog : Event
 
         data class ExportConfig(
             val password: String,
             val uri: Uri,
-        ) : Event()
+        ) : Event
 
         data class ImportFileSelected(
             val uri: Uri,
-        ) : Event()
+        ) : Event
 
         data class PasswordEntered(
             val password: String,
-        ) : Event()
+        ) : Event
 
-        data object DismissImportPasswordDialog : Event()
+        data object DismissImportPasswordDialog : Event
 
-        data object ConfirmImport : Event()
+        data object ConfirmImport : Event
 
-        data object DismissImportConfirmDialog : Event()
+        data object DismissImportConfirmDialog : Event
 
-        data object ClearMessage : Event()
+        data object ClearMessage : Event
     }
 }
 

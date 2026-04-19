@@ -90,18 +90,18 @@ data class ConfigureNotificationMediumScreen constructor(
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
+    sealed interface Event : CircuitUiEvent {
         data class UpdateConfigValue(
             val alertMediumConfig: AlertMediumConfig?,
-        ) : Event()
+        ) : Event
 
-        data object SaveConfig : Event()
+        data object SaveConfig : Event
 
-        data object TestConfig : Event()
+        data object TestConfig : Event
 
-        data object DismissSnackbar : Event()
+        data object DismissSnackbar : Event
 
-        data object NavigateBack : Event()
+        data object NavigateBack : Event
     }
 
     @Parcelize
