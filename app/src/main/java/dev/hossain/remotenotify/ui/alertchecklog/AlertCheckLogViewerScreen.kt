@@ -73,6 +73,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -613,6 +614,7 @@ private fun ActiveFiltersSection(
     modifier: Modifier = Modifier,
     onClearFilter: (String) -> Unit,
 ) {
+    val locale = LocalConfiguration.current.locales[0]
     Column(
         modifier =
             modifier
@@ -724,14 +726,14 @@ private fun ActiveFiltersSection(
 
                                 dateRange.first != null -> {
                                     "From ${
-                                        SimpleDateFormat("MMM dd", Locale.getDefault())
+                                        SimpleDateFormat("MMM dd", locale)
                                             .format(Date(dateRange.first!!))
                                     }"
                                 }
 
                                 else -> {
                                     "Until ${
-                                        SimpleDateFormat("MMM dd", Locale.getDefault())
+                                        SimpleDateFormat("MMM dd", locale)
                                             .format(Date(dateRange.second!!))
                                     }"
                                 }

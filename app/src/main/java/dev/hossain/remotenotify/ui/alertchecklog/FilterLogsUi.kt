@@ -25,6 +25,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,7 @@ internal fun FilterBottomSheetContent(
     onClearFilters: () -> Unit,
     onClose: () -> Unit,
 ) {
+    val locale = LocalConfiguration.current.locales[0]
     Column(
         modifier =
             Modifier
@@ -158,7 +160,7 @@ internal fun FilterBottomSheetContent(
             OutlinedTextField(
                 value =
                     if (currentState.dateRange.first != null) {
-                        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                        SimpleDateFormat("MMM dd, yyyy", locale)
                             .format(Date(currentState.dateRange.first!!))
                     } else {
                         ""
@@ -181,7 +183,7 @@ internal fun FilterBottomSheetContent(
             OutlinedTextField(
                 value =
                     if (currentState.dateRange.second != null) {
-                        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                        SimpleDateFormat("MMM dd, yyyy", locale)
                             .format(Date(currentState.dateRange.second!!))
                     } else {
                         ""

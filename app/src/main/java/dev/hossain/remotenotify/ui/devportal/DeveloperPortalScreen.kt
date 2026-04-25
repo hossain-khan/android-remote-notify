@@ -540,8 +540,8 @@ fun DeveloperPortalUi(
     val scope = rememberCoroutineScope()
 
     // Show snackbar when simulation result changes
-    state.simulationResult?.let { result ->
-        scope.launch {
+    LaunchedEffect(state.simulationResult) {
+        state.simulationResult?.let { result ->
             snackbarHostState.showSnackbar(result)
         }
     }
