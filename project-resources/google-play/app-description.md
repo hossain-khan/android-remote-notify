@@ -5,7 +5,7 @@
 Tired of your remote Android devices running out of juice 🔋 or storage 💾 when you're not around?
 **Remote Notify** has got your back! This smart app keeps an eye on your remote device's battery and storage levels and alerts you when it's time to take action — no matter where you are!
 
-Stay in control with notifications via 📬 Email, Twilio (SMS via API) 📲, Slack 💬, Telegram 📢, Webhooks 🔗, and more!
+Stay in control with notifications via 📬 Email, Twilio (SMS via API) 📲, Slack 💬, Discord 🎮, Telegram 📢, Webhooks 🔗, and more!
 
 ---
 
@@ -15,7 +15,7 @@ Stay in control with notifications via 📬 Email, Twilio (SMS via API) 📲, Sl
 
 Never let your remote devices die on you again! Whether you're managing one device or many, this app ensures you're always in the loop when battery 🔋 or storage 💾 levels drop too low. Get notified before it's too late — even when your devices are miles away!
 
-📲 Install the app on each devices you want to monitor and configure the notification medium, and you are set to receive alerts when the threshold is met. ✅
+📲 Install the app on each device you want to monitor and configure the notification medium, and you are set to receive alerts when the threshold is met. ✅
 
 ---
 
@@ -24,7 +24,7 @@ Never let your remote devices die on you again! Whether you're managing one devi
 - 🔋 **Real-time Monitoring**: Keep tabs on your remote device's battery and storage levels on the home screen.
 - 📲 **Custom Alerts**: Set up personalized triggers for battery (5%-50%) and storage (down to 2GB).
 - ➕ **Easy Management**: Add, edit, or delete alerts with a swipe — and undo if you change your mind (coming soon)!
-- 🛡️ **Multiple Notification Methods**: Get notified via Twilio (SMS via API), Telegram, REST webhooks, and more.
+- 🛡️ **Multiple Notification Methods**: Get notified via Email, Twilio (SMS via API), Slack, Discord, Telegram, REST webhooks, and more.
 - ⚙️ **Flexible Settings**: Choose how often checks happen — every 30 mins, 2 hours, or your own schedule!
 - 📊 **Detailed Stats**: Track notification history and see how your remote device's battery and storage levels change over time (coming soon).
 - 💡 **Dark & Light Mode**: Enjoy a beautiful, Material 3 design in both themes!

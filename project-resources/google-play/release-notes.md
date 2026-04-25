@@ -2,11 +2,12 @@
 📝 Release notes 
 
 ### Release Checklist
-- [ ] Update version code and name in `build.gradle`.
+- [ ] Update version code and name in `app/build.gradle.kts`.
 - [ ] Update `release-notes.md` with release notes.
 - [ ] Check `local.properties` for correct keystore path and password.
-- [ ] Run release APK build and test.
-- [ ] Upload and test release APK via Firebase Test Lab.
+- [ ] Build release bundle **locally**: `./gradlew clean assembleRelease bundleRelease`.
+- [ ] Test release build locally.
+- [ ] **Upload AAB to Google Play Console from your local machine** (not from GitHub Actions).
 
 -----------------------------------------------------------------------------
 

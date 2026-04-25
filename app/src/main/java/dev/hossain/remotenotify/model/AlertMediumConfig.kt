@@ -19,6 +19,10 @@ sealed interface AlertMediumConfig {
     /**
      * Configuration for Webhook (REST API) alert notifications.
      *
+     * This configuration is used by both the generic REST webhook notifier and
+     * the Slack workflow webhook notifier. The notifier type is determined by
+     * the [dev.hossain.remotenotify.notifier.NotifierType] of the sender.
+     *
      * @property url The webhook URL that will receive POST requests with notification data.
      *             Must be a valid HTTP/HTTPS URL.
      */
@@ -32,11 +36,23 @@ sealed interface AlertMediumConfig {
          * @see [Twilio Account SID](https://www.twilio.com/docs/iam/api/authtoken)
          */
         val accountSid: String,
+        /** Twilio Auth Token used to authenticate API requests. */
         val authToken: String,
+        /** The Twilio phone number to send the SMS from (E.164 format, e.g., "+15551234567"). */
         val fromPhone: String,
+        /** The recipient phone number for the SMS (E.164 format, e.g., "+15557654321"). */
         val toPhone: String,
     ) : AlertMediumConfig
 
+    /**
+     * Configuration for Email (Mailgun API) alert notifications.
+     *
+     * @property apiKey The Mailgun API key for authenticating requests.
+     * @property domain The Mailgun sending domain (e.g., "mg.example.com").
+     * @property fromEmail The sender email address (e.g., "alerts@mg.example.com").
+     * @property toEmail The recipient email address that will receive the alert notifications.
+     * @see [Mailgun API Documentation](https://documentation.mailgun.com/en/latest/api-intro.html)
+     */
     data class EmailConfig(
         val apiKey: String,
         val domain: String,
