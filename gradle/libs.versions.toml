@@ -7,16 +7,16 @@ adaptiveAndroid = "1.2.0"
 
 # Android Studio version and AGP version compatibility
 # https://developer.android.com/studio/releases#android_gradle_plugin_and_android_studio_compatibility
-agp = "9.1.1"
+agp = "9.2.0"
 
 # Metro - A multiplatform dependency injection framework for Kotlin
 # https://zacsweers.github.io/metro/
-metro = "1.0.0-RC2"
+metro = "1.0.0-RC4"
 
 # https://github.com/slackhq/circuit/releases
 circuit = "0.33.1"
 
-composeBom = "2026.03.01"
+composeBom = "2026.04.01"
 composeLintChecks = "1.4.2"
 composeMaterial3 = "1.4.0"
 coreKtx = "1.18.0"
@@ -78,7 +78,7 @@ kotlinxSerializationProperties = "1.11.0"
 # Kotlin Symbol Processing API
 # https://kotlinlang.org/docs/ksp-overview.html
 # https://github.com/google/ksp/releases
-ksp = "2.3.6"
+ksp = "2.3.7"
 
 lifecycleRuntimeKtx = "2.10.0"
 

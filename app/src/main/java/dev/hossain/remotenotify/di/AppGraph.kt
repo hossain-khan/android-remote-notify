@@ -8,7 +8,6 @@ import androidx.work.WorkerFactory
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Multibinds
-import dev.zacsweers.metro.Provider
 import dev.zacsweers.metro.Provides
 import kotlin.reflect.KClass
 
@@ -29,7 +28,7 @@ interface AppGraph {
      * A multibinding map of activity classes to their providers accessible for
      * [ComposeAppComponentFactory].
      */
-    @Multibinds val activityProviders: Map<KClass<out Activity>, Provider<Activity>>
+    @Multibinds val activityProviders: Map<KClass<out Activity>, () -> Activity>
 
     val workManager: WorkManager
 
