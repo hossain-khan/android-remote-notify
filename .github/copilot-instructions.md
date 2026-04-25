@@ -4,12 +4,12 @@
 
 ## Project Overview
 
-**Android Remote Notify** is a specialized Android application that monitors battery and storage levels on remote Android devices and sends notifications when thresholds are exceeded. The app supports multiple notification channels including Email, Twilio SMS, Slack webhooks, Telegram, and REST webhooks.
+**Android Remote Notify** is a specialized Android application that monitors battery and storage levels on remote Android devices and sends notifications when thresholds are exceeded. The app supports multiple notification channels including Email, Twilio SMS, Slack webhooks, Discord webhooks, Telegram, and REST webhooks.
 
 ### Key Features
 - 🔋 Battery level monitoring with customizable thresholds
 - 💾 Storage space monitoring with configurable alerts
-- 📧 Multi-channel notifications (Email, SMS, Slack, Telegram, Webhooks)
+- 📧 Multi-channel notifications (Email, SMS, Slack, Discord, Telegram, Webhooks)
 - ⏰ Periodic background monitoring using WorkManager
 - 📊 Alert history and logging with filtering capabilities
 - 🎨 Modern Material3 UI with dark/light theme support
@@ -25,7 +25,7 @@
 ## Technology Stack & Architecture
 
 ### Core Technologies
-- **Language**: Kotlin 2.2.0 with Java 17 compatibility
+- **Language**: Kotlin 2.3.20 with Java 17 compatibility
 - **UI Framework**: Jetpack Compose with Material3 design system
 - **Minimum SDK**: 30 (Android 11)
 - **Target SDK**: 35 (Android 15)
@@ -33,10 +33,10 @@
 ### Architecture Components
 - **Navigation & State Management**: [Slack Circuit](https://slackhq.github.io/circuit/) - Compose-driven architecture
 - **Dependency Injection**: [Metro](https://zacsweers.github.io/metro/) - Kotlin-first dependency injection framework
-- **Database**: Room 2.7.1 with SQLite backend
-- **Networking**: Retrofit 3.0.0 + OkHttp 4.12.0 + Moshi 1.15.2
-- **Background Processing**: WorkManager 2.10.1 for periodic health checks
-- **Data Storage**: DataStore 1.1.6 for preferences and configuration
+- **Database**: Room 2.8.4 with SQLite backend
+- **Networking**: Retrofit 3.0.0 + OkHttp 5.3.2 + Moshi 1.15.2
+- **Background Processing**: WorkManager 2.11.2 for periodic health checks
+- **Data Storage**: DataStore 1.2.1 for preferences and configuration
 - **Asynchronous Operations**: Kotlin Coroutines with Flow for reactive streams
 
 ### Supporting Libraries
@@ -143,18 +143,19 @@ data object SettingsScreen : Screen {
         val eventSink: (Event) -> Unit,
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
-        data object NavigateBack : Event()
+    sealed interface Event : CircuitUiEvent {
+        data object NavigateBack : Event
         // ... other events
     }
 }
 
 // Presenter with Metro assisted injection
-@Inject
-class SettingsPresenter(
-    @Assisted private val navigator: Navigator,
-    // Inject other dependencies
-) : Presenter<SettingsScreen.State> {
+@AssistedInject
+class SettingsPresenter
+    constructor(
+        @Assisted private val navigator: Navigator,
+        // Inject other dependencies
+    ) : Presenter<SettingsScreen.State> {
     
     @Composable
     override fun present(): SettingsScreen.State {

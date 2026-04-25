@@ -161,8 +161,8 @@ app/src/main/java/dev/hossain/remotenotify/ui/devportal/
 ```kotlin
 data class State(
     val currentBatteryLevel: Int,
-    val currentStorageGb: Double,
-    val maxStorageGb: Int,
+    val currentStorageGb: Long,
+    val maxStorageGb: Long,
     val buildVersion: String,
     val isSimulating: Boolean,
     val simulationResult: String?,
@@ -183,20 +183,20 @@ data class State(
 
 #### Event Handling
 ```kotlin
-sealed class Event : CircuitUiEvent {
-    data object GoBack : Event()
-    data class SimulateBatteryAlert(val simulatedLevel: Int) : Event()
-    data class SimulateStorageAlert(val simulatedStorageGb: Int) : Event()
-    data class TestNotificationChannel(val notifierType: NotifierType) : Event()
-    data object NavigateToAlertsList : Event()
-    data object ShowClearLogsDialog : Event()
-    data object DismissClearLogsDialog : Event()
-    data object ConfirmClearLogs : Event()
-    data object ShowBatteryOptSheet : Event()
-    data object DismissBatteryOptSheet : Event()
-    data object ResetBatteryOptPreference : Event()
-    data object OpenBatterySettings : Event()
-    data object TriggerOneTimeWork : Event()
+sealed interface Event : CircuitUiEvent {
+    data object GoBack : Event
+    data class SimulateBatteryAlert(val simulatedLevel: Int) : Event
+    data class SimulateStorageAlert(val simulatedStorageGb: Int) : Event
+    data class TestNotificationChannel(val channelType: NotifierType) : Event
+    data object NavigateToAlertsList : Event
+    data object ShowClearLogsDialog : Event
+    data object DismissClearLogsDialog : Event
+    data object ConfirmClearLogs : Event
+    data object ShowBatteryOptSheet : Event
+    data object DismissBatteryOptSheet : Event
+    data object ResetBatteryOptPreference : Event
+    data object OpenBatterySettings : Event
+    data object TriggerOneTimeWork : Event
 }
 ```
 
@@ -206,15 +206,16 @@ The presenter uses Metro's assisted injection:
 
 ```kotlin
 @AssistedInject
-class DeveloperPortalPresenter constructor(
-    @Assisted private val navigator: Navigator,
-    private val analytics: Analytics,
-    private val batteryMonitor: BatteryMonitor,
-    private val storageMonitor: StorageMonitor,
-    private val repository: RemoteAlertRepository,
-    private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
-    private val appPreferencesDataStore: AppPreferencesDataStore,
-) : Presenter<DeveloperPortalScreen.State>
+class DeveloperPortalPresenter
+    constructor(
+        @Assisted private val navigator: Navigator,
+        private val analytics: Analytics,
+        private val batteryMonitor: BatteryMonitor,
+        private val storageMonitor: StorageMonitor,
+        private val repository: RemoteAlertRepository,
+        private val notifiers: Set<@JvmSuppressWildcards NotificationSender>,
+        private val appPreferencesDataStore: AppPreferencesDataStore,
+    ) : Presenter<DeveloperPortalScreen.State>
 ```
 
 All dependencies are automatically provided by Metro's dependency graph.
