@@ -61,6 +61,7 @@ import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.model.AlertCheckLog
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.WorkerStatus
@@ -497,8 +498,19 @@ fun NotificationItem(
             Text(
                 text =
                     when (remoteAlert) {
-                        is RemoteAlert.BatteryAlert -> "Battery Alert"
-                        is RemoteAlert.StorageAlert -> "Storage Alert"
+                        is RemoteAlert.BatteryAlert ->
+                            if (remoteAlert.alertMode == AlertMode.PERIODIC) {
+                                "Battery Status"
+                            } else {
+                                "Battery Alert"
+                            }
+
+                        is RemoteAlert.StorageAlert ->
+                            if (remoteAlert.alertMode == AlertMode.PERIODIC) {
+                                "Storage Status"
+                            } else {
+                                "Storage Alert"
+                            }
                     },
                 style = MaterialTheme.typography.titleSmall,
             )
@@ -510,23 +522,35 @@ fun NotificationItem(
             ) {
                 when (remoteAlert) {
                     is RemoteAlert.BatteryAlert -> {
-                        LinearProgressIndicator(
-                            progress = { remoteAlert.batteryPercentage / 100f },
-                            modifier =
-                                Modifier
-                                    .weight(1f)
-                                    .height(4.dp),
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "${remoteAlert.batteryPercentage}%",
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                        if (remoteAlert.alertMode == AlertMode.PERIODIC) {
+                            Text(
+                                text = "Sends current battery status every check interval",
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        } else {
+                            LinearProgressIndicator(
+                                progress = { remoteAlert.batteryPercentage / 100f },
+                                modifier =
+                                    Modifier
+                                        .weight(1f)
+                                        .height(4.dp),
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "${remoteAlert.batteryPercentage}%",
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
                     }
 
                     is RemoteAlert.StorageAlert -> {
                         Text(
-                            text = "Min Storage: ${remoteAlert.storageMinSpaceGb} GB",
+                            text =
+                                if (remoteAlert.alertMode == AlertMode.PERIODIC) {
+                                    "Sends current storage status every check interval"
+                                } else {
+                                    "Min Storage: ${remoteAlert.storageMinSpaceGb} GB"
+                                },
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }

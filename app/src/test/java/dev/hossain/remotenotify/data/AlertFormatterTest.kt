@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.data
 
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.DeviceAlert
 import dev.hossain.remotenotify.model.RemoteAlert
 import org.junit.Assert.assertTrue
@@ -182,5 +183,45 @@ class AlertFormatterTest {
         // Then
         assertTrue("Should contain battery percentage", result.contains("15%"))
         assertTrue("Should contain critical low message", result.contains("critically low"))
+    }
+
+    @Test
+    fun `periodic battery status with current level does not show threshold`() {
+        // Given
+        val batteryAlert =
+            RemoteAlert.BatteryAlert(
+                alertId = 1L,
+                batteryPercentage = 15,
+                currentBatteryLevel = 80,
+                alertMode = AlertMode.PERIODIC,
+            )
+
+        // When
+        val result = alertFormatter.format(batteryAlert, DeviceAlert.FormatType.TEXT)
+
+        // Then
+        assertTrue("Should contain current battery level", result.contains("Battery Level: 80%"))
+        assertTrue("Should not contain threshold value", !result.contains("Threshold:"))
+        assertTrue("Should not indicate critical status", !result.contains("Critical"))
+    }
+
+    @Test
+    fun `periodic storage status with current storage does not show threshold`() {
+        // Given
+        val storageAlert =
+            RemoteAlert.StorageAlert(
+                alertId = 1L,
+                storageMinSpaceGb = 10,
+                currentStorageGb = 42.0,
+                alertMode = AlertMode.PERIODIC,
+            )
+
+        // When
+        val result = alertFormatter.format(storageAlert, DeviceAlert.FormatType.TEXT)
+
+        // Then
+        assertTrue("Should contain current storage value", result.contains("Storage Space Available: 42.0 GB"))
+        assertTrue("Should not contain threshold value", !result.contains("Threshold:"))
+        assertTrue("Should not indicate critical status", !result.contains("Critical"))
     }
 }

@@ -18,6 +18,11 @@ sealed interface RemoteAlert {
     val alertId: Long
 
     /**
+     * Defines whether this alert sends only when the threshold is met or every periodic worker run.
+     */
+    val alertMode: AlertMode
+
+    /**
      * Represents an alert condition based on battery percentage.
      * The alert is typically triggered when the battery level drops to or below the specified [batteryPercentage].
      *
@@ -29,6 +34,7 @@ sealed interface RemoteAlert {
         override val alertId: Long = 0,
         val batteryPercentage: Int,
         val currentBatteryLevel: Int? = null,
+        override val alertMode: AlertMode = AlertMode.THRESHOLD,
     ) : RemoteAlert
 
     /**
@@ -43,6 +49,7 @@ sealed interface RemoteAlert {
         override val alertId: Long = 0,
         val storageMinSpaceGb: Int,
         val currentStorageGb: Double? = null,
+        override val alertMode: AlertMode = AlertMode.THRESHOLD,
     ) : RemoteAlert
 }
 
@@ -58,6 +65,7 @@ internal fun RemoteAlert.toAlertConfigEntity(): AlertConfigEntity =
                 batteryPercentage = batteryPercentage,
                 type = AlertType.BATTERY,
                 storageMinSpaceGb = 0,
+                alertMode = alertMode,
             )
         }
 
@@ -67,6 +75,7 @@ internal fun RemoteAlert.toAlertConfigEntity(): AlertConfigEntity =
                 storageMinSpaceGb = storageMinSpaceGb,
                 type = AlertType.STORAGE,
                 batteryPercentage = 0,
+                alertMode = alertMode,
             )
         }
     }
@@ -87,8 +96,8 @@ internal fun RemoteAlert.toAlertType(): AlertType =
  */
 internal fun AlertConfigEntity.toRemoteAlert(): RemoteAlert =
     when (type) {
-        AlertType.BATTERY -> RemoteAlert.BatteryAlert(id, batteryPercentage)
-        AlertType.STORAGE -> RemoteAlert.StorageAlert(id, storageMinSpaceGb)
+        AlertType.BATTERY -> RemoteAlert.BatteryAlert(id, batteryPercentage, alertMode = alertMode)
+        AlertType.STORAGE -> RemoteAlert.StorageAlert(id, storageMinSpaceGb, alertMode = alertMode)
     }
 
 /**

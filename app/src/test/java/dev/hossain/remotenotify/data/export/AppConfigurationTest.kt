@@ -1,6 +1,7 @@
 package dev.hossain.remotenotify.data.export
 
 import com.google.common.truth.Truth.assertThat
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.AlertType
 import org.junit.Test
 
@@ -16,6 +17,7 @@ class AppConfigurationTest {
         assertThat(alertConfig.type).isEqualTo(AlertType.BATTERY)
         assertThat(alertConfig.batteryPercentage).isEqualTo(20)
         assertThat(alertConfig.storageMinSpaceGb).isNull()
+        assertThat(alertConfig.alertMode).isEqualTo(AlertMode.THRESHOLD)
     }
 
     @Test
@@ -24,11 +26,13 @@ class AppConfigurationTest {
             AlertConfig(
                 type = AlertType.STORAGE,
                 storageMinSpaceGb = 5,
+                alertMode = AlertMode.PERIODIC,
             )
 
         assertThat(alertConfig.type).isEqualTo(AlertType.STORAGE)
         assertThat(alertConfig.storageMinSpaceGb).isEqualTo(5)
         assertThat(alertConfig.batteryPercentage).isNull()
+        assertThat(alertConfig.alertMode).isEqualTo(AlertMode.PERIODIC)
     }
 
     @Test

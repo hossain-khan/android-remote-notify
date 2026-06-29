@@ -47,7 +47,7 @@ class DeviceAlertTest {
 
         val result = alert.format(DeviceAlert.FormatType.TEXT)
 
-        assertThat(result).contains("Battery Level is at 10%")
+        assertThat(result).contains("Battery Level: 10%")
     }
 
     @Test
@@ -153,12 +153,14 @@ class DeviceAlertTest {
                 deviceModel = "Pixel 7",
                 androidVersion = "14",
                 batteryLevel = 5,
+                isStatusReport = true,
                 timestamp = fixedTimestamp,
             )
 
         val result = alert.format(DeviceAlert.FormatType.EXTENDED_TEXT)
 
-        assertThat(result).contains("critically low at 5%")
+        assertThat(result).contains("Device battery level is 5%")
+        assertThat(result).contains("No action required.")
     }
 
     @Test
@@ -208,12 +210,14 @@ class DeviceAlertTest {
                 deviceModel = "Galaxy S23",
                 androidVersion = "13",
                 availableStorageGb = 8.5,
+                isStatusReport = true,
                 timestamp = fixedTimestamp,
             )
 
         val result = alert.format(DeviceAlert.FormatType.EXTENDED_TEXT)
 
-        assertThat(result).contains("Available storage space is low (8.5 GB)")
+        assertThat(result).contains("Available storage space is 8.5 GB")
+        assertThat(result).contains("No action required.")
     }
 
     @Test

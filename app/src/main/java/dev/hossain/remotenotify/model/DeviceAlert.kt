@@ -28,6 +28,8 @@ data class DeviceAlert(
     val availableStorageGb: Double? = null,
     /** The storage threshold in Gigabytes (GB) that triggered this alert. Null if not applicable to storage alerts. */
     val storageThresholdGb: Double? = null,
+    /** Whether this is a scheduled status report rather than a threshold-triggered alert. */
+    val isStatusReport: Boolean = false,
     /** The timestamp when the alert was generated. Defaults to the current time. */
     val timestamp: LocalDateTime = LocalDateTime.now(),
 ) {
@@ -89,7 +91,7 @@ data class DeviceAlert(
                         }
 
                         batteryLevel != null -> {
-                            "Battery Level is at $batteryLevel%"
+                            "Battery Level: $batteryLevel%"
                         }
 
                         else -> {
@@ -137,14 +139,22 @@ data class DeviceAlert(
                             }
 
                             batteryLevel != null -> {
-                                "Device battery is critically low at $batteryLevel%"
+                                if (isStatusReport) {
+                                    "Device battery level is $batteryLevel%"
+                                } else {
+                                    "Device battery is critically low at $batteryLevel%"
+                                }
                             }
 
                             else -> {
                                 "Device battery is critically low"
                             }
                         },
-                        "Please connect your device to a charger to prevent shutdown.",
+                        if (batteryThresholdPercent != null || !isStatusReport) {
+                            "Please connect your device to a charger to prevent shutdown."
+                        } else {
+                            "No action required."
+                        },
                     )
                 }
 
@@ -152,18 +162,29 @@ data class DeviceAlert(
                     Pair(
                         when {
                             storageThresholdGb != null && availableStorageGb != null -> {
-                                "Available storage space is critically low (Current: $availableStorageGb GB, Threshold: $storageThresholdGb GB)"
+                                buildString {
+                                    append("Available storage space is critically low ")
+                                    append("(Current: $availableStorageGb GB, Threshold: $storageThresholdGb GB)")
+                                }
                             }
 
                             availableStorageGb != null -> {
-                                "Available storage space is low ($availableStorageGb GB)"
+                                if (isStatusReport) {
+                                    "Available storage space is $availableStorageGb GB"
+                                } else {
+                                    "Available storage space is low ($availableStorageGb GB)"
+                                }
                             }
 
                             else -> {
                                 "Available storage space is low"
                             }
                         },
-                        "Consider removing unused apps or media files to free up space.",
+                        if (storageThresholdGb != null || !isStatusReport) {
+                            "Consider removing unused apps or media files to free up space."
+                        } else {
+                            "No action required."
+                        },
                     )
                 }
             }
@@ -191,14 +212,22 @@ data class DeviceAlert(
                             }
 
                             batteryLevel != null -> {
-                                "Device battery is critically low at $batteryLevel%"
+                                if (isStatusReport) {
+                                    "Device battery level is $batteryLevel%"
+                                } else {
+                                    "Device battery is critically low at $batteryLevel%"
+                                }
                             }
 
                             else -> {
                                 "Device battery is critically low"
                             }
                         },
-                        "Please connect your device to a charger to prevent shutdown.",
+                        if (batteryThresholdPercent != null || !isStatusReport) {
+                            "Please connect your device to a charger to prevent shutdown."
+                        } else {
+                            "No action required."
+                        },
                     )
                 }
 
@@ -206,18 +235,29 @@ data class DeviceAlert(
                     Pair(
                         when {
                             storageThresholdGb != null && availableStorageGb != null -> {
-                                "Available storage space is critically low (Current: $availableStorageGb GB, Threshold: $storageThresholdGb GB)"
+                                buildString {
+                                    append("Available storage space is critically low ")
+                                    append("(Current: $availableStorageGb GB, Threshold: $storageThresholdGb GB)")
+                                }
                             }
 
                             availableStorageGb != null -> {
-                                "Available storage space is low ($availableStorageGb GB)"
+                                if (isStatusReport) {
+                                    "Available storage space is $availableStorageGb GB"
+                                } else {
+                                    "Available storage space is low ($availableStorageGb GB)"
+                                }
                             }
 
                             else -> {
                                 "Available storage space is low"
                             }
                         },
-                        "Consider removing unused apps or media files to free up space.",
+                        if (storageThresholdGb != null || !isStatusReport) {
+                            "Consider removing unused apps or media files to free up space."
+                        } else {
+                            "No action required."
+                        },
                     )
                 }
             }

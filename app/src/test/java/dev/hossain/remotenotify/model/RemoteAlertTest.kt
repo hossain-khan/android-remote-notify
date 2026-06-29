@@ -17,17 +17,19 @@ class RemoteAlertTest {
         assertThat(entity.batteryPercentage).isEqualTo(20)
         assertThat(entity.type).isEqualTo(AlertType.BATTERY)
         assertThat(entity.storageMinSpaceGb).isEqualTo(0)
+        assertThat(entity.alertMode).isEqualTo(AlertMode.THRESHOLD)
     }
 
     @Test
     fun `given storage alert, when toAlertConfigEntity, then returns correct entity`() {
-        val storageAlert = RemoteAlert.StorageAlert(alertId = 2L, storageMinSpaceGb = 5)
+        val storageAlert = RemoteAlert.StorageAlert(alertId = 2L, storageMinSpaceGb = 5, alertMode = AlertMode.PERIODIC)
         val entity: AlertConfigEntity = storageAlert.toAlertConfigEntity()
 
         assertThat(entity.id).isEqualTo(2L)
         assertThat(entity.storageMinSpaceGb).isEqualTo(5)
         assertThat(entity.type).isEqualTo(AlertType.STORAGE)
         assertThat(entity.batteryPercentage).isEqualTo(0)
+        assertThat(entity.alertMode).isEqualTo(AlertMode.PERIODIC)
     }
 
     @Test
@@ -70,6 +72,7 @@ class RemoteAlertTest {
                 batteryPercentage = 20,
                 type = AlertType.BATTERY,
                 storageMinSpaceGb = 0,
+                alertMode = AlertMode.PERIODIC,
             )
         val remoteAlert = entity.toRemoteAlert()
 
@@ -77,6 +80,7 @@ class RemoteAlertTest {
         val batteryAlert = remoteAlert as RemoteAlert.BatteryAlert
         assertThat(batteryAlert.alertId).isEqualTo(1L)
         assertThat(batteryAlert.batteryPercentage).isEqualTo(20)
+        assertThat(batteryAlert.alertMode).isEqualTo(AlertMode.PERIODIC)
     }
 
     @Test
@@ -94,5 +98,6 @@ class RemoteAlertTest {
         val storageAlert = remoteAlert as RemoteAlert.StorageAlert
         assertThat(storageAlert.alertId).isEqualTo(2L)
         assertThat(storageAlert.storageMinSpaceGb).isEqualTo(5)
+        assertThat(storageAlert.alertMode).isEqualTo(AlertMode.THRESHOLD)
     }
 }

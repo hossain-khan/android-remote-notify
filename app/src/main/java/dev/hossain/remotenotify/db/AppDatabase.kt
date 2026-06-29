@@ -12,12 +12,15 @@ import androidx.room.RoomDatabase
  */
 @Database(
     entities = [AlertConfigEntity::class, AlertCheckLogEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = true,
     // https://developer.android.com/training/data-storage/room/migrating-db-versions
     // https://github.com/hossain-khan/android-weather-alert/issues/272#issuecomment-2629512823
     // https://medium.com/androiddevelopers/room-auto-migrations-d5370b0ca6eb
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2),
+        AutoMigration(from = 2, to = 3),
+    ],
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun notificationDao(): AlertConfigDao

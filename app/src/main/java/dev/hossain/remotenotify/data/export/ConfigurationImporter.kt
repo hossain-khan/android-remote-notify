@@ -10,6 +10,7 @@ import dev.hossain.remotenotify.data.TelegramConfigDataStore
 import dev.hossain.remotenotify.data.TwilioConfigDataStore
 import dev.hossain.remotenotify.data.WebhookConfigDataStore
 import dev.hossain.remotenotify.model.AlertMediumConfig
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.zacsweers.metro.AppScope
@@ -145,18 +146,24 @@ class ConfigurationImporter
             configuration.alerts.forEach { alert ->
                 when (alert.type) {
                     AlertType.BATTERY -> {
-                        if (alert.batteryPercentage == null) {
+                        if (alert.alertMode == AlertMode.THRESHOLD && alert.batteryPercentage == null) {
                             errors.add("Battery alert missing batteryPercentage")
-                        } else if (alert.batteryPercentage < 0 || alert.batteryPercentage > 100) {
-                            errors.add("Invalid battery percentage: ${alert.batteryPercentage}")
+                        }
+                        alert.batteryPercentage?.let { batteryPercentage ->
+                            if (batteryPercentage < 0 || batteryPercentage > 100) {
+                                errors.add("Invalid battery percentage: $batteryPercentage")
+                            }
                         }
                     }
 
                     AlertType.STORAGE -> {
-                        if (alert.storageMinSpaceGb == null) {
+                        if (alert.alertMode == AlertMode.THRESHOLD && alert.storageMinSpaceGb == null) {
                             errors.add("Storage alert missing storageMinSpaceGb")
-                        } else if (alert.storageMinSpaceGb < 0) {
-                            errors.add("Invalid storage space: ${alert.storageMinSpaceGb}")
+                        }
+                        alert.storageMinSpaceGb?.let { storageMinSpaceGb ->
+                            if (storageMinSpaceGb < 0) {
+                                errors.add("Invalid storage space: $storageMinSpaceGb")
+                            }
                         }
                     }
                 }
@@ -188,12 +195,14 @@ class ConfigurationImporter
                         AlertType.BATTERY -> {
                             RemoteAlert.BatteryAlert(
                                 batteryPercentage = alertConfig.batteryPercentage ?: 20,
+                                alertMode = alertConfig.alertMode,
                             )
                         }
 
                         AlertType.STORAGE -> {
                             RemoteAlert.StorageAlert(
                                 storageMinSpaceGb = alertConfig.storageMinSpaceGb ?: 1,
+                                alertMode = alertConfig.alertMode,
                             )
                         }
                     }

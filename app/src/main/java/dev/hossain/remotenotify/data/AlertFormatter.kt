@@ -1,5 +1,6 @@
 package dev.hossain.remotenotify.data
 
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.DeviceAlert
 import dev.hossain.remotenotify.model.DeviceAlert.FormatType
@@ -39,11 +40,14 @@ class AlertFormatter
                             batteryLevel = remoteAlert.currentBatteryLevel ?: remoteAlert.batteryPercentage,
                             // Only show threshold label when current value is present
                             batteryThresholdPercent =
-                                if (remoteAlert.currentBatteryLevel != null) {
+                                if (remoteAlert.alertMode == AlertMode.THRESHOLD &&
+                                    remoteAlert.currentBatteryLevel != null
+                                ) {
                                     remoteAlert.batteryPercentage
                                 } else {
                                     null
                                 },
+                            isStatusReport = remoteAlert.alertMode == AlertMode.PERIODIC,
                         )
                     }
 
@@ -54,13 +58,14 @@ class AlertFormatter
                             availableStorageGb = remoteAlert.currentStorageGb ?: remoteAlert.storageMinSpaceGb.toDouble(),
                             // Only show threshold label when current value is present
                             storageThresholdGb =
-                                if (remoteAlert.currentStorageGb !=
-                                    null
+                                if (remoteAlert.alertMode == AlertMode.THRESHOLD &&
+                                    remoteAlert.currentStorageGb != null
                                 ) {
                                     remoteAlert.storageMinSpaceGb.toDouble()
                                 } else {
                                     null
                                 },
+                            isStatusReport = remoteAlert.alertMode == AlertMode.PERIODIC,
                         )
                     }
                 }
