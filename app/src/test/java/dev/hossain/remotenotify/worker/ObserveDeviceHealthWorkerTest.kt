@@ -178,6 +178,7 @@ class ObserveDeviceHealthWorkerTest {
     fun `doWork sends periodic battery status when threshold is not met`() =
         runTest {
             // Given
+            every { notificationSender.notifierType } returns NotifierType.TELEGRAM
             val batteryAlert =
                 RemoteAlert.BatteryAlert(
                     alertId = 1L,
@@ -197,7 +198,31 @@ class ObserveDeviceHealthWorkerTest {
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify { notificationSender.sendNotification(statusAlert) }
             coVerify(exactly = 0) { repository.getLatestCheckForAlert(any()) }
-            coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 80, true, NotifierType.EMAIL) }
+            coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 80, true, NotifierType.TELEGRAM) }
+        }
+
+    @Test
+    fun `doWork skips email notification when alert mode is periodic`() =
+        runTest {
+            // Given
+            every { notificationSender.notifierType } returns NotifierType.EMAIL
+            val batteryAlert =
+                RemoteAlert.BatteryAlert(
+                    alertId = 1L,
+                    batteryPercentage = 20,
+                    alertMode = AlertMode.PERIODIC,
+                )
+
+            coEvery { repository.getAllRemoteAlert() } returns listOf(batteryAlert)
+            every { batteryMonitor.getBatteryLevel() } returns 80
+            every { storageMonitor.getAvailableStorageInGB() } returns 20L
+
+            // When
+            val result = worker.doWork()
+
+            // Then
+            assertEquals(ListenableWorker.Result.success(), result)
+            coVerify(exactly = 0) { notificationSender.sendNotification(any()) }
         }
 
     @Ignore("Test has incomplete mock setup - repository.insertAlertCheckLog needs proper mocking")
@@ -262,6 +287,7 @@ class ObserveDeviceHealthWorkerTest {
     fun `doWork sends periodic storage status when threshold is not met`() =
         runTest {
             // Given
+            every { notificationSender.notifierType } returns NotifierType.TELEGRAM
             val storageAlert =
                 RemoteAlert.StorageAlert(
                     alertId = 2L,
@@ -281,7 +307,7 @@ class ObserveDeviceHealthWorkerTest {
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify { notificationSender.sendNotification(statusAlert) }
             coVerify(exactly = 0) { repository.getLatestCheckForAlert(any()) }
-            coVerify { repository.insertAlertCheckLog(2L, AlertType.STORAGE, 42, true, NotifierType.EMAIL) }
+            coVerify { repository.insertAlertCheckLog(2L, AlertType.STORAGE, 42, true, NotifierType.TELEGRAM) }
         }
 
     @Test

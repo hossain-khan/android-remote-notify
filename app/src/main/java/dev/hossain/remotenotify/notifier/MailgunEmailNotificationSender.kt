@@ -6,6 +6,7 @@ import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.EmailConfigDataStore
 import dev.hossain.remotenotify.data.EmailQuotaManager
 import dev.hossain.remotenotify.model.AlertMediumConfig
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.DeviceAlert
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.toTypeDisplayName
@@ -35,6 +36,11 @@ class MailgunEmailNotificationSender
         override val notifierType: NotifierType = NotifierType.EMAIL
 
         override suspend fun sendNotification(remoteAlert: RemoteAlert): Boolean {
+            if (remoteAlert.alertMode == AlertMode.PERIODIC) {
+                Timber.i("Skipping EMAIL notification for PERIODIC alert due to daily quota limit")
+                return true
+            }
+
             if (!emailQuotaManager.canSendEmail()) {
                 Timber.w("Daily email quota exceeded")
                 return false
