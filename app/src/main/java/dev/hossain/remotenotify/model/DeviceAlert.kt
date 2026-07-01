@@ -28,11 +28,12 @@ data class DeviceAlert(
     val availableStorageGb: Double? = null,
     /** The storage threshold in Gigabytes (GB) that triggered this alert. Null if not applicable to storage alerts. */
     val storageThresholdGb: Double? = null,
-    /** Whether this is a scheduled status report rather than a threshold-triggered alert. */
-    val isStatusReport: Boolean = false,
+    /** The mode under which the alert was triggered. */
+    val alertMode: AlertMode = AlertMode.THRESHOLD,
     /** The timestamp when the alert was generated. Defaults to the current time. */
     val timestamp: LocalDateTime = LocalDateTime.now(),
 ) {
+    internal val isStatusReport: Boolean get() = alertMode == AlertMode.PERIODIC
     /**
      * Formats the device alert information into a string representation based on the specified format type.
      *
@@ -74,6 +75,7 @@ data class DeviceAlert(
                 batteryThresholdPercent = batteryThresholdPercent,
                 availableStorageGb = availableStorageGb,
                 storageThresholdGb = storageThresholdGb,
+                alertMode = alertMode,
                 isoDateTime = timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             )
         return payload.toJson()

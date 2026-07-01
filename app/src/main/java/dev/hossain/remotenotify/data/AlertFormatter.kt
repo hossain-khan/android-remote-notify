@@ -47,7 +47,7 @@ class AlertFormatter
                                 } else {
                                     null
                                 },
-                            isStatusReport = remoteAlert.alertMode == AlertMode.PERIODIC,
+                            alertMode = remoteAlert.alertMode,
                         )
                     }
 
@@ -65,7 +65,7 @@ class AlertFormatter
                                 } else {
                                     null
                                 },
-                            isStatusReport = remoteAlert.alertMode == AlertMode.PERIODIC,
+                            alertMode = remoteAlert.alertMode,
                         )
                     }
                 }

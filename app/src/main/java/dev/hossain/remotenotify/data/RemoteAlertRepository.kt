@@ -5,6 +5,7 @@ import dev.hossain.remotenotify.db.AlertCheckLogEntity
 import dev.hossain.remotenotify.db.AlertConfigDao
 import dev.hossain.remotenotify.db.AlertConfigEntity
 import dev.hossain.remotenotify.model.AlertCheckLog
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.toAlertCheckLog
@@ -49,6 +50,7 @@ interface RemoteAlertRepository {
         alertStateValue: Int,
         alertTriggered: Boolean,
         notifierType: NotifierType?,
+        alertMode: AlertMode = AlertMode.THRESHOLD,
     )
 
     fun getLatestCheckForAlert(alertId: Long): Flow<AlertCheckLog?>
@@ -104,8 +106,9 @@ class RemoteAlertRepositoryImpl
             alertStateValue: Int,
             alertTriggered: Boolean,
             notifierType: NotifierType?,
+            alertMode: AlertMode,
         ) {
-            Timber.d("Inserting alert check log for alertId=$alertId, type=$alertType, triggered=$alertTriggered")
+            Timber.d("Inserting alert check log for alertId=$alertId, type=$alertType, triggered=$alertTriggered, mode=$alertMode")
             alertCheckLogDao.insert(
                 AlertCheckLogEntity(
                     alertConfigId = alertId,
@@ -113,6 +116,7 @@ class RemoteAlertRepositoryImpl
                     alertStateValue = alertStateValue,
                     alertTriggered = alertTriggered,
                     notifierType = notifierType,
+                    alertMode = alertMode,
                 ),
             )
         }

@@ -113,8 +113,8 @@ class ObserveDeviceHealthWorker(
     private suspend fun wasThresholdAlertSentRecently(userConfiguredAlert: RemoteAlert): Boolean {
         val lastAlertLog: AlertCheckLog? = repository.getLatestCheckForAlert(userConfiguredAlert.alertId).first()
 
-        // Skip if last alert was triggered within 24 hours
-        if (lastAlertLog?.isAlertSent == true) {
+        // Skip if last alert was triggered within 24 hours AND it was a threshold-triggered alert
+        if (lastAlertLog?.isAlertSent == true && lastAlertLog.alertMode == AlertMode.THRESHOLD) {
             val hoursSinceLastAlert = (System.currentTimeMillis() - lastAlertLog.checkedOn) / (1000 * 60 * 60)
             if (hoursSinceLastAlert < 24) {
                 // NOTE: This is to avoid spamming threshold notifications.
@@ -138,7 +138,7 @@ class ObserveDeviceHealthWorker(
             sendNotification(userConfiguredAlert, alertType, stateValue)
         } else {
             Timber.tag(WORKER_LOG_TAG).d("Notification threshold not met. Not sending: $userConfiguredAlert for $alertType")
-            saveAlertCheckLog(userConfiguredAlert.alertId, alertType, stateValue, false, null)
+            saveAlertCheckLog(userConfiguredAlert.alertId, alertType, stateValue, false, null, userConfiguredAlert.alertMode)
         }
     }
 
@@ -158,7 +158,7 @@ class ObserveDeviceHealthWorker(
             .forEach { notifier ->
                 if (remoteAlert.alertMode == AlertMode.PERIODIC && notifier.notifierType == NotifierType.EMAIL) {
                     Timber.tag(WORKER_LOG_TAG).i("Skipping EMAIL notification for PERIODIC alert due to daily quota limit")
-                    saveAlertCheckLog(remoteAlert.alertId, alertType, stateValue, false, notifier.notifierType)
+                    saveAlertCheckLog(remoteAlert.alertId, alertType, stateValue, false, notifier.notifierType, remoteAlert.alertMode)
                     return@forEach
                 }
 
@@ -199,7 +199,7 @@ class ObserveDeviceHealthWorker(
                             // Log when alert is failed to send
                             analytics.logWorkFailed(notifier.notifierType, error)
                         }.onSuccess {
-                            saveAlertCheckLog(remoteAlert.alertId, alertType, stateValue, true, notifier.notifierType)
+                            saveAlertCheckLog(remoteAlert.alertId, alertType, stateValue, true, notifier.notifierType, remoteAlert.alertMode)
                             Timber.tag(WORKER_LOG_TAG).d("Notifier status: $it")
 
                             // Log when alert is successfully sent
@@ -221,6 +221,7 @@ class ObserveDeviceHealthWorker(
         stateValue: Int,
         alertSent: Boolean,
         notifierType: NotifierType?,
+        alertMode: AlertMode = AlertMode.THRESHOLD,
     ) {
         Timber.tag(WORKER_LOG_TAG).i("Saving alert check log for $alertId")
         repository.insertAlertCheckLog(
@@ -229,6 +230,7 @@ class ObserveDeviceHealthWorker(
             alertStateValue = stateValue,
             alertTriggered = alertSent,
             notifierType = notifierType,
+            alertMode = alertMode,
         )
     }
 }

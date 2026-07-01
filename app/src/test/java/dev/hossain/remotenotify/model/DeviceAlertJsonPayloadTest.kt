@@ -109,4 +109,21 @@ class DeviceAlertJsonPayloadTest {
         assertThat(result).startsWith("{")
         assertThat(result).endsWith("}")
     }
+
+    @Test
+    fun `toJson includes alertMode`() {
+        val payload =
+            DeviceAlertJsonPayload(
+                alertType = AlertType.BATTERY,
+                deviceModel = "Google Pixel 7",
+                androidVersion = "14",
+                batteryLevel = 80,
+                alertMode = AlertMode.PERIODIC,
+                isoDateTime = "2024-03-15T14:30:45",
+            )
+
+        val result = payload.toJson()
+
+        assertThat(result).contains("\"alertMode\":\"PERIODIC\"")
+    }
 }

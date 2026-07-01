@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.notifier.NotifierType
 
@@ -35,4 +36,5 @@ data class AlertCheckLogEntity(
      * This is nullable because the alert might be triggered by threshold set (e.g. battery level)
      */
     @ColumnInfo(name = "notifier_type") val notifierType: NotifierType?,
+    @ColumnInfo(name = "alert_mode", defaultValue = "'THRESHOLD'") val alertMode: AlertMode = AlertMode.THRESHOLD,
 )

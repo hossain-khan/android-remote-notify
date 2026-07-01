@@ -14,6 +14,7 @@ data class AlertCheckLog(
     val configBatteryPercentage: Int,
     val configStorageMinSpaceGb: Int,
     val configCreatedOn: Long,
+    val alertMode: AlertMode = AlertMode.THRESHOLD,
 )
 
 fun AlertCheckLogEntity.toAlertCheckLog(): AlertCheckLog =
@@ -27,6 +28,7 @@ fun AlertCheckLogEntity.toAlertCheckLog(): AlertCheckLog =
         configBatteryPercentage = 0,
         configStorageMinSpaceGb = 0,
         configCreatedOn = 0,
+        alertMode = alertMode,
     )
 
 fun AlertLogWithConfig.toAlertCheckLog(): AlertCheckLog =
@@ -40,4 +42,5 @@ fun AlertLogWithConfig.toAlertCheckLog(): AlertCheckLog =
         configBatteryPercentage = config.batteryPercentage,
         configStorageMinSpaceGb = config.storageMinSpaceGb,
         configCreatedOn = config.createdOn,
+        alertMode = log.alertMode,
     )

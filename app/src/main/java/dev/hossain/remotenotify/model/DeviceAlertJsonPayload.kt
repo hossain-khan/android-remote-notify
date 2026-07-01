@@ -47,6 +47,8 @@ data class DeviceAlertJsonPayload constructor(
     val availableStorageGb: Double? = null,
     @SerialName("storageThresholdGb")
     val storageThresholdGb: Double? = null,
+    @SerialName("alertMode")
+    val alertMode: AlertMode = AlertMode.THRESHOLD,
     @SerialName("isoDateTime")
     val isoDateTime: String,
 ) {

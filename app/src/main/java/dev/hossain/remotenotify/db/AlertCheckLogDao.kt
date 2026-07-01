@@ -23,7 +23,7 @@ interface AlertCheckLogDao {
         """
         SELECT * FROM alert_check_log 
         WHERE alert_config_id = :alertConfigId 
-        ORDER BY checked_at DESC 
+        ORDER BY checked_at DESC, is_alert_triggered DESC
         LIMIT 1
     """,
     )
@@ -53,7 +53,7 @@ interface AlertCheckLogDao {
     @Query(
         """
         SELECT * FROM alert_check_log 
-        ORDER BY checked_at DESC 
+        ORDER BY checked_at DESC, is_alert_triggered DESC
         LIMIT 1
     """,
     )

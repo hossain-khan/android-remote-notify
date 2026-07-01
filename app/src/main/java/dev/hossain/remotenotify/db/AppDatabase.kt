@@ -12,7 +12,7 @@ import androidx.room.RoomDatabase
  */
 @Database(
     entities = [AlertConfigEntity::class, AlertCheckLogEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = true,
     // https://developer.android.com/training/data-storage/room/migrating-db-versions
     // https://github.com/hossain-khan/android-weather-alert/issues/272#issuecomment-2629512823
@@ -20,6 +20,7 @@ import androidx.room.RoomDatabase
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
+        AutoMigration(from = 3, to = 4),
     ],
 )
 abstract class AppDatabase : RoomDatabase() {

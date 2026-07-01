@@ -77,7 +77,7 @@ class ObserveDeviceHealthWorkerTest {
         coEvery { analytics.logWorkSuccess() } just Runs
         coEvery { analytics.logWorkFailed(any(), any()) } just Runs
         coEvery { analytics.logAlertSent(any(), any()) } just Runs
-        coEvery { repository.insertAlertCheckLog(any(), any(), any(), any(), any()) } just Runs
+        coEvery { repository.insertAlertCheckLog(any(), any(), any(), any(), any(), any()) } just Runs
 
         // Add this to suppress errors from worker params
         every { workerParameters.runAttemptCount } returns 0
@@ -121,7 +121,7 @@ class ObserveDeviceHealthWorkerTest {
             // Then
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify(exactly = 0) { notificationSender.sendNotification(any()) }
-            coVerify(exactly = 0) { repository.insertAlertCheckLog(any(), any(), any(), any(), any()) }
+            coVerify(exactly = 0) { repository.insertAlertCheckLog(any(), any(), any(), any(), any(), any()) }
         }
 
     @Ignore("Test has incomplete mock setup - repository.insertAlertCheckLog needs proper mocking")
@@ -198,7 +198,7 @@ class ObserveDeviceHealthWorkerTest {
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify { notificationSender.sendNotification(statusAlert) }
             coVerify(exactly = 0) { repository.getLatestCheckForAlert(any()) }
-            coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 80, true, NotifierType.TELEGRAM) }
+            coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 80, true, NotifierType.TELEGRAM, AlertMode.PERIODIC) }
         }
 
     @Test
@@ -223,7 +223,7 @@ class ObserveDeviceHealthWorkerTest {
             // Then
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify(exactly = 0) { notificationSender.sendNotification(any()) }
-            coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 80, false, NotifierType.EMAIL) }
+            coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 80, false, NotifierType.EMAIL, AlertMode.PERIODIC) }
         }
 
     @Ignore("Test has incomplete mock setup - repository.insertAlertCheckLog needs proper mocking")
@@ -248,7 +248,7 @@ class ObserveDeviceHealthWorkerTest {
             // Then
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify(exactly = 0) { notificationSender.sendNotification(any()) }
-            coVerify(exactly = 1) { repository.insertAlertCheckLog(2L, AlertType.STORAGE, 10, false, null) }
+            coVerify(exactly = 1) { repository.insertAlertCheckLog(2L, AlertType.STORAGE, 10, false, null, AlertMode.THRESHOLD) }
         }
 
     @Test
@@ -280,6 +280,7 @@ class ObserveDeviceHealthWorkerTest {
                     alertStateValue = 8,
                     alertTriggered = true,
                     notifierType = NotifierType.EMAIL,
+                    alertMode = AlertMode.THRESHOLD
                 )
             }
         }
@@ -308,7 +309,7 @@ class ObserveDeviceHealthWorkerTest {
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify { notificationSender.sendNotification(statusAlert) }
             coVerify(exactly = 0) { repository.getLatestCheckForAlert(any()) }
-            coVerify { repository.insertAlertCheckLog(2L, AlertType.STORAGE, 42, true, NotifierType.TELEGRAM) }
+            coVerify { repository.insertAlertCheckLog(2L, AlertType.STORAGE, 42, true, NotifierType.TELEGRAM, AlertMode.PERIODIC) }
         }
 
     @Test
@@ -346,7 +347,7 @@ class ObserveDeviceHealthWorkerTest {
             // Then
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify(exactly = 0) { notificationSender.sendNotification(any()) }
-            coVerify(exactly = 0) { repository.insertAlertCheckLog(any(), any(), any(), any(), any()) }
+            coVerify(exactly = 0) { repository.insertAlertCheckLog(any(), any(), any(), any(), any(), any()) }
         }
 
     @Test
@@ -386,6 +387,46 @@ class ObserveDeviceHealthWorkerTest {
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify { notificationSender.sendNotification(triggeredAlert) }
             coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 15, true, NotifierType.EMAIL) }
+        }
+
+    @Test
+    fun `doWork notifies threshold alert when prior periodic alert was sent within 24 hours`() =
+        runTest {
+            // Given
+            val batteryAlert =
+                RemoteAlert.BatteryAlert(
+                    alertId = 1L,
+                    batteryPercentage = 20,
+                    alertMode = AlertMode.THRESHOLD,
+                )
+
+            val currentTime = System.currentTimeMillis()
+            val alertLog =
+                AlertCheckLog(
+                    checkedOn = currentTime - (2 * 60 * 60 * 1000), // 2 hours ago (less than 24)
+                    alertType = AlertType.BATTERY,
+                    isAlertSent = true,
+                    notifierType = NotifierType.EMAIL,
+                    stateValue = 15,
+                    configId = 1L,
+                    configBatteryPercentage = 20,
+                    configStorageMinSpaceGb = 0,
+                    configCreatedOn = currentTime - (30 * 24 * 60 * 60 * 1000),
+                    alertMode = AlertMode.PERIODIC,
+                )
+
+            coEvery { repository.getAllRemoteAlert() } returns listOf(batteryAlert)
+            every { batteryMonitor.getBatteryLevel() } returns 15 // Below threshold
+            every { storageMonitor.getAvailableStorageInGB() } returns 20L
+            coEvery { repository.getLatestCheckForAlert(1L) } returns flowOf(alertLog)
+
+            // When
+            val result = worker.doWork()
+
+            // Then
+            val triggeredAlert = batteryAlert.copy(currentBatteryLevel = 15)
+            assertEquals(ListenableWorker.Result.success(), result)
+            coVerify { notificationSender.sendNotification(triggeredAlert) }
         }
 
     @Test
@@ -479,7 +520,7 @@ class ObserveDeviceHealthWorkerTest {
             coEvery { repository.getLatestCheckForAlert(1L) } returns flowOf(null)
 
             // Mock the saveAlertCheckLog method since it's referenced in the success path
-            coEvery { repository.insertAlertCheckLog(any(), any(), any(), any(), any()) } returns Unit
+            coEvery { repository.insertAlertCheckLog(any(), any(), any(), any(), any(), any()) } returns Unit
 
             // When
             worker.doWork()

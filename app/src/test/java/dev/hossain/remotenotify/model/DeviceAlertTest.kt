@@ -153,7 +153,7 @@ class DeviceAlertTest {
                 deviceModel = "Pixel 7",
                 androidVersion = "14",
                 batteryLevel = 5,
-                isStatusReport = true,
+                alertMode = AlertMode.PERIODIC,
                 timestamp = fixedTimestamp,
             )
 
@@ -210,7 +210,7 @@ class DeviceAlertTest {
                 deviceModel = "Galaxy S23",
                 androidVersion = "13",
                 availableStorageGb = 8.5,
-                isStatusReport = true,
+                alertMode = AlertMode.PERIODIC,
                 timestamp = fixedTimestamp,
             )
 
@@ -385,12 +385,13 @@ class DeviceAlertTest {
                 deviceModel = "Pixel 7",
                 androidVersion = "14",
                 batteryLevel = 80,
-                isStatusReport = true,
+                alertMode = AlertMode.PERIODIC,
                 timestamp = fixedTimestamp,
             )
 
         assertThat(alert.format(DeviceAlert.FormatType.TEXT)).contains("ℹ️ Battery Status Report")
         assertThat(alert.format(DeviceAlert.FormatType.EXTENDED_TEXT)).contains("ℹ️ Status Report: Battery")
         assertThat(alert.format(DeviceAlert.FormatType.HTML)).contains("ℹ️ Battery Status Report")
+        assertThat(alert.format(DeviceAlert.FormatType.JSON)).contains("\"alertMode\":\"PERIODIC\"")
     }
 }
