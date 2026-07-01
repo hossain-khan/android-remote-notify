@@ -223,6 +223,7 @@ class ObserveDeviceHealthWorkerTest {
             // Then
             assertEquals(ListenableWorker.Result.success(), result)
             coVerify(exactly = 0) { notificationSender.sendNotification(any()) }
+            coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 80, false, NotifierType.EMAIL) }
         }
 
     @Ignore("Test has incomplete mock setup - repository.insertAlertCheckLog needs proper mocking")

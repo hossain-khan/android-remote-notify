@@ -118,7 +118,11 @@ data class DeviceAlert(
             }
 
         return buildString {
-            append("⚠️ ${alertType.name.toTitleCase()} Alert")
+            if (isStatusReport) {
+                append("ℹ️ ${alertType.name.toTitleCase()} Status Report")
+            } else {
+                append("⚠️ ${alertType.name.toTitleCase()} Alert")
+            }
             append("\n📱 ${deviceName()}")
             append("\n📍 Android $androidVersion")
             append("\n${getAlertEmoji()} $alertMessage")
@@ -190,11 +194,16 @@ data class DeviceAlert(
             }
 
         return buildString {
-            append("${getAlertEmoji()} Alert: ${alertType.name.toTitleCase()} Low\n\n")
+            if (isStatusReport) {
+                append("ℹ️ Status Report: ${alertType.name.toTitleCase()}\n\n")
+            } else {
+                append("${getAlertEmoji()} Alert: ${alertType.name.toTitleCase()} Low\n\n")
+            }
             append("📱 Device: ${deviceName()}\n")
             append("📍 System: Android $androidVersion\n")
             append("ℹ️ Status: $message\n")
-            append("⚡ Action: $action\n\n")
+            val actionPrefix = if (isStatusReport) "ℹ️ Action: " else "⚡ Action: "
+            append("$actionPrefix$action\n\n")
             append("🕒 Reported on: $formattedTimestamp")
         }
     }
@@ -262,14 +271,23 @@ data class DeviceAlert(
                 }
             }
 
+        val headerColor = if (isStatusReport) "#1976d2" else "#d32f2f"
+        val headerTitle =
+            if (isStatusReport) {
+                "ℹ️ ${alertType.name.toTitleCase()} Status Report"
+            } else {
+                "${getAlertEmoji()} ${alertType.name.toTitleCase()} Alert"
+            }
+        val actionLabel = if (isStatusReport) "ℹ️ Action:" else "⚡ Action Required:"
+
         return """
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #d32f2f;">${getAlertEmoji()} ${alertType.name.toTitleCase()} Alert</h2>
+                <h2 style="color: $headerColor;">$headerTitle</h2>
                 <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
                     <p style="margin: 5px 0;"><strong>📱 Device:</strong> ${deviceName()}</p>
                     <p style="margin: 5px 0;"><strong>📍 System:</strong> Android $androidVersion</p>
                     <p style="margin: 5px 0;"><strong>ℹ️ Status:</strong> $message</p>
-                    <p style="margin: 5px 0;"><strong>⚡ Action Required:</strong> $action</p>
+                    <p style="margin: 5px 0;"><strong>$actionLabel</strong> $action</p>
                     <p style="margin: 5px 0; color: #666;"><strong>🕒 Reported on:</strong> $formattedTimestamp</p>
                 </div>
                 <p style="font-size: 12px; color: #666;">

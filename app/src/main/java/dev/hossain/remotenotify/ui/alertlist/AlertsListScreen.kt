@@ -498,19 +498,21 @@ fun NotificationItem(
             Text(
                 text =
                     when (remoteAlert) {
-                        is RemoteAlert.BatteryAlert ->
+                        is RemoteAlert.BatteryAlert -> {
                             if (remoteAlert.alertMode == AlertMode.PERIODIC) {
                                 "Battery Status"
                             } else {
                                 "Battery Alert"
                             }
+                        }
 
-                        is RemoteAlert.StorageAlert ->
+                        is RemoteAlert.StorageAlert -> {
                             if (remoteAlert.alertMode == AlertMode.PERIODIC) {
                                 "Storage Status"
                             } else {
                                 "Storage Alert"
                             }
+                        }
                     },
                 style = MaterialTheme.typography.titleSmall,
             )

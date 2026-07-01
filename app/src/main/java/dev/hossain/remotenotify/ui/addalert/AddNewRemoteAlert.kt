@@ -526,19 +526,21 @@ fun AddNewRemoteAlertUi(
                     headlineContent = {
                         Text(
                             when (state.selectedAlertType) {
-                                AlertType.BATTERY ->
+                                AlertType.BATTERY -> {
                                     if (state.selectedAlertMode == AlertMode.PERIODIC) {
                                         "Battery Status"
                                     } else {
                                         "Battery Alert"
                                     }
+                                }
 
-                                AlertType.STORAGE ->
+                                AlertType.STORAGE -> {
                                     if (state.selectedAlertMode == AlertMode.PERIODIC) {
                                         "Storage Status"
                                     } else {
                                         "Storage Alert"
                                     }
+                                }
                             },
                         )
                     },
@@ -598,17 +600,19 @@ fun AddNewRemoteAlertUi(
                 onClick = {
                     val notification =
                         when (state.selectedAlertType) {
-                            AlertType.BATTERY ->
+                            AlertType.BATTERY -> {
                                 RemoteAlert.BatteryAlert(
                                     batteryPercentage = state.threshold,
                                     alertMode = state.selectedAlertMode,
                                 )
+                            }
 
-                            AlertType.STORAGE ->
+                            AlertType.STORAGE -> {
                                 RemoteAlert.StorageAlert(
                                     storageMinSpaceGb = state.threshold,
                                     alertMode = state.selectedAlertMode,
                                 )
+                            }
                         }
                     state.eventSink(AddNewRemoteAlertScreen.Event.SaveNotification(notification))
                 },

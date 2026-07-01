@@ -375,4 +375,22 @@ class DeviceAlertTest {
 
         assertThat(result).contains("💾")
     }
+
+    @Test
+    fun `status report formats headers appropriately`() {
+        val alert =
+            DeviceAlert(
+                alertType = AlertType.BATTERY,
+                deviceBrand = "Google",
+                deviceModel = "Pixel 7",
+                androidVersion = "14",
+                batteryLevel = 80,
+                isStatusReport = true,
+                timestamp = fixedTimestamp,
+            )
+
+        assertThat(alert.format(DeviceAlert.FormatType.TEXT)).contains("ℹ️ Battery Status Report")
+        assertThat(alert.format(DeviceAlert.FormatType.EXTENDED_TEXT)).contains("ℹ️ Status Report: Battery")
+        assertThat(alert.format(DeviceAlert.FormatType.HTML)).contains("ℹ️ Battery Status Report")
+    }
 }

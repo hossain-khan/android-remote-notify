@@ -158,6 +158,7 @@ class ObserveDeviceHealthWorker(
             .forEach { notifier ->
                 if (remoteAlert.alertMode == AlertMode.PERIODIC && notifier.notifierType == NotifierType.EMAIL) {
                     Timber.tag(WORKER_LOG_TAG).i("Skipping EMAIL notification for PERIODIC alert due to daily quota limit")
+                    saveAlertCheckLog(remoteAlert.alertId, alertType, stateValue, false, notifier.notifierType)
                     return@forEach
                 }
 
