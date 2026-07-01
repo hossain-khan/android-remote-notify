@@ -11,6 +11,15 @@
 
 -----------------------------------------------------------------------------
 
+## Release v1.21
+- 🆕 Added Periodic Status Reports mode to check and report remote device battery and storage health at regular intervals.
+- ℹ️ Cleanly formatted status reports across Discord, Telegram, Twilio SMS, and Webhooks with dedicated status headings and icons.
+- 📬 Automatically skips Email notifications during periodic checks to avoid daily Mailgun quota limits while recording check logs.
+- 📚 Upgraded dependencies: AGP 9.2.0, Metro DI 1.0.0-RC4, KSP 2.3.7, and Compose BOM 2026.04.01.
+- 🧪 Expanded unit test coverage and stability improvements.
+
+Full changelog: https://github.com/hossain-khan/android-remote-notify/releases/tag/v1.21
+
 ## Release v1.20
 - ⚒️ Upgraded Metro DI framework to 1.0.0-RC2 for improved API stability and performance.
 - 🎯 Improved stability with latest dependency updates (AGP 9.1.1, Gradle 9.4.1).
