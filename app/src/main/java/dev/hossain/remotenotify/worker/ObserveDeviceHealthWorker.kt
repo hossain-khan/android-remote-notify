@@ -7,6 +7,7 @@ import androidx.work.workDataOf
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.model.AlertCheckLog
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.monitor.BatteryMonitor
@@ -61,22 +62,15 @@ class ObserveDeviceHealthWorker(
 
             // Send notifications if thresholds are met
             userConfiguredAlerts.forEach { userConfiguredAlert: RemoteAlert ->
-                val lastAlertLog: AlertCheckLog? = repository.getLatestCheckForAlert(userConfiguredAlert.alertId).first()
-
-                // Skip if last alert was triggered within 24 hours
-                if (lastAlertLog?.isAlertSent == true) {
-                    val hoursSinceLastAlert = (System.currentTimeMillis() - lastAlertLog.checkedOn) / (1000 * 60 * 60)
-                    if (hoursSinceLastAlert < 24) {
-                        // NOTE: This is to avoid spamming the notification
-                        // If the 24 hour limit changes, make sure to update `Add Alert` screen to reflect that.
-                        Timber.tag(WORKER_LOG_TAG).d("Skipping alert: Last notification was sent $hoursSinceLastAlert hours ago")
-                        return@forEach
-                    }
+                if (userConfiguredAlert.alertMode == AlertMode.THRESHOLD && wasThresholdAlertSentRecently(userConfiguredAlert)) {
+                    return@forEach
                 }
 
                 when (userConfiguredAlert) {
                     is RemoteAlert.BatteryAlert -> {
-                        val triggered = deviceCurrentBatteryLevel <= userConfiguredAlert.batteryPercentage
+                        val triggered =
+                            userConfiguredAlert.alertMode == AlertMode.PERIODIC ||
+                                deviceCurrentBatteryLevel <= userConfiguredAlert.batteryPercentage
                         checkAndProcessAlert(
                             userConfiguredAlert = userConfiguredAlert,
                             triggered = triggered,
@@ -86,7 +80,9 @@ class ObserveDeviceHealthWorker(
                     }
 
                     is RemoteAlert.StorageAlert -> {
-                        val triggered = deviceCurrentAvailableStorage <= userConfiguredAlert.storageMinSpaceGb
+                        val triggered =
+                            userConfiguredAlert.alertMode == AlertMode.PERIODIC ||
+                                deviceCurrentAvailableStorage <= userConfiguredAlert.storageMinSpaceGb
                         checkAndProcessAlert(
                             userConfiguredAlert = userConfiguredAlert,
                             triggered = triggered,
@@ -112,6 +108,23 @@ class ObserveDeviceHealthWorker(
 
             return Result.failure()
         }
+    }
+
+    private suspend fun wasThresholdAlertSentRecently(userConfiguredAlert: RemoteAlert): Boolean {
+        val lastAlertLog: AlertCheckLog? = repository.getLatestCheckForAlert(userConfiguredAlert.alertId).first()
+
+        // Skip if last alert was triggered within 24 hours
+        if (lastAlertLog?.isAlertSent == true) {
+            val hoursSinceLastAlert = (System.currentTimeMillis() - lastAlertLog.checkedOn) / (1000 * 60 * 60)
+            if (hoursSinceLastAlert < 24) {
+                // NOTE: This is to avoid spamming threshold notifications.
+                // Periodic alerts intentionally send once per configured worker interval.
+                Timber.tag(WORKER_LOG_TAG).d("Skipping alert: Last notification was sent $hoursSinceLastAlert hours ago")
+                return true
+            }
+        }
+
+        return false
     }
 
     private suspend fun checkAndProcessAlert(
@@ -143,6 +156,12 @@ class ObserveDeviceHealthWorker(
         notifiers
             .filter { it.hasValidConfig() }
             .forEach { notifier ->
+                if (remoteAlert.alertMode == AlertMode.PERIODIC && notifier.notifierType == NotifierType.EMAIL) {
+                    Timber.tag(WORKER_LOG_TAG).i("Skipping EMAIL notification for PERIODIC alert due to daily quota limit")
+                    saveAlertCheckLog(remoteAlert.alertId, alertType, stateValue, false, notifier.notifierType)
+                    return@forEach
+                }
+
                 try {
                     Timber.tag(WORKER_LOG_TAG).i("Sending notification with ${notifier.notifierType}")
 
@@ -156,6 +175,7 @@ class ObserveDeviceHealthWorker(
                                     alertId = remoteAlert.alertId,
                                     batteryPercentage = remoteAlert.batteryPercentage, // Threshold from DB
                                     currentBatteryLevel = stateValue, // Current measured battery level
+                                    alertMode = remoteAlert.alertMode,
                                 )
                             }
 
@@ -164,6 +184,7 @@ class ObserveDeviceHealthWorker(
                                     alertId = remoteAlert.alertId,
                                     storageMinSpaceGb = remoteAlert.storageMinSpaceGb, // Threshold from DB
                                     currentStorageGb = stateValue.toDouble(), // Current measured storage
+                                    alertMode = remoteAlert.alertMode,
                                 )
                             }
                         }

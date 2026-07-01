@@ -1,6 +1,7 @@
 package dev.hossain.remotenotify.data.export
 
 import com.squareup.moshi.JsonClass
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.notifier.NotifierType
 
@@ -25,7 +26,7 @@ data class AppConfiguration(
     val preferences: AppPreferences = AppPreferences(),
 ) {
     companion object {
-        const val CURRENT_VERSION = 1
+        const val CURRENT_VERSION = 2
     }
 }
 
@@ -37,6 +38,7 @@ data class AlertConfig(
     val type: AlertType,
     val batteryPercentage: Int? = null,
     val storageMinSpaceGb: Int? = null,
+    val alertMode: AlertMode = AlertMode.THRESHOLD,
 )
 
 /**

@@ -3,6 +3,7 @@ package dev.hossain.remotenotify.db
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.BATTERY_PERCENTAGE_NONE
 import dev.hossain.remotenotify.model.STORAGE_MIN_SPACE_GB_NONE
@@ -15,6 +16,8 @@ data class AlertConfigEntity(
     val batteryPercentage: Int,
     @ColumnInfo(name = "storage_min_space_gb", defaultValue = STORAGE_MIN_SPACE_GB_NONE.toString())
     val storageMinSpaceGb: Int,
+    @ColumnInfo(name = "alert_mode", defaultValue = "'THRESHOLD'")
+    val alertMode: AlertMode = AlertMode.THRESHOLD,
     @ColumnInfo(name = "created_on")
     val createdOn: Long = System.currentTimeMillis(),
 )

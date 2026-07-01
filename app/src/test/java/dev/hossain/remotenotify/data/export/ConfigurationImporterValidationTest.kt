@@ -13,6 +13,7 @@ import dev.hossain.remotenotify.data.SlackWebhookConfigDataStore
 import dev.hossain.remotenotify.data.TelegramConfigDataStore
 import dev.hossain.remotenotify.data.TwilioConfigDataStore
 import dev.hossain.remotenotify.data.WebhookConfigDataStore
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.AlertType
 import io.mockk.mockk
 import org.junit.Before
@@ -150,6 +151,37 @@ class ConfigurationImporterValidationTest {
         assertThat(result).isInstanceOf(ImportValidationResult.Invalid::class.java)
         val invalid = result as ImportValidationResult.Invalid
         assertThat(invalid.errors.any { it.contains("storageMinSpaceGb") }).isTrue()
+    }
+
+    @Test
+    fun `parseAndValidate returns Valid for periodic alerts without thresholds`() {
+        val json =
+            """
+            {
+                "version": 2,
+                "exportedAt": 1234567890,
+                "alerts": [
+                    {
+                        "type": "BATTERY",
+                        "alertMode": "PERIODIC"
+                    },
+                    {
+                        "type": "STORAGE",
+                        "alertMode": "PERIODIC"
+                    }
+                ],
+                "notifiers": {},
+                "preferences": {}
+            }
+            """.trimIndent()
+
+        val result = importer.parseAndValidate(json)
+
+        assertThat(result).isInstanceOf(ImportValidationResult.Valid::class.java)
+        val valid = result as ImportValidationResult.Valid
+        assertThat(valid.configuration.alerts).hasSize(2)
+        assertThat(valid.configuration.alerts[0].alertMode).isEqualTo(AlertMode.PERIODIC)
+        assertThat(valid.configuration.alerts[1].alertMode).isEqualTo(AlertMode.PERIODIC)
     }
 
     @Test

@@ -52,7 +52,7 @@ jobs:
       # Sticky Pull Request Comment
       # https://github.com/marocchino/sticky-pull-request-comment
       - name: Post coverage comment
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           message: |
             ## Code Coverage Report

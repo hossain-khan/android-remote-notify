@@ -77,6 +77,7 @@ class ConfigurationExporter
                         AlertConfig(
                             type = AlertType.BATTERY,
                             batteryPercentage = alert.batteryPercentage,
+                            alertMode = alert.alertMode,
                         )
                     }
 
@@ -84,6 +85,7 @@ class ConfigurationExporter
                         AlertConfig(
                             type = AlertType.STORAGE,
                             storageMinSpaceGb = alert.storageMinSpaceGb,
+                            alertMode = alert.alertMode,
                         )
                     }
                 }

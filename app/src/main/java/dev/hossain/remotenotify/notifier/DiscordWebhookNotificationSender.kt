@@ -3,6 +3,7 @@ package dev.hossain.remotenotify.notifier
 import dev.hossain.remotenotify.data.ConfigValidationResult
 import dev.hossain.remotenotify.data.DiscordWebhookConfigDataStore
 import dev.hossain.remotenotify.model.AlertMediumConfig
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesIntoSet
@@ -31,6 +32,7 @@ class DiscordWebhookNotificationSender
             // Discord embed color codes (decimal)
             private const val COLOR_BATTERY_CRITICAL = 16711680 // #FF0000 (red)
             private const val COLOR_STORAGE_CRITICAL = 16753920 // #FFA500 (orange)
+            private const val COLOR_STATUS_REPORT = 3447003 // #3498DB (blue)
         }
 
         override suspend fun sendNotification(remoteAlert: RemoteAlert): Boolean {
@@ -63,20 +65,29 @@ class DiscordWebhookNotificationSender
             val deviceName = "${android.os.Build.BRAND.replaceFirstChar {
                 if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString()
             }} ${android.os.Build.MODEL}"
+            val isPeriodic = remoteAlert.alertMode == AlertMode.PERIODIC
 
             return when (remoteAlert) {
                 is RemoteAlert.BatteryAlert -> {
                     val currentLevel = remoteAlert.currentBatteryLevel ?: remoteAlert.batteryPercentage
                     val threshold = remoteAlert.batteryPercentage
 
+                    val desc =
+                        if (isPeriodic) {
+                            "Periodic battery status check report"
+                        } else {
+                            "Device battery level is critically low"
+                        }
+                    val thresholdLabel = if (isPeriodic) "📊 Configured Threshold" else "⚠️ Alert Threshold"
+
                     buildJsonEmbed(
-                        title = "🪫 Battery Alert",
-                        description = "Device battery level is critically low",
-                        color = COLOR_BATTERY_CRITICAL,
+                        title = if (isPeriodic) "🔋 Battery Status Report" else "🪫 Battery Alert",
+                        description = desc,
+                        color = if (isPeriodic) COLOR_STATUS_REPORT else COLOR_BATTERY_CRITICAL,
                         fields =
                             listOf(
                                 Field("🔋 Current Level", "$currentLevel%"),
-                                Field("⚠️ Alert Threshold", "$threshold%"),
+                                Field(thresholdLabel, "$threshold%"),
                                 Field("📱 Device", deviceName, inline = true),
                                 Field("📍 Android", android.os.Build.VERSION.RELEASE, inline = true),
                             ),
@@ -89,14 +100,22 @@ class DiscordWebhookNotificationSender
                     val currentStorage = remoteAlert.currentStorageGb ?: remoteAlert.storageMinSpaceGb.toDouble()
                     val threshold = remoteAlert.storageMinSpaceGb
 
+                    val desc =
+                        if (isPeriodic) {
+                            "Periodic storage space check report"
+                        } else {
+                            "Available storage space is critically low"
+                        }
+                    val thresholdLabel = if (isPeriodic) "📊 Configured Threshold" else "⚠️ Alert Threshold"
+
                     buildJsonEmbed(
-                        title = "💾 Storage Alert",
-                        description = "Available storage space is critically low",
-                        color = COLOR_STORAGE_CRITICAL,
+                        title = if (isPeriodic) "ℹ️ Storage Status Report" else "💾 Storage Alert",
+                        description = desc,
+                        color = if (isPeriodic) COLOR_STATUS_REPORT else COLOR_STORAGE_CRITICAL,
                         fields =
                             listOf(
                                 Field("💿 Available Space", String.format(Locale.US, "%.1f GB", currentStorage)),
-                                Field("⚠️ Alert Threshold", "$threshold GB"),
+                                Field(thresholdLabel, "$threshold GB"),
                                 Field("📱 Device", deviceName, inline = true),
                                 Field("📍 Android", android.os.Build.VERSION.RELEASE, inline = true),
                             ),

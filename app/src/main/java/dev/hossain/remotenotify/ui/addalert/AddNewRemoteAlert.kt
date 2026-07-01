@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -20,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -39,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -57,7 +61,9 @@ import com.slack.circuitx.effects.LaunchedImpressionEffect
 import dev.hossain.remotenotify.R
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AppPreferencesDataStore
+import dev.hossain.remotenotify.data.EmailConfigDataStore
 import dev.hossain.remotenotify.data.RemoteAlertRepository
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.model.toAlertType
@@ -83,6 +89,8 @@ data class AddNewRemoteAlertScreen(
         val showBatteryOptSheet: Boolean,
         val isBatteryOptimized: Boolean,
         val selectedAlertType: AlertType,
+        val selectedAlertMode: AlertMode,
+        val hasEmailConfigured: Boolean = false,
         val threshold: Int,
         val availableStorage: Int,
         val storageSliderMax: Int,
@@ -109,6 +117,10 @@ data class AddNewRemoteAlertScreen(
             val alertType: AlertType,
         ) : Event
 
+        data class UpdateAlertMode(
+            val alertMode: AlertMode,
+        ) : Event
+
         data class UpdateThreshold(
             val value: Int,
         ) : Event
@@ -123,6 +135,7 @@ class AddNewRemoteAlertPresenter
         private val remoteAlertRepository: RemoteAlertRepository,
         private val storageMonitor: StorageMonitor,
         private val appPreferencesDataStore: AppPreferencesDataStore,
+        private val emailConfigDataStore: EmailConfigDataStore,
         private val analytics: Analytics,
     ) : Presenter<AddNewRemoteAlertScreen.State> {
         @Composable
@@ -134,9 +147,11 @@ class AddNewRemoteAlertPresenter
                 mutableStateOf(BatteryOptimizationHelper.isIgnoringBatteryOptimizations(context))
             }
             var hideBatteryOptReminder by remember { mutableStateOf(false) }
+            var hasEmailConfigured by remember { mutableStateOf(false) }
 
             val isEditMode = screen.alertId != null
             var selectedType by remember { mutableStateOf(AlertType.BATTERY) }
+            var selectedMode by remember { mutableStateOf(AlertMode.THRESHOLD) }
             var threshold by remember { mutableIntStateOf(10) }
             var existingAlertId by remember { mutableStateOf<Long?>(null) }
 
@@ -169,11 +184,13 @@ class AddNewRemoteAlertPresenter
                     when (existingAlert) {
                         is RemoteAlert.BatteryAlert -> {
                             selectedType = AlertType.BATTERY
+                            selectedMode = existingAlert.alertMode
                             threshold = existingAlert.batteryPercentage
                         }
 
                         is RemoteAlert.StorageAlert -> {
                             selectedType = AlertType.STORAGE
+                            selectedMode = existingAlert.alertMode
                             threshold = existingAlert.storageMinSpaceGb
                         }
                     }
@@ -188,8 +205,13 @@ class AddNewRemoteAlertPresenter
             }
 
             LaunchedEffect(Unit) {
-                appPreferencesDataStore.hideBatteryOptReminder.collect { hidden ->
-                    hideBatteryOptReminder = hidden
+                launch {
+                    hasEmailConfigured = emailConfigDataStore.hasValidConfig()
+                }
+                launch {
+                    appPreferencesDataStore.hideBatteryOptReminder.collect { hidden ->
+                        hideBatteryOptReminder = hidden
+                    }
                 }
             }
 
@@ -214,6 +236,8 @@ class AddNewRemoteAlertPresenter
                 showBatteryOptSheet = showBatteryOptimizeSheet,
                 isBatteryOptimized = isBatteryOptimized,
                 selectedAlertType = selectedType,
+                selectedAlertMode = selectedMode,
+                hasEmailConfigured = hasEmailConfigured,
                 threshold = threshold,
                 availableStorage = availableStorage,
                 storageSliderMax = storageSliderMax,
@@ -282,6 +306,10 @@ class AddNewRemoteAlertPresenter
 
                     is AddNewRemoteAlertScreen.Event.UpdateAlertType -> {
                         selectedType = event.alertType
+                    }
+
+                    is AddNewRemoteAlertScreen.Event.UpdateAlertMode -> {
+                        selectedMode = event.alertMode
                     }
 
                     is AddNewRemoteAlertScreen.Event.UpdateThreshold -> {
@@ -368,7 +396,7 @@ fun AddNewRemoteAlertUi(
                 }
             }
 
-            // Threshold Selection
+            // Alert Mode Selection
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors =
@@ -378,43 +406,110 @@ fun AddNewRemoteAlertUi(
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        when (state.selectedAlertType) {
-                            AlertType.BATTERY -> "Battery Level Threshold"
-                            AlertType.STORAGE -> "Storage Space Threshold"
-                        },
+                        "Check Mode",
                         style = MaterialTheme.typography.labelMedium,
                     )
+                    AlertModeSelector(
+                        selectedMode = state.selectedAlertMode,
+                        onModeSelected = { mode ->
+                            state.eventSink(AddNewRemoteAlertScreen.Event.UpdateAlertMode(mode))
+                        },
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+            }
 
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (state.selectedAlertMode == AlertMode.PERIODIC && state.hasEmailConfigured) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        ),
+                ) {
+                    ListItem(
+                        colors =
+                            ListItemDefaults.colors(
+                                containerColor = Color.Transparent,
+                            ),
+                        leadingContent = {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                            )
+                        },
+                        headlineContent = {
+                            Text(
+                                "Email Notifications Skipped",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                "Email notify will be skipped for Periodic check mode due to daily email quota limits (max 2/day). Other configured notification mediums will continue to receive periodic updates.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            )
+                        },
+                    )
+                }
+            }
+
+            // Threshold Selection
+            if (state.selectedAlertMode == AlertMode.THRESHOLD) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        ),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
                         Text(
                             when (state.selectedAlertType) {
-                                AlertType.BATTERY -> "Alert when battery falls below ${state.threshold}%"
-                                AlertType.STORAGE -> "Alert when available storage is below ${state.threshold}GB"
+                                AlertType.BATTERY -> "Battery Level Threshold"
+                                AlertType.STORAGE -> "Storage Space Threshold"
                             },
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.labelMedium,
                         )
-                        Slider(
-                            value = state.threshold.toFloat(),
-                            onValueChange = { value ->
-                                state.eventSink(AddNewRemoteAlertScreen.Event.UpdateThreshold(value.toInt()))
-                            },
-                            valueRange =
-                                when (state.selectedAlertType) {
-                                    AlertType.BATTERY -> 5f..50f
-                                    AlertType.STORAGE -> 1f..state.storageSliderMax.toFloat()
-                                },
-                            steps =
-                                when (state.selectedAlertType) {
-                                    AlertType.BATTERY -> 44
 
-                                    // Total steps: (50-5) - 1 = 44 steps
-                                    AlertType.STORAGE -> (state.storageSliderMax - 1) // From 1 to max, so max-1 steps
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                when (state.selectedAlertType) {
+                                    AlertType.BATTERY -> "Alert when battery falls below ${state.threshold}%"
+                                    AlertType.STORAGE -> "Alert when available storage is below ${state.threshold}GB"
                                 },
-                        )
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Slider(
+                                value = state.threshold.toFloat(),
+                                onValueChange = { value ->
+                                    state.eventSink(AddNewRemoteAlertScreen.Event.UpdateThreshold(value.toInt()))
+                                },
+                                valueRange =
+                                    when (state.selectedAlertType) {
+                                        AlertType.BATTERY -> 5f..50f
+                                        AlertType.STORAGE -> 1f..state.storageSliderMax.toFloat()
+                                    },
+                                steps =
+                                    when (state.selectedAlertType) {
+                                        AlertType.BATTERY -> 44
+
+                                        // Total steps: (50-5) - 1 = 44 steps
+                                        AlertType.STORAGE -> (state.storageSliderMax - 1) // From 1 to max, so max-1 steps
+                                    },
+                            )
+                        }
                     }
                 }
             }
@@ -431,8 +526,21 @@ fun AddNewRemoteAlertUi(
                     headlineContent = {
                         Text(
                             when (state.selectedAlertType) {
-                                AlertType.BATTERY -> "Battery Alert"
-                                AlertType.STORAGE -> "Storage Alert"
+                                AlertType.BATTERY -> {
+                                    if (state.selectedAlertMode == AlertMode.PERIODIC) {
+                                        "Battery Status"
+                                    } else {
+                                        "Battery Alert"
+                                    }
+                                }
+
+                                AlertType.STORAGE -> {
+                                    if (state.selectedAlertMode == AlertMode.PERIODIC) {
+                                        "Storage Status"
+                                    } else {
+                                        "Storage Alert"
+                                    }
+                                }
                             },
                         )
                     },
@@ -441,24 +549,37 @@ fun AddNewRemoteAlertUi(
                             Text(
                                 when (state.selectedAlertType) {
                                     AlertType.BATTERY -> {
-                                        "Will notify when battery is below ${state.threshold}%"
+                                        if (state.selectedAlertMode == AlertMode.PERIODIC) {
+                                            "Will send current battery status every configured check interval"
+                                        } else {
+                                            "Will notify when battery is below ${state.threshold}%"
+                                        }
                                     }
 
                                     AlertType.STORAGE -> {
-                                        buildString {
-                                            append("Will notify when storage is below ${state.threshold}GB")
-                                            append(" (Currently: ${state.availableStorage}GB available)")
+                                        if (state.selectedAlertMode == AlertMode.PERIODIC) {
+                                            buildString {
+                                                append("Will send current storage status every configured check interval")
+                                                append(" (Currently: ${state.availableStorage}GB available)")
+                                            }
+                                        } else {
+                                            buildString {
+                                                append("Will notify when storage is below ${state.threshold}GB")
+                                                append(" (Currently: ${state.availableStorage}GB available)")
+                                            }
                                         }
                                     }
                                 },
                             )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                "NOTE: Same alert will be sent only once every 24 hours.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                fontStyle = FontStyle.Italic,
-                            )
+                            if (state.selectedAlertMode == AlertMode.THRESHOLD) {
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    "NOTE: Same alert will be sent only once every 24 hours.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    fontStyle = FontStyle.Italic,
+                                )
+                            }
                         }
                     },
                     leadingContent = {
@@ -479,8 +600,19 @@ fun AddNewRemoteAlertUi(
                 onClick = {
                     val notification =
                         when (state.selectedAlertType) {
-                            AlertType.BATTERY -> RemoteAlert.BatteryAlert(batteryPercentage = state.threshold)
-                            AlertType.STORAGE -> RemoteAlert.StorageAlert(storageMinSpaceGb = state.threshold)
+                            AlertType.BATTERY -> {
+                                RemoteAlert.BatteryAlert(
+                                    batteryPercentage = state.threshold,
+                                    alertMode = state.selectedAlertMode,
+                                )
+                            }
+
+                            AlertType.STORAGE -> {
+                                RemoteAlert.StorageAlert(
+                                    storageMinSpaceGb = state.threshold,
+                                    alertMode = state.selectedAlertMode,
+                                )
+                            }
                         }
                     state.eventSink(AddNewRemoteAlertScreen.Event.SaveNotification(notification))
                 },
@@ -566,6 +698,48 @@ private fun AlertTypeSelector(
 }
 
 @Composable
+private fun AlertModeSelector(
+    selectedMode: AlertMode,
+    onModeSelected: (AlertMode) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
+        AlertMode.entries.forEachIndexed { index, alertMode ->
+            SegmentedButton(
+                shape =
+                    SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = AlertMode.entries.size,
+                    ),
+                icon = {
+                    SegmentedButtonDefaults.Icon(active = alertMode == selectedMode) {
+                        Icon(
+                            painter =
+                                painterResource(
+                                    when (alertMode) {
+                                        AlertMode.THRESHOLD -> R.drawable.notification_settings_24dp
+                                        AlertMode.PERIODIC -> R.drawable.schedule_24dp
+                                    },
+                                ),
+                            contentDescription = null,
+                        )
+                    }
+                },
+                onClick = { onModeSelected(alertMode) },
+                selected = alertMode == selectedMode,
+            ) {
+                Text(
+                    when (alertMode) {
+                        AlertMode.THRESHOLD -> "Threshold"
+                        AlertMode.PERIODIC -> "Periodic"
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
 @PreviewLightDark
 @PreviewDynamicColors
 private fun PreviewAddNewRemoteAlertUi() {
@@ -577,6 +751,7 @@ private fun PreviewAddNewRemoteAlertUi() {
                     showBatteryOptSheet = false,
                     isBatteryOptimized = false,
                     selectedAlertType = AlertType.BATTERY,
+                    selectedAlertMode = AlertMode.THRESHOLD,
                     threshold = 10,
                     availableStorage = 56,
                     storageSliderMax = 96,
@@ -599,6 +774,8 @@ private fun PreviewStorageAlertUi() {
                     showBatteryOptSheet = false,
                     isBatteryOptimized = true,
                     selectedAlertType = AlertType.STORAGE,
+                    selectedAlertMode = AlertMode.PERIODIC,
+                    hasEmailConfigured = true,
                     threshold = 8,
                     availableStorage = 16,
                     storageSliderMax = 20,
@@ -621,6 +798,7 @@ private fun PreviewEditAlertUi() {
                     showBatteryOptSheet = false,
                     isBatteryOptimized = true,
                     selectedAlertType = AlertType.BATTERY,
+                    selectedAlertMode = AlertMode.THRESHOLD,
                     threshold = 20,
                     availableStorage = 56,
                     storageSliderMax = 96,

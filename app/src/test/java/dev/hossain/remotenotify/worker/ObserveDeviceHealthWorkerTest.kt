@@ -7,6 +7,7 @@ import androidx.work.WorkerParameters
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.RemoteAlertRepository
 import dev.hossain.remotenotify.model.AlertCheckLog
+import dev.hossain.remotenotify.model.AlertMode
 import dev.hossain.remotenotify.model.AlertType
 import dev.hossain.remotenotify.model.RemoteAlert
 import dev.hossain.remotenotify.monitor.BatteryMonitor
@@ -76,6 +77,7 @@ class ObserveDeviceHealthWorkerTest {
         coEvery { analytics.logWorkSuccess() } just Runs
         coEvery { analytics.logWorkFailed(any(), any()) } just Runs
         coEvery { analytics.logAlertSent(any(), any()) } just Runs
+        coEvery { repository.insertAlertCheckLog(any(), any(), any(), any(), any()) } just Runs
 
         // Add this to suppress errors from worker params
         every { workerParameters.runAttemptCount } returns 0
@@ -172,6 +174,58 @@ class ObserveDeviceHealthWorkerTest {
             coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 15, true, NotifierType.EMAIL) }
         }
 
+    @Test
+    fun `doWork sends periodic battery status when threshold is not met`() =
+        runTest {
+            // Given
+            every { notificationSender.notifierType } returns NotifierType.TELEGRAM
+            val batteryAlert =
+                RemoteAlert.BatteryAlert(
+                    alertId = 1L,
+                    batteryPercentage = 20,
+                    alertMode = AlertMode.PERIODIC,
+                )
+
+            coEvery { repository.getAllRemoteAlert() } returns listOf(batteryAlert)
+            every { batteryMonitor.getBatteryLevel() } returns 80
+            every { storageMonitor.getAvailableStorageInGB() } returns 20L
+
+            // When
+            val result = worker.doWork()
+
+            // Then
+            val statusAlert = batteryAlert.copy(currentBatteryLevel = 80)
+            assertEquals(ListenableWorker.Result.success(), result)
+            coVerify { notificationSender.sendNotification(statusAlert) }
+            coVerify(exactly = 0) { repository.getLatestCheckForAlert(any()) }
+            coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 80, true, NotifierType.TELEGRAM) }
+        }
+
+    @Test
+    fun `doWork skips email notification when alert mode is periodic`() =
+        runTest {
+            // Given
+            every { notificationSender.notifierType } returns NotifierType.EMAIL
+            val batteryAlert =
+                RemoteAlert.BatteryAlert(
+                    alertId = 1L,
+                    batteryPercentage = 20,
+                    alertMode = AlertMode.PERIODIC,
+                )
+
+            coEvery { repository.getAllRemoteAlert() } returns listOf(batteryAlert)
+            every { batteryMonitor.getBatteryLevel() } returns 80
+            every { storageMonitor.getAvailableStorageInGB() } returns 20L
+
+            // When
+            val result = worker.doWork()
+
+            // Then
+            assertEquals(ListenableWorker.Result.success(), result)
+            coVerify(exactly = 0) { notificationSender.sendNotification(any()) }
+            coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 80, false, NotifierType.EMAIL) }
+        }
+
     @Ignore("Test has incomplete mock setup - repository.insertAlertCheckLog needs proper mocking")
     @Test
     fun `doWork logs storage check but doesn't notify when threshold not met`() =
@@ -228,6 +282,33 @@ class ObserveDeviceHealthWorkerTest {
                     notifierType = NotifierType.EMAIL,
                 )
             }
+        }
+
+    @Test
+    fun `doWork sends periodic storage status when threshold is not met`() =
+        runTest {
+            // Given
+            every { notificationSender.notifierType } returns NotifierType.TELEGRAM
+            val storageAlert =
+                RemoteAlert.StorageAlert(
+                    alertId = 2L,
+                    storageMinSpaceGb = 10,
+                    alertMode = AlertMode.PERIODIC,
+                )
+
+            coEvery { repository.getAllRemoteAlert() } returns listOf(storageAlert)
+            every { batteryMonitor.getBatteryLevel() } returns 80
+            every { storageMonitor.getAvailableStorageInGB() } returns 42L
+
+            // When
+            val result = worker.doWork()
+
+            // Then
+            val statusAlert = storageAlert.copy(currentStorageGb = 42.0)
+            assertEquals(ListenableWorker.Result.success(), result)
+            coVerify { notificationSender.sendNotification(statusAlert) }
+            coVerify(exactly = 0) { repository.getLatestCheckForAlert(any()) }
+            coVerify { repository.insertAlertCheckLog(2L, AlertType.STORAGE, 42, true, NotifierType.TELEGRAM) }
         }
 
     @Test
