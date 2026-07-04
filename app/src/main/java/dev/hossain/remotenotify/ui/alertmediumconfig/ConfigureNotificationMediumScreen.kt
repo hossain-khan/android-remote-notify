@@ -47,7 +47,10 @@ import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.PopResult
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
+import dev.hossain.highlight.ui.HighlightThemeProvider
 import dev.hossain.highlight.ui.SyntaxHighlightedCode
+import dev.hossain.highlight.ui.rememberTomorrowNightTheme
+import dev.hossain.highlight.ui.rememberTomorrowTheme
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
@@ -286,75 +289,80 @@ fun ConfigureNotificationMediumUi(
     modifier: Modifier = Modifier,
 ) {
     SideEffect { Timber.d("ConfigureNotificationMediumUi: ${state.alertMediumConfig}") }
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text("Configure ${state.notifierType.displayName}") },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        state.eventSink(ConfigureNotificationMediumScreen.Event.NavigateBack)
-                    }) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                        )
-                    }
-                },
-            )
-        },
-        snackbarHost = {
-            state.snackbarMessage?.let { message ->
-                Snackbar(
-                    action = {
-                        TextButton(onClick = {
-                            state.eventSink(ConfigureNotificationMediumScreen.Event.DismissSnackbar)
+    HighlightThemeProvider(
+        lightHighlightTheme = rememberTomorrowTheme(),
+        darkHighlightTheme = rememberTomorrowNightTheme(),
+    ) {
+        Scaffold(
+            modifier = modifier,
+            topBar = {
+                TopAppBar(
+                    title = { Text("Configure ${state.notifierType.displayName}") },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            state.eventSink(ConfigureNotificationMediumScreen.Event.NavigateBack)
                         }) {
-                            Text("Dismiss")
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                            )
                         }
                     },
-                ) {
-                    Text(message)
+                )
+            },
+            snackbarHost = {
+                state.snackbarMessage?.let { message ->
+                    Snackbar(
+                        action = {
+                            TextButton(onClick = {
+                                state.eventSink(ConfigureNotificationMediumScreen.Event.DismissSnackbar)
+                            }) {
+                                Text("Dismiss")
+                            }
+                        },
+                    ) {
+                        Text(message)
+                    }
                 }
-            }
-        },
-    ) { innerPadding ->
-        Column(
-            modifier =
-                Modifier
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-        ) {
-            NotifierConfigInputUi(state)
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = { state.eventSink(ConfigureNotificationMediumScreen.Event.SaveConfig) },
-                modifier = Modifier.fillMaxWidth(),
+            },
+        ) { innerPadding ->
+            Column(
+                modifier =
+                    Modifier
+                        .padding(innerPadding)
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
             ) {
-                Text(if (state.isConfigured) "Update Configuration" else "Save Configuration")
-            }
+                NotifierConfigInputUi(state)
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // Only show test button if configuration exists
-            AnimatedVisibility(
-                visible = state.configValidationResult.isValid,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically(),
-            ) {
-                OutlinedButton(
-                    onClick = { state.eventSink(ConfigureNotificationMediumScreen.Event.TestConfig) },
+                Button(
+                    onClick = { state.eventSink(ConfigureNotificationMediumScreen.Event.SaveConfig) },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Test Configuration")
+                    Text(if (state.isConfigured) "Update Configuration" else "Save Configuration")
                 }
-            }
 
-            // Additional optional UI show based on notifier type
-            NotifierConfigSuffixUi(state)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Only show test button if configuration exists
+                AnimatedVisibility(
+                    visible = state.configValidationResult.isValid,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically(),
+                ) {
+                    OutlinedButton(
+                        onClick = { state.eventSink(ConfigureNotificationMediumScreen.Event.TestConfig) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Test Configuration")
+                    }
+                }
+
+                // Additional optional UI show based on notifier type
+                NotifierConfigSuffixUi(state)
+            }
         }
     }
 }
