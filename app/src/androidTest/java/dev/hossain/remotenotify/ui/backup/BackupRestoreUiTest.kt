@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -118,7 +120,7 @@ class BackupRestoreUiTest {
         }
 
         composeRule.onNodeWithText("Enter Password").assertIsDisplayed()
-        composeRule.onNodeWithText("Invalid password. Please try again.").assertIsDisplayed()
+        composeRule.onAllNodesWithText("Invalid password. Please try again.").onFirst().assertIsDisplayed()
 
         // Clicking cancel triggers event
         composeRule.onNodeWithText("Cancel").performClick()
