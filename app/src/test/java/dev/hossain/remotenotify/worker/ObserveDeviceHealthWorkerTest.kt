@@ -226,6 +226,91 @@ class ObserveDeviceHealthWorkerTest {
             coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 80, false, NotifierType.EMAIL) }
         }
 
+    @Test
+    fun `doWork skips threshold alert when recent sent log exists`() =
+        runTest {
+            // Given
+            val batteryAlert =
+                RemoteAlert.BatteryAlert(
+                    alertId = 1L,
+                    batteryPercentage = 20,
+                )
+            val recentSentLog =
+                AlertCheckLog(
+                    checkedOn = System.currentTimeMillis() - (2 * 60 * 60 * 1000),
+                    alertType = AlertType.BATTERY,
+                    isAlertSent = true,
+                    notifierType = NotifierType.EMAIL,
+                    stateValue = 15,
+                    configId = 1L,
+                    configBatteryPercentage = 20,
+                    configStorageMinSpaceGb = 0,
+                    configCreatedOn = System.currentTimeMillis(),
+                )
+
+            coEvery { repository.getAllRemoteAlert() } returns listOf(batteryAlert)
+            every { batteryMonitor.getBatteryLevel() } returns 15
+            every { storageMonitor.getAvailableStorageInGB() } returns 20L
+            coEvery { repository.getLatestCheckForAlert(1L) } returns flowOf(recentSentLog)
+
+            // When
+            val result = worker.doWork()
+
+            // Then
+            assertEquals(ListenableWorker.Result.success(), result)
+            coVerify(exactly = 0) { notificationSender.sendNotification(any()) }
+            coVerify(exactly = 0) { repository.insertAlertCheckLog(any(), any(), any(), any(), any()) }
+        }
+
+    @Test
+    fun `doWork continues notifying remaining senders after one sender fails`() =
+        runTest {
+            // Given
+            val failingSender = mockk<NotificationSender>()
+            val successfulSender = mockk<NotificationSender>()
+            val batteryAlert =
+                RemoteAlert.BatteryAlert(
+                    alertId = 1L,
+                    batteryPercentage = 20,
+                )
+
+            every { failingSender.notifierType } returns NotifierType.TELEGRAM
+            every { successfulSender.notifierType } returns NotifierType.WEBHOOK_REST_API
+            coEvery { failingSender.hasValidConfig() } returns true
+            coEvery { successfulSender.hasValidConfig() } returns true
+            coEvery { failingSender.sendNotification(any()) } throws IllegalStateException("boom")
+            coEvery { successfulSender.sendNotification(any()) } returns true
+
+            val multiSenderWorker =
+                spyk(
+                    ObserveDeviceHealthWorker(
+                        context = context,
+                        workerParams = workerParameters,
+                        batteryMonitor = batteryMonitor,
+                        storageMonitor = storageMonitor,
+                        repository = repository,
+                        notifiers = setOf(failingSender, successfulSender),
+                        analytics = analytics,
+                    ),
+                )
+            coEvery { multiSenderWorker.setProgress(any()) } just Runs
+
+            coEvery { repository.getAllRemoteAlert() } returns listOf(batteryAlert)
+            every { batteryMonitor.getBatteryLevel() } returns 15
+            every { storageMonitor.getAvailableStorageInGB() } returns 20L
+            coEvery { repository.getLatestCheckForAlert(1L) } returns flowOf(null)
+
+            // When
+            val result = multiSenderWorker.doWork()
+
+            // Then
+            assertEquals(ListenableWorker.Result.success(), result)
+            coVerify { failingSender.sendNotification(batteryAlert.copy(currentBatteryLevel = 15)) }
+            coVerify { successfulSender.sendNotification(batteryAlert.copy(currentBatteryLevel = 15)) }
+            coVerify { analytics.logWorkFailed(NotifierType.TELEGRAM, any()) }
+            coVerify { repository.insertAlertCheckLog(1L, AlertType.BATTERY, 15, true, NotifierType.WEBHOOK_REST_API) }
+        }
+
     @Ignore("Test has incomplete mock setup - repository.insertAlertCheckLog needs proper mocking")
     @Test
     fun `doWork logs storage check but doesn't notify when threshold not met`() =
