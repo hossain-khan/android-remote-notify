@@ -199,6 +199,7 @@ robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "
 # MockK mocking library for Kotlin
 # https://mockk.io
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
 
 
 # Adaptive library to create adaptive UIs
