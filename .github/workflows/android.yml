@@ -22,28 +22,49 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check file changes
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            src:
+              - 'app/**'
+              - 'gradle/**'
+              - 'build.gradle.kts'
+              - 'settings.gradle.kts'
+              - 'gradle.properties'
+              - '.github/workflows/android.yml'
+
       - name: set up JDK
+        if: steps.filter.outputs.src == 'true'
         uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.java-version }}
           distribution: ${{ matrix.distribution }}
 
       - name: Setup Android SDK
+        if: steps.filter.outputs.src == 'true'
         uses: android-actions/setup-android@v4
 
       # Automatic gradle caching using `actions/cache@v4`
       # https://github.com/gradle/actions/tree/main/setup-gradle
       - name: Setup Gradle
+        if: steps.filter.outputs.src == 'true'
         uses: gradle/actions/setup-gradle@v6
 
       - name: Run test
+        if: steps.filter.outputs.src == 'true'
         run: ./gradlew testDebugUnitTest --parallel --daemon
 
       - name: Build with Gradle
+        if: steps.filter.outputs.src == 'true'
         run: ./gradlew assembleDebug --parallel --daemon
 
       - name: Archive Problems Report
-        if: ${{ failure() }}
+        if: steps.filter.outputs.src == 'true' && failure()
         uses: actions/upload-artifact@v4
         with:
           name: build-report-${{ github.run_id }}
