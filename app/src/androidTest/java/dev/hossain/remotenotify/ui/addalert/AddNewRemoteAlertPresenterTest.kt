@@ -59,6 +59,7 @@ class AddNewRemoteAlertPresenterTest {
         every { storageMonitor.getAvailableStorageInGB() } returns 12L
         coEvery { emailConfigDataStore.hasValidConfig() } returns false
         every { appPreferencesDataStore.hideBatteryOptReminder } returns flowOf(false)
+        coEvery { appPreferencesDataStore.setHideBatteryOptReminder(true) } just runs
 
         coEvery { analytics.logScreenView(any()) } just runs
         coEvery { analytics.logAlertAdded(any()) } just runs
