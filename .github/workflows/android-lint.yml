@@ -23,7 +23,7 @@ jobs:
           cache: gradle
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       # Automatic gradle caching using `actions/cache@v4`
       # https://github.com/gradle/actions/tree/main/setup-gradle
