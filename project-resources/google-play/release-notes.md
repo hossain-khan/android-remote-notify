@@ -11,6 +11,12 @@
 
 -----------------------------------------------------------------------------
 
+## Release v1.22
+- 🆕 Replaced custom JSON syntax highlighting with a lightweight, feature-rich Compose library (`dev.hossain:compose-highlight`).
+- ⚡ Improved cold start times and memory footprint by lazy-loading the syntax highlighting engine only on screens that need it.
+- ⚒️ Upgraded Gradle build system to 9.6.1 and compileSdk to 37.
+- 📚 Updated all core library dependencies (Circuit 0.34.0, Metro DI 1.3.0, KSP 2.3.9, OkHttp 5.4.0) to their latest stable versions.
+
 ## Release v1.21
 - 🆕 Added Periodic Status Reports mode to check and report remote device battery and storage health at regular intervals.
 - ℹ️ Cleanly formatted status reports across Discord, Telegram, Twilio SMS, and Webhooks with dedicated status headings and icons.
