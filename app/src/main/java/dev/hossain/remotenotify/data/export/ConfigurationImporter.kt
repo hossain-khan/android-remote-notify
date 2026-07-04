@@ -93,6 +93,10 @@ class ConfigurationImporter
                 return true
             }
 
+            if (!encryptedConfig.encrypted) {
+                return true
+            }
+
             return try {
                 ConfigEncryption.decrypt(encryptedConfig.data, password)
                 true
