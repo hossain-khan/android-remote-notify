@@ -168,6 +168,7 @@ kover {
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
+    implementation(libs.compose.highlight)
     implementation(libs.androidx.adaptive.android)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.datastore.core)

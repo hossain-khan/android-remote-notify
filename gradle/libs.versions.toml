@@ -18,6 +18,7 @@ circuit = "0.34.0"
 composeBom = "2026.06.01"
 composeLintChecks = "1.5.2"
 composeMaterial3 = "1.4.0"
+composeHighlight = "0.31.0"
 coreKtx = "1.19.0"
 coroutinesTest = "1.11.0"
 
@@ -108,6 +109,7 @@ workManager = "2.11.2"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+compose-highlight = { group = "dev.hossain", name = "compose-highlight", version.ref = "composeHighlight" }
 
 # https://developer.android.com/develop/ui/compose/bom
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
