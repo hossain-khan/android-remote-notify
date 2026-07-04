@@ -20,7 +20,7 @@ plugins {
 
 android {
     namespace = "dev.hossain.remotenotify"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "dev.hossain.remotenotify"
