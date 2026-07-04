@@ -14,6 +14,9 @@ import com.slack.circuit.foundation.NavigableCircuitContent
 import com.slack.circuit.foundation.rememberCircuitNavigator
 import com.slack.circuit.overlay.ContentWithOverlays
 import com.slack.circuitx.gesturenavigation.GestureNavigationDecorationFactory
+import dev.hossain.highlight.ui.HighlightThemeProvider
+import dev.hossain.highlight.ui.rememberTomorrowNightTheme
+import dev.hossain.highlight.ui.rememberTomorrowTheme
 import dev.hossain.remotenotify.di.ActivityKey
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertlist.AlertsListScreen
@@ -36,23 +39,28 @@ class MainActivity
 
             setContent {
                 ComposeAppTheme {
-                    // See https://slackhq.github.io/circuit/navigation/
-                    val backStack = rememberSaveableBackStack(root = AlertsListScreen)
-                    val navigator = rememberCircuitNavigator(backStack)
+                    HighlightThemeProvider(
+                        lightHighlightTheme = rememberTomorrowTheme(),
+                        darkHighlightTheme = rememberTomorrowNightTheme(),
+                    ) {
+                        // See https://slackhq.github.io/circuit/navigation/
+                        val backStack = rememberSaveableBackStack(root = AlertsListScreen)
+                        val navigator = rememberCircuitNavigator(backStack)
 
-                    // See https://slackhq.github.io/circuit/circuit-content/
-                    CircuitCompositionLocals(circuit) {
-                        // See https://slackhq.github.io/circuit/shared-elements/
+                        // See https://slackhq.github.io/circuit/circuit-content/
+                        CircuitCompositionLocals(circuit) {
+                            // See https://slackhq.github.io/circuit/shared-elements/
 
-                        ContentWithOverlays {
-                            NavigableCircuitContent(
-                                navigator = navigator,
-                                backStack = backStack,
-                                decoratorFactory =
-                                    remember {
-                                        GestureNavigationDecorationFactory()
-                                    },
-                            )
+                            ContentWithOverlays {
+                                NavigableCircuitContent(
+                                    navigator = navigator,
+                                    backStack = backStack,
+                                    decoratorFactory =
+                                        remember {
+                                            GestureNavigationDecorationFactory()
+                                        },
+                                )
+                            }
                         }
                     }
                 }

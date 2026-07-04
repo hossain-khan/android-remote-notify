@@ -47,6 +47,7 @@ import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.PopResult
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuitx.effects.LaunchedImpressionEffect
+import dev.hossain.highlight.ui.SyntaxHighlightedCode
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
@@ -60,7 +61,6 @@ import dev.hossain.remotenotify.notifier.NotifierType
 import dev.hossain.remotenotify.notifier.of
 import dev.hossain.remotenotify.theme.ComposeAppTheme
 import dev.hossain.remotenotify.ui.alertmediumconfig.ConfigureNotificationMediumScreen.ConfigurationResult
-import dev.hossain.remotenotify.utils.PreformattedCodeBlock
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Assisted
 import dev.zacsweers.metro.AssistedFactory
@@ -439,9 +439,20 @@ private fun NotifierConfigSuffixUi(
             Column(modifier = modifier.fillMaxWidth()) {
                 Spacer(modifier = Modifier.height(32.dp))
 
-                Text("Sample JSON Payload", style = MaterialTheme.typography.titleSmall)
                 state.sampleJsonPayload.forEach { jsonText ->
-                    PreformattedCodeBlock(codeBlock = jsonText, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
+                    val formattedJson =
+                        remember(jsonText) {
+                            try {
+                                org.json.JSONObject(jsonText).toString(2)
+                            } catch (e: Exception) {
+                                jsonText
+                            }
+                        }
+                    SyntaxHighlightedCode(
+                        code = formattedJson,
+                        language = "json",
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    )
                 }
             }
         }
