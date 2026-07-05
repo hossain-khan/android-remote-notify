@@ -140,7 +140,7 @@ jobs:
           cp app/build/outputs/bundle/release/app-release.aab artifact/remote-notify-v${{ steps.version.outputs.VERSION }}.aab
 
       - name: Upload Release APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: remote-notify-apk
           path: artifact/remote-notify-v${{ steps.version.outputs.VERSION }}.apk
@@ -149,7 +149,7 @@ jobs:
           retention-days: 30
 
       - name: Upload Release AAB
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: remote-notify-aab
           path: artifact/remote-notify-v${{ steps.version.outputs.VERSION }}.aab
