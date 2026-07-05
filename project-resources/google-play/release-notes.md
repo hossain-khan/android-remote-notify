@@ -11,6 +11,15 @@
 
 -----------------------------------------------------------------------------
 
+## Release v1.23
+- 🆕 Upgraded syntax highlighting library `compose-highlight` to version 0.32.0.
+- ⚡ Optimized GitHub Actions CI workflows using conditional paths-filtering to execute checks only when relevant files change.
+- ⚒️ Upgraded GitHub Actions (`setup-android` to `v4` and `upload-artifact` to `v6`) to support Node.js 24 and remove deprecation warnings.
+- 🧪 Added comprehensive test coverage for backup/restore configurations, UI components, and core presenters.
+- 🐞 Fixed imports layout and ktlint-enforced lexicographical ordering.
+
+Full changelog: https://github.com/hossain-khan/android-remote-notify/releases/tag/v1.23
+
 ## Release v1.22
 - 🆕 Replaced custom JSON syntax highlighting with a lightweight, feature-rich Compose library (`dev.hossain:compose-highlight`).
 - ⚡ Improved cold start times and memory footprint by lazy-loading the syntax highlighting engine only on screens that need it.
