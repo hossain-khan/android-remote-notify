@@ -105,7 +105,7 @@ jobs:
 
       # Upload APKs as artifacts for manual inspection
       - name: Upload base APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: base-apk
@@ -113,7 +113,7 @@ jobs:
           retention-days: 7
 
       - name: Upload PR APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: pr-apk
