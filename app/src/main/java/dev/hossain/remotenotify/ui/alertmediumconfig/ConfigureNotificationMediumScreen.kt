@@ -52,7 +52,7 @@ import com.slack.circuitx.effects.LaunchedImpressionEffect
 import dev.hossain.highlight.ui.HighlightThemeProvider
 import dev.hossain.highlight.ui.SyntaxHighlightedCode
 import dev.hossain.highlight.ui.rememberTomorrowNightTheme
-import dev.hossain.highlight.ui.rememberTomorrowTheme
+import dev.hossain.highlight.ui.rememberTomorrowLightTheme
 import dev.hossain.remotenotify.analytics.Analytics
 import dev.hossain.remotenotify.data.AlertFormatter
 import dev.hossain.remotenotify.data.ConfigValidationResult
@@ -292,7 +292,7 @@ fun ConfigureNotificationMediumUi(
 ) {
     SideEffect { Timber.d("ConfigureNotificationMediumUi: ${state.alertMediumConfig}") }
     HighlightThemeProvider(
-        lightHighlightTheme = rememberTomorrowTheme(),
+        lightHighlightTheme = rememberTomorrowLightTheme(),
         darkHighlightTheme = rememberTomorrowNightTheme(),
     ) {
         Scaffold(
