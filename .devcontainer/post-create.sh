@@ -32,7 +32,7 @@ yes | sdkmanager --licenses || true
 
 # Install required Android SDK components
 echo "📦 Installing Android SDK components..."
-sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" || true
+sdkmanager "platform-tools" "platforms;android-37" "build-tools;35.0.0" || true
 
 # Update SDK components
 echo "🔄 Updating SDK components..."
