@@ -11,6 +11,14 @@
 
 -----------------------------------------------------------------------------
 
+## Release v1.24
+- 🎯 Upgraded app Target SDK to API 37 (Android 17) with verified behavior change compatibility.
+- 📚 Updated core library dependencies (Metro 1.3.2, Firebase BOM 34.16.0, Navigation Compose 2.9.8, KSP 2.3.10).
+- 🧪 Expanded unit test coverage for WorkManager request builder.
+- ⚒️ Upgraded AGP build system to 9.3.0 and devcontainer environment to Platform 37.
+
+Full changelog: https://github.com/hossain-khan/android-remote-notify/releases/tag/v1.24
+
 ## Release v1.23
 - 🆕 Upgraded syntax highlighting library `compose-highlight` to version 0.32.0.
 - ⚡ Optimized GitHub Actions CI workflows using conditional paths-filtering to execute checks only when relevant files change.
