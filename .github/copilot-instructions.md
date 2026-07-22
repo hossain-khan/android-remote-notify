@@ -28,7 +28,7 @@
 - **Language**: Kotlin 2.3.20 with Java 17 compatibility
 - **UI Framework**: Jetpack Compose with Material3 design system
 - **Minimum SDK**: 30 (Android 11)
-- **Target SDK**: 35 (Android 15)
+- **Target SDK**: 37 (Android 17)
 
 ### Architecture Components
 - **Navigation & State Management**: [Slack Circuit](https://slackhq.github.io/circuit/) - Compose-driven architecture

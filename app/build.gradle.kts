@@ -25,7 +25,7 @@ android {
     defaultConfig {
         applicationId = "dev.hossain.remotenotify"
         minSdk = 30
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 28
         // 📣 Don't forget to update release notes! 🤓
         versionName = "1.23"

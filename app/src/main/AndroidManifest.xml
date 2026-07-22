@@ -13,7 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.App"
-        tools:targetApi="35"
+        tools:targetApi="37"
         android:enableOnBackInvokedCallback="true"
         tools:replace="android:appComponentFactory">
         <activity
