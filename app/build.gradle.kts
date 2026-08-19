@@ -144,11 +144,37 @@ kover {
         filters {
             excludes {
                 androidGeneratedClasses()
+                // Exclude generated code and UI boilerplate to focus coverage on business logic
+                classes(
+                    // Room Database & DAO generated implementations
+                    "*_Impl*",
+                    "*_Impl$*",
+                    "*Dao_Impl*",
+                    "*Database_Impl*",
+                    // Metro / DI generated factories and binders
+                    "*$$$*",
+                    "*_Factory*",
+                    "*Factory$*",
+                    // Compose UI Composables, screens, themes, and views
+                    "*.ui.theme.*",
+                    "*ScreenKt*",
+                    "*ViewKt*",
+                    "*ContentKt*",
+                    "*ComponentsKt*",
+                    "*BottomSheetKt*",
+                    "*PreviewKt*",
+                    "*ComposableSingletons*",
+                    // Android UI entry points
+                    "*Activity*",
+                    "*Application*",
+                )
                 annotatedBy(
+                    "androidx.compose.runtime.Composable",
+                    "androidx.compose.ui.tooling.preview.Preview",
                     "*Composable",
                     "*Parcelize",
                     "*Preview",
-                    "javax.annotation.processing.Generated"
+                    "javax.annotation.processing.Generated",
                 )
             }
         }
