@@ -18,7 +18,7 @@ circuit = "0.34.0"
 composeBom = "2026.06.01"
 composeLintChecks = "1.5.3"
 composeMaterial3 = "1.4.0"
-composeHighlight = "0.32.0"
+composeHighlight = "0.41.1"
 coreKtx = "1.19.0"
 coroutinesTest = "1.11.0"
 
