@@ -11,6 +11,12 @@
 
 -----------------------------------------------------------------------------
 
+## Release v1.25
+- 🆕 Upgraded syntax highlighting library `compose-highlight` to version 0.41.1.
+- 🛡️ Excluded Compose UI previews and generated classes from Kover coverage.
+
+Full changelog: https://github.com/hossain-khan/android-remote-notify/releases/tag/v1.25
+
 ## Release v1.24
 - 🎯 Upgraded app Target SDK to API 37 (Android 17) with verified behavior change compatibility.
 - 📚 Updated core library dependencies (Metro 1.3.2, Firebase BOM 34.16.0, Navigation Compose 2.9.8, KSP 2.3.10).
